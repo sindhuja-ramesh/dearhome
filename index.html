@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>DearHome - AI Smart Indian Kitchen & Pantry Assistant</title>
+  <title>DearHome - AI Smart Indian Kitchen and Pantry Assistant</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
@@ -25,6 +25,7 @@
   <script type="text/babel">
     const { useState, useEffect, useMemo, useRef } = React;
 
+    // VECTOR SVG ICONS (NO UNICODE/EMOJI/BULLET GLITCHES)
     const Icons = {
       Home: () => <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>,
       Users: () => <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>,
@@ -39,43 +40,43 @@
       Plus: () => <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4"/></svg>,
       Check: () => <svg className="w-4 h-4 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"/></svg>,
       Send: () => <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>,
-      Video: () => <svg className="w-3.5 h-3.5 text-red-500" fill="currentColor" viewBox="0 0 24 24"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/></svg>,
+      Video: () => <svg className="w-3.5 h-3.5 text-red-600" fill="currentColor" viewBox="0 0 24 24"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/></svg>,
       BookOpen: () => <svg className="w-3.5 h-3.5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
     };
 
-    const CATEGORIES = ["All Items", "Atta & Grains", "Dals & Pulses", "Oils & Ghee", "Masala Dabba", "Dairy & Fresh", "Vegetables", "Beverages & Snacks"];
+    const CATEGORIES = ["All Items", "Atta and Grains", "Dals and Pulses", "Oils and Ghee", "Masala Dabba", "Dairy and Fresh", "Vegetables", "Beverages and Snacks"];
 
     const INITIAL_PANTRY = [
-      { id: "item-1", name: "Aashirvaad Shudh Chakki Atta", shortName: "Chakki Atta", category: "Atta & Grains", current: 8.5, max: 10, unit: "kg", threshold: 2.5, dailyBurn: 0.38, price: 48 },
-      { id: "item-2", name: "Fortune Daawat Basmati Rice", shortName: "Basmati Rice", category: "Atta & Grains", current: 3.8, max: 5, unit: "kg", threshold: 1.5, dailyBurn: 0.22, price: 110 },
-      { id: "item-3", name: "Tata Sampann Poha (Thick)", shortName: "Poha", category: "Atta & Grains", current: 0.8, max: 1, unit: "kg", threshold: 0.3, dailyBurn: 0.08, price: 65 },
-      { id: "item-4", name: "Tata Sampann Toor Dal (Arhar)", shortName: "Toor Dal", category: "Dals & Pulses", current: 0.45, max: 2, unit: "kg", threshold: 0.6, dailyBurn: 0.12, price: 175 },
-      { id: "item-5", name: "Chitra Rajma (Kidney Beans)", shortName: "Rajma", category: "Dals & Pulses", current: 1.2, max: 1.5, unit: "kg", threshold: 0.35, dailyBurn: 0.05, price: 160 },
-      { id: "item-6", name: "Moong Dal (Yellow Dhuli)", shortName: "Moong Dal", category: "Dals & Pulses", current: 1.0, max: 1.5, unit: "kg", threshold: 0.4, dailyBurn: 0.08, price: 140 },
-      { id: "item-7", name: "Fortune Kachi Ghani Mustard Oil", shortName: "Mustard Oil", category: "Oils & Ghee", current: 1.8, max: 3, unit: "L", threshold: 0.75, dailyBurn: 0.07, price: 165 },
-      { id: "item-8", name: "Fortune Refined Sunflower Oil", shortName: "Sunflower Oil", category: "Oils & Ghee", current: 2.2, max: 3, unit: "L", threshold: 0.8, dailyBurn: 0.08, price: 140 },
-      { id: "item-9", name: "Amul Pure Cow Ghee", shortName: "Desi Ghee", category: "Oils & Ghee", current: 0.35, max: 1, unit: "L", threshold: 0.3, dailyBurn: 0.03, price: 620 },
+      { id: "item-1", name: "Aashirvaad Shudh Chakki Atta", shortName: "Chakki Atta", category: "Atta and Grains", current: 8.5, max: 10, unit: "kg", threshold: 2.5, dailyBurn: 0.38, price: 48 },
+      { id: "item-2", name: "Fortune Daawat Basmati Rice", shortName: "Basmati Rice", category: "Atta and Grains", current: 3.8, max: 5, unit: "kg", threshold: 1.5, dailyBurn: 0.22, price: 110 },
+      { id: "item-3", name: "Tata Sampann Poha (Thick)", shortName: "Poha", category: "Atta and Grains", current: 0.8, max: 1, unit: "kg", threshold: 0.3, dailyBurn: 0.08, price: 65 },
+      { id: "item-4", name: "Tata Sampann Toor Dal (Arhar)", shortName: "Toor Dal", category: "Dals and Pulses", current: 0.45, max: 2, unit: "kg", threshold: 0.6, dailyBurn: 0.12, price: 175 },
+      { id: "item-5", name: "Chitra Rajma (Kidney Beans)", shortName: "Rajma", category: "Dals and Pulses", current: 1.2, max: 1.5, unit: "kg", threshold: 0.35, dailyBurn: 0.05, price: 160 },
+      { id: "item-6", name: "Moong Dal (Yellow Dhuli)", shortName: "Moong Dal", category: "Dals and Pulses", current: 1.0, max: 1.5, unit: "kg", threshold: 0.4, dailyBurn: 0.08, price: 140 },
+      { id: "item-7", name: "Fortune Kachi Ghani Mustard Oil", shortName: "Mustard Oil", category: "Oils and Ghee", current: 1.8, max: 3, unit: "L", threshold: 0.75, dailyBurn: 0.07, price: 165 },
+      { id: "item-8", name: "Fortune Refined Sunflower Oil", shortName: "Sunflower Oil", category: "Oils and Ghee", current: 2.2, max: 3, unit: "L", threshold: 0.8, dailyBurn: 0.08, price: 140 },
+      { id: "item-9", name: "Amul Pure Cow Ghee", shortName: "Desi Ghee", category: "Oils and Ghee", current: 0.35, max: 1, unit: "L", threshold: 0.3, dailyBurn: 0.03, price: 620 },
       { id: "item-10", name: "Everest Haldi (Turmeric Powder)", shortName: "Haldi (Turmeric)", category: "Masala Dabba", current: 160, max: 250, unit: "g", threshold: 50, dailyBurn: 5, price: 38 },
       { id: "item-11", name: "Catch Jeera (Cumin Seeds)", shortName: "Jeera (Cumin)", category: "Masala Dabba", current: 130, max: 200, unit: "g", threshold: 40, dailyBurn: 4.5, price: 55 },
       { id: "item-12", name: "Everest Lal Mirch Powder", shortName: "Lal Mirch Powder", category: "Masala Dabba", current: 140, max: 200, unit: "g", threshold: 45, dailyBurn: 4, price: 42 },
       { id: "item-13", name: "Black Mustard Seeds (Rai)", shortName: "Mustard Seeds (Rai)", category: "Masala Dabba", current: 110, max: 200, unit: "g", threshold: 30, dailyBurn: 2.5, price: 30 },
       { id: "item-14", name: "Catch Hing (Asafoetida)", shortName: "Hing (Asafoetida)", category: "Masala Dabba", current: 35, max: 50, unit: "g", threshold: 10, dailyBurn: 0.8, price: 90 },
-      { id: "item-15", name: "Amul Taaza Toned Milk", shortName: "Amul Milk", category: "Dairy & Fresh", current: 0.5, max: 2, unit: "L", threshold: 1.0, dailyBurn: 1.0, price: 56 },
-      { id: "item-16", name: "Amul Masti Dahi / Curd", shortName: "Curd / Dahi", category: "Dairy & Fresh", current: 350, max: 500, unit: "g", threshold: 200, dailyBurn: 150, price: 40 },
-      { id: "item-17", name: "Amul Malai Paneer (Fresh)", shortName: "Fresh Paneer", category: "Dairy & Fresh", current: 200, max: 400, unit: "g", threshold: 200, dailyBurn: 100, price: 95 },
+      { id: "item-15", name: "Amul Taaza Toned Milk", shortName: "Amul Milk", category: "Dairy and Fresh", current: 0.5, max: 2, unit: "L", threshold: 1.0, dailyBurn: 1.0, price: 56 },
+      { id: "item-16", name: "Amul Masti Dahi / Curd", shortName: "Curd / Dahi", category: "Dairy and Fresh", current: 350, max: 500, unit: "g", threshold: 200, dailyBurn: 150, price: 40 },
+      { id: "item-17", name: "Amul Malai Paneer (Fresh)", shortName: "Fresh Paneer", category: "Dairy and Fresh", current: 200, max: 400, unit: "g", threshold: 200, dailyBurn: 100, price: 95 },
       { id: "item-18", name: "Fresh Red Onions (Pyaz)", shortName: "Onion (Pyaz)", category: "Vegetables", current: 1.2, max: 4, unit: "kg", threshold: 1.2, dailyBurn: 0.35, price: 35 },
       { id: "item-19", name: "Fresh Country Tomatoes", shortName: "Tomato (Tamatar)", category: "Vegetables", current: 0.5, max: 2.5, unit: "kg", threshold: 0.8, dailyBurn: 0.28, price: 40 },
       { id: "item-20", name: "Fresh Potatoes (Aloo)", shortName: "Potato (Aloo)", category: "Vegetables", current: 2.5, max: 5, unit: "kg", threshold: 1.5, dailyBurn: 0.35, price: 30 },
-      { id: "item-21", name: "Fresh Ginger & Garlic", shortName: "Ginger-Garlic", category: "Vegetables", current: 120, max: 250, unit: "g", threshold: 60, dailyBurn: 15, price: 35 },
-      { id: "item-22", name: "Tata Tea Gold (Chai Patti)", shortName: "Chai Patti (Tea)", category: "Beverages & Snacks", current: 350, max: 500, unit: "g", threshold: 100, dailyBurn: 12, price: 165 },
-      { id: "item-23", name: "Madhur Pure Sugar", shortName: "Sugar (Cheeni)", category: "Beverages & Snacks", current: 1.8, max: 3, unit: "kg", threshold: 0.8, dailyBurn: 0.05, price: 48 },
-      { id: "item-24", name: "Tata Salt (Vacuum Evaporated)", shortName: "Tata Salt", category: "Beverages & Snacks", current: 0.8, max: 1, unit: "kg", threshold: 0.3, dailyBurn: 0.02, price: 28 }
+      { id: "item-21", name: "Fresh Ginger and Garlic", shortName: "Ginger-Garlic", category: "Vegetables", current: 120, max: 250, unit: "g", threshold: 60, dailyBurn: 15, price: 35 },
+      { id: "item-22", name: "Tata Tea Gold (Chai Patti)", shortName: "Chai Patti (Tea)", category: "Beverages and Snacks", current: 350, max: 500, unit: "g", threshold: 100, dailyBurn: 12, price: 165 },
+      { id: "item-23", name: "Madhur Pure Sugar", shortName: "Sugar (Cheeni)", category: "Beverages and Snacks", current: 1.8, max: 3, unit: "kg", threshold: 0.8, dailyBurn: 0.05, price: 48 },
+      { id: "item-24", name: "Tata Salt (Vacuum Evaporated)", shortName: "Tata Salt", category: "Beverages and Snacks", current: 0.8, max: 1, unit: "kg", threshold: 0.3, dailyBurn: 0.02, price: 28 }
     ];
 
     const INDIAN_RECIPES = [
       {
         id: "dal_tadka_rice",
-        name: "Dal Tadka & Jeera Rice",
+        name: "Dal Tadka and Jeera Rice",
         cuisine: "North Indian",
         prepTime: "25 mins",
         youtubeQuery: "Authentic Dal Tadka and Jeera Rice Recipe Chef Ranveer Brar",
@@ -92,7 +93,7 @@
       },
       {
         id: "rajma_chawal",
-        name: "Punjabi Rajma Masala & Rice",
+        name: "Punjabi Rajma Masala and Rice",
         cuisine: "Punjabi",
         prepTime: "40 mins",
         youtubeQuery: "Punjabi Rajma Masala Recipe Ranveer Brar",
@@ -108,7 +109,7 @@
       },
       {
         id: "aloo_paratha",
-        name: "Aloo Paratha & Makkhan",
+        name: "Aloo Paratha and Makkhan",
         cuisine: "North Indian",
         prepTime: "25 mins",
         youtubeQuery: "Dhaba Style Punjabi Aloo Paratha Recipe Ranveer Brar",
@@ -122,7 +123,7 @@
       },
       {
         id: "paneer_butter_masala",
-        name: "Paneer Butter Masala & Roti",
+        name: "Paneer Butter Masala and Roti",
         cuisine: "North Indian",
         prepTime: "30 mins",
         youtubeQuery: "Restaurant Style Paneer Butter Masala Recipe Chef Ranveer Brar",
@@ -243,8 +244,8 @@
       };
 
       const appetiteMultiplier = useMemo(() => {
-        if (household.appetiteLevel?.includes("Light")) return 0.75;
-        if (household.appetiteLevel?.includes("Hearty")) return 1.30;
+        if (household.appetiteLevel && household.appetiteLevel.indexOf("Light") !== -1) return 0.75;
+        if (household.appetiteLevel && household.appetiteLevel.indexOf("Hearty") !== -1) return 1.30;
         return 1.0;
       }, [household.appetiteLevel]);
 
@@ -276,8 +277,8 @@
         recipe.ingredients.forEach(ing => {
           const index = updatedPantry.findIndex(p =>
             p.shortName.toLowerCase() === ing.name.toLowerCase() ||
-            p.name.toLowerCase().includes(ing.name.toLowerCase()) ||
-            ing.name.toLowerCase().includes(p.shortName.toLowerCase())
+            p.name.toLowerCase().indexOf(ing.name.toLowerCase()) !== -1 ||
+            ing.name.toLowerCase().indexOf(p.shortName.toLowerCase()) !== -1
           );
 
           if (index !== -1) {
@@ -321,30 +322,30 @@
           setIsAiThinking(false);
           const lower = query.toLowerCase();
 
-          if (lower.includes("what can i cook") || lower.includes("suggest") || lower.includes("recipe") || lower.includes("available") || lower.includes("dinner") || lower.includes("lunch") || lower.includes("video") || lower.includes("youtube")) {
-            const hasAtta = (pantry.find(i => i.shortName.includes("Atta"))?.current || 0) >= 1;
-            const hasRice = (pantry.find(i => i.shortName.includes("Rice"))?.current || 0) >= 1;
-            const hasPaneer = (pantry.find(i => i.shortName.includes("Paneer"))?.current || 0) >= 100;
-            const hasDal = (pantry.find(i => i.shortName.includes("Toor Dal"))?.current || 0) >= 0.3;
-            const hasRajma = (pantry.find(i => i.shortName.includes("Rajma"))?.current || 0) >= 0.5;
-            const hasAloo = (pantry.find(i => i.shortName.includes("Potato"))?.current || 0) >= 1;
+          if (lower.indexOf("what can i cook") !== -1 || lower.indexOf("suggest") !== -1 || lower.indexOf("recipe") !== -1 || lower.indexOf("available") !== -1 || lower.indexOf("dinner") !== -1 || lower.indexOf("lunch") !== -1 || lower.indexOf("video") !== -1 || lower.indexOf("youtube") !== -1) {
+            const hasAtta = (pantry.find(i => i.shortName.indexOf("Atta") !== -1)?.current || 0) >= 1;
+            const hasRice = (pantry.find(i => i.shortName.indexOf("Rice") !== -1)?.current || 0) >= 1;
+            const hasPaneer = (pantry.find(i => i.shortName.indexOf("Paneer") !== -1)?.current || 0) >= 100;
+            const hasDal = (pantry.find(i => i.shortName.indexOf("Toor Dal") !== -1)?.current || 0) >= 0.3;
+            const hasRajma = (pantry.find(i => i.shortName.indexOf("Rajma") !== -1)?.current || 0) >= 0.5;
+            const hasAloo = (pantry.find(i => i.shortName.indexOf("Potato") !== -1)?.current || 0) >= 1;
 
             let suggestionsList = [];
             if (hasAtta && hasAloo) {
               const r = INDIAN_RECIPES[2];
-              suggestionsList.push({ ...r, reason: "8.5kg Atta & 2.5kg Potatoes available" });
+              suggestionsList.push({ ...r, reason: "8.5kg Atta and 2.5kg Potatoes available" });
             }
             if (hasDal && hasRice) {
               const r = INDIAN_RECIPES[0];
-              suggestionsList.push({ ...r, reason: "Toor dal & Basmati rice ready in stock" });
+              suggestionsList.push({ ...r, reason: "Toor dal and Basmati rice ready in stock" });
             }
             if (hasPaneer && hasAtta) {
               const r = INDIAN_RECIPES[3];
-              suggestionsList.push({ ...r, reason: "Fresh Malai Paneer & Atta ready" });
+              suggestionsList.push({ ...r, reason: "Fresh Malai Paneer and Atta ready" });
             }
             if (hasRajma && hasRice) {
               const r = INDIAN_RECIPES[1];
-              suggestionsList.push({ ...r, reason: "1.2kg Rajma & Basmati in stock" });
+              suggestionsList.push({ ...r, reason: "1.2kg Rajma and Basmati in stock" });
             }
 
             setChatMessages(prev => [
@@ -352,21 +353,21 @@
               {
                 id: "ai-" + Date.now(),
                 sender: "ai",
-                text: "Based on your live pantry groceries, here are dishes you can cook right now with curated YouTube tutorials & recipe steps:",
+                text: "Based on your live pantry groceries, here are dishes you can cook right now with curated YouTube tutorials and recipe steps:",
                 dishRecommendations: suggestionsList,
                 suggestions: ["What groceries are running low?", "I cooked one of these dishes"]
               }
             ]);
           }
-          else if (lower.includes("cook") || lower.includes("made") || lower.includes("prepared") || lower.includes("ate") || lower.includes("dal") || lower.includes("paratha") || lower.includes("rajma") || lower.includes("poha") || lower.includes("chai")) {
-            let matchedRecipe = INDIAN_RECIPES.find(r => lower.includes(r.name.toLowerCase()) || lower.includes(r.id.toLowerCase()) || lower.includes(r.cuisine.toLowerCase()));
+          else if (lower.indexOf("cook") !== -1 || lower.indexOf("made") !== -1 || lower.indexOf("prepared") !== -1 || lower.indexOf("ate") !== -1 || lower.indexOf("dal") !== -1 || lower.indexOf("paratha") !== -1 || lower.indexOf("rajma") !== -1 || lower.indexOf("poha") !== -1 || lower.indexOf("chai") !== -1) {
+            let matchedRecipe = INDIAN_RECIPES.find(r => lower.indexOf(r.name.toLowerCase()) !== -1 || lower.indexOf(r.id.toLowerCase()) !== -1 || lower.indexOf(r.cuisine.toLowerCase()) !== -1);
             if (!matchedRecipe) {
-              if (lower.includes("dal") || lower.includes("rice")) matchedRecipe = INDIAN_RECIPES[0];
-              else if (lower.includes("rajma")) matchedRecipe = INDIAN_RECIPES[1];
-              else if (lower.includes("paratha") || lower.includes("aloo")) matchedRecipe = INDIAN_RECIPES[2];
-              else if (lower.includes("paneer")) matchedRecipe = INDIAN_RECIPES[3];
-              else if (lower.includes("poha")) matchedRecipe = INDIAN_RECIPES[4];
-              else if (lower.includes("chai") || lower.includes("tea")) matchedRecipe = INDIAN_RECIPES[5];
+              if (lower.indexOf("dal") !== -1 || lower.indexOf("rice") !== -1) matchedRecipe = INDIAN_RECIPES[0];
+              else if (lower.indexOf("rajma") !== -1) matchedRecipe = INDIAN_RECIPES[1];
+              else if (lower.indexOf("paratha") !== -1 || lower.indexOf("aloo") !== -1) matchedRecipe = INDIAN_RECIPES[2];
+              else if (lower.indexOf("paneer") !== -1) matchedRecipe = INDIAN_RECIPES[3];
+              else if (lower.indexOf("poha") !== -1) matchedRecipe = INDIAN_RECIPES[4];
+              else if (lower.indexOf("chai") !== -1 || lower.indexOf("tea") !== -1) matchedRecipe = INDIAN_RECIPES[5];
               else matchedRecipe = INDIAN_RECIPES[0];
             }
 
@@ -388,7 +389,7 @@
               }
             ]);
           }
-          else if (lower.includes("low") || lower.includes("stock") || lower.includes("radar") || lower.includes("empty") || lower.includes("running out")) {
+          else if (lower.indexOf("low") !== -1 || lower.indexOf("stock") !== -1 || lower.indexOf("radar") !== -1 || lower.indexOf("empty") !== -1 || lower.indexOf("running out") !== -1) {
             const lowItemsNames = lowStockItems.map(i => i.shortName + " (" + i.current + " " + i.unit + " left)").join(", ");
             setChatMessages(prev => [
               ...prev,
@@ -422,21 +423,21 @@
 
       const handleQuickSync = (platform) => {
         setPantry(prev => prev.map(item => {
-          if (item.shortName.includes("Milk")) return { ...item, current: +(item.current + 2).toFixed(1) };
-          if (item.shortName.includes("Toor Dal")) return { ...item, current: +(item.current + 1).toFixed(1) };
-          if (item.shortName.includes("Tomato")) return { ...item, current: +(item.current + 1.5).toFixed(1) };
-          if (item.shortName.includes("Atta")) return { ...item, current: +(item.current + 5).toFixed(1) };
+          if (item.shortName.indexOf("Milk") !== -1) return { ...item, current: +(item.current + 2).toFixed(1) };
+          if (item.shortName.indexOf("Toor Dal") !== -1) return { ...item, current: +(item.current + 1).toFixed(1) };
+          if (item.shortName.indexOf("Tomato") !== -1) return { ...item, current: +(item.current + 1.5).toFixed(1) };
+          if (item.shortName.indexOf("Atta") !== -1) return { ...item, current: +(item.current + 5).toFixed(1) };
           return item;
         }));
-        showToast("Order Ingested from " + platform + "! Added Milk, Toor Dal, Tomatoes & Atta.");
+        showToast("Order Ingested from " + platform + "! Added Milk, Toor Dal, Tomatoes and Atta.");
       };
 
       const filteredItems = useMemo(() => {
         return pantry.filter(item => {
           const matchesCategory = selectedCategory === "All Items" || item.category === selectedCategory;
-          const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                                item.shortName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                                item.category.toLowerCase().includes(searchQuery.toLowerCase());
+          const matchesSearch = item.name.toLowerCase().indexOf(searchQuery.toLowerCase()) !== -1 ||
+                                item.shortName.toLowerCase().indexOf(searchQuery.toLowerCase()) !== -1 ||
+                                item.category.toLowerCase().indexOf(searchQuery.toLowerCase()) !== -1;
           return matchesCategory && matchesSearch;
         });
       }, [pantry, selectedCategory, searchQuery]);
@@ -459,7 +460,7 @@
                     Cloud Synced
                   </span>
                 </div>
-                <p class="text-xs text-slate-500 font-medium">Smart Autonomous Indian Kitchen & Grocery Inventory</p>
+                <p class="text-xs text-slate-500 font-medium">Smart Autonomous Indian Kitchen and Grocery Inventory</p>
               </div>
             </div>
 
@@ -478,7 +479,7 @@
                 class="px-4 py-2.5 rounded-2xl bg-white border border-slate-200 hover:bg-slate-50 text-slate-800 font-extrabold text-xs shadow-sm transition-all flex items-center gap-2"
               >
                 <Icons.Users />
-                <span>Family ({household.adults}A, {household.children}K â€¢ {household.appetiteLevel.split(" ")[0]})</span>
+                <span>Family ({household.adults}A, {household.children}K - {household.appetiteLevel.split(" ")[0]})</span>
               </button>
 
               <button
@@ -496,7 +497,7 @@
             {[
               { id: "assistant", label: "AI Kitchen Assistant", icon: <Icons.Chat /> },
               { id: "pantry", label: "Digital Pantry", count: pantry.length, icon: <Icons.Box /> },
-              { id: "family", label: "Family, Appetite & Guests", icon: <Icons.Users /> },
+              { id: "family", label: "Family, Appetite and Guests", icon: <Icons.Users /> },
               { id: "masala", label: "Masala Dabba", count: 5, icon: <Icons.Flame /> },
               { id: "cook", label: "What Did You Cook?", icon: <Icons.Flame /> },
               { id: "radar", label: "Restock Radar", count: lowStockItems.length, alert: lowStockItems.length > 0, icon: <Icons.Alert /> },
@@ -526,7 +527,7 @@
             ))}
           </nav>
 
-          {/* TAB 1: CONVERSATIONAL AI KITCHEN ASSISTANT WITH YOUTUBE & RECIPE LINKS */}
+          {/* TAB 1: CONVERSATIONAL AI KITCHEN ASSISTANT */}
           {activeTab === "assistant" && (
             <div class="max-w-3xl mx-auto space-y-4">
               <div class="bg-gradient-to-r from-amber-600 via-orange-600 to-amber-700 rounded-3xl p-6 text-white shadow-xl flex items-center justify-between">
@@ -536,7 +537,7 @@
                   </span>
                   <h2 class="text-2xl font-black mt-2">DearHome Conversational Agent</h2>
                   <p class="text-xs text-orange-100 mt-1">
-                    Smart meal suggestions with direct YouTube cooking tutorials & automatic pantry deduction.
+                    Smart meal suggestions with direct YouTube cooking tutorials and automatic pantry deduction.
                   </p>
                 </div>
                 <div class="w-14 h-14 rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center text-white text-2xl border border-white/20">
@@ -559,7 +560,7 @@
                     >
                       <p class="font-medium">{msg.text}</p>
 
-                      {/* DISH RECOMMENDATION CARDS WITH YOUTUBE & WEBSITE LINKS */}
+                      {/* DISH RECOMMENDATION CARDS WITH YOUTUBE AND WEBSITE LINKS */}
                       {msg.dishRecommendations && (
                         <div class="mt-3 space-y-2.5 pt-2 border-t border-orange-200">
                           {msg.dishRecommendations.map((rec, idx) => {
@@ -569,7 +570,7 @@
                                 <div class="flex justify-between items-start">
                                   <div>
                                     <span class="font-extrabold text-sm text-slate-900 block">{rec.name}</span>
-                                    <span class="text-[10px] text-slate-500 block mt-0.5">{rec.reason} â€¢ {rec.prepTime}</span>
+                                    <span class="text-[10px] text-slate-500 block mt-0.5">{rec.reason} - {rec.prepTime}</span>
                                   </div>
                                   <span class="text-[10px] font-bold bg-amber-100 text-amber-900 px-2 py-0.5 rounded-md">
                                     {rec.cuisine}
@@ -577,7 +578,6 @@
                                 </div>
 
                                 <div class="flex flex-wrap items-center gap-2 pt-1 border-t border-slate-100">
-                                  {/* YOUTUBE VIDEO BUTTON */}
                                   <a
                                     href={ytSearchUrl}
                                     target="_blank"
@@ -588,7 +588,6 @@
                                     <span>Watch on YouTube</span>
                                   </a>
 
-                                  {/* RECIPE WEB GUIDE BUTTON */}
                                   {rec.recipeUrl && (
                                     <a
                                       href={rec.recipeUrl}
@@ -601,7 +600,6 @@
                                     </a>
                                   )}
 
-                                  {/* AUTO DEDUCT COOKED THIS BUTTON */}
                                   <button
                                     onClick={() => handleCookMealDirect(rec.id, baseFamilyServings)}
                                     class="inline-flex items-center gap-1 px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-white font-bold text-[11px] rounded-xl shadow-sm ml-auto transition-all"
@@ -653,7 +651,7 @@
                             class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs rounded-xl shadow-md flex items-center justify-center gap-1.5 transition-all"
                           >
                             <Icons.Check />
-                            <span>Confirm & Auto-Deduct {msg.actionableMeal.recipe.ingredients.length} Ingredients</span>
+                            <span>Confirm and Auto-Deduct {msg.actionableMeal.recipe.ingredients.length} Ingredients</span>
                           </button>
                         </div>
                       )}
@@ -678,7 +676,7 @@
                 {isAiThinking && (
                   <div class="flex items-center gap-2 p-3 bg-orange-50 rounded-2xl max-w-xs text-xs text-orange-800 font-semibold border border-orange-200 animate-pulse">
                     <Icons.Sparkles />
-                    <span>Analyzing pantry stock, recipes & YouTube tutorials...</span>
+                    <span>Analyzing pantry stock, recipes and YouTube tutorials...</span>
                   </div>
                 )}
                 <div ref={chatEndRef} />
@@ -809,9 +807,9 @@
             <div class="max-w-2xl mx-auto bg-white rounded-3xl p-6 sm:p-8 border border-orange-200 shadow-lg space-y-6">
               <div>
                 <span class="text-xs font-black uppercase text-orange-600 bg-orange-100 px-3 py-1 rounded-full">
-                  Family Profile & Appetite Calibration
+                  Family Profile and Appetite Calibration
                 </span>
-                <h2 class="text-2xl font-black text-slate-900 mt-2">Customize Household & Eating Pattern</h2>
+                <h2 class="text-2xl font-black text-slate-900 mt-2">Customize Household and Eating Pattern</h2>
                 <p class="text-xs text-slate-500 mt-0.5">
                   Tailor member counts, dietary style, and appetite coefficients so DearHome deducts exact portion weights.
                 </p>
@@ -944,7 +942,7 @@
 
                   <div>
                     <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                      Tadka & Oil Preference
+                      Tadka and Oil Preference
                     </label>
                     <select
                       value={household.oilIntensity || "Standard Tadka (1.0x)"}
@@ -952,8 +950,8 @@
                       class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800"
                     >
                       <option value="Standard Tadka (1.0x)">Standard Desi Tadka (1.0x)</option>
-                      <option value="Low Oil (0.7x)">Low Oil & Ghee (Health-focused)</option>
-                      <option value="Rich Tadka (1.3x)">Rich & Flavorful (1.3x)</option>
+                      <option value="Low Oil (0.7x)">Low Oil and Ghee (Health-focused)</option>
+                      <option value="Rich Tadka (1.3x)">Rich and Flavorful (1.3x)</option>
                     </select>
                   </div>
                 </div>
@@ -998,7 +996,7 @@
                     <option value="North Indian">North Indian (Roti, Dals, Sabzis)</option>
                     <option value="South Indian">South Indian (Rice, Sambar, Idli)</option>
                     <option value="Maharashtrian">Maharashtrian (Poha, Poli, Dal)</option>
-                    <option value="Bengali">Bengali (Rice & Curries)</option>
+                    <option value="Bengali">Bengali (Rice and Curries)</option>
                     <option value="Gujarati">Gujarati (Rotli, Shaak, Dal, Khichdi)</option>
                     <option value="Punjabi">Punjabi (Parathas, Rajma, Paneer)</option>
                   </select>
@@ -1007,11 +1005,11 @@
                 <button
                   onClick={() => {
                     setActiveTab("pantry");
-                    showToast("Household & Appetite profile saved!");
+                    showToast("Household and Appetite profile saved!");
                   }}
                   class="w-full py-4 bg-slate-900 hover:bg-slate-800 text-white font-black text-xs rounded-xl shadow-md transition-all mt-2"
                 >
-                  Save Profile & Go to Digital Pantry
+                  Save Profile and Go to Digital Pantry
                 </button>
               </div>
             </div>
@@ -1116,7 +1114,7 @@
                       >
                         <div>
                           <h4 class="font-extrabold text-xs text-slate-900">{recipe.name}</h4>
-                          <p class="text-[10px] text-slate-400">{recipe.cuisine} â€¢ {recipe.prepTime}</p>
+                          <p class="text-[10px] text-slate-400">{recipe.cuisine} - {recipe.prepTime}</p>
                         </div>
                       </div>
                     ))}
@@ -1126,9 +1124,9 @@
                 <div class="p-4 bg-orange-50/60 rounded-2xl border border-orange-200/80 space-y-3">
                   <div class="flex justify-between items-center">
                     <div>
-                      <span class="text-xs font-black text-slate-900 block">2. Diners & Appetite Setup</span>
+                      <span class="text-xs font-black text-slate-900 block">2. Diners and Appetite Setup</span>
                       <span class="text-[11px] text-slate-500">
-                        {household.adults} Adults, {household.children} Kids â€¢ <strong>{household.appetiteLevel}</strong>
+                        {household.adults} Adults, {household.children} Kids - <strong>{household.appetiteLevel}</strong>
                       </span>
                     </div>
                     <div class="text-right">
@@ -1163,7 +1161,7 @@
                   onClick={() => handleCookMealDirect(selectedRecipe, totalMealEaters)}
                   class="w-full py-4 rounded-2xl bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white font-black text-xs shadow-lg shadow-orange-600/25 transition-all"
                 >
-                  Confirm & Auto-Deduct Ingredients for {totalMealEaters} Portion Units
+                  Confirm and Auto-Deduct Ingredients for {totalMealEaters} Portion Units
                 </button>
               </div>
 
@@ -1181,7 +1179,7 @@
                   <div class="space-y-2 max-h-52 overflow-y-auto">
                     {INDIAN_RECIPES.find(r => r.id === selectedRecipe)?.ingredients.map(ing => (
                       <div key={ing.name} class="flex justify-between text-xs p-2 bg-white/90 rounded-xl border border-orange-100">
-                        <span class="font-medium text-slate-700">â€¢ {ing.name}</span>
+                        <span class="font-medium text-slate-700">- {ing.name}</span>
                         <span class="font-black text-orange-700">- {(ing.qty * totalMealEaters).toFixed(1)} {ing.unit}</span>
                       </div>
                     ))}
@@ -1323,12 +1321,12 @@
                 </div>
                 <div>
                   <p class="text-xs font-bold text-slate-800">Drop receipt image or simulate scanning</p>
-                  <p class="text-[10px] text-slate-400 mt-0.5">Supports thermal cash receipts & GST supermarket invoices</p>
+                  <p class="text-[10px] text-slate-400 mt-0.5">Supports thermal cash receipts and GST supermarket invoices</p>
                 </div>
                 <button
                   onClick={() => {
                     handleQuickSync("D-Mart Store #402");
-                    showToast("D-Mart Invoice Parsed! Added 5kg Atta, 1L Mustard Oil & 1kg Dal.");
+                    showToast("D-Mart Invoice Parsed! Added 5kg Atta, 1L Mustard Oil and 1kg Dal.");
                   }}
                   class="px-6 py-3 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-xl shadow-md"
                 >
