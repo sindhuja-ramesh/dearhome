@@ -19,7 +19,7 @@
     .animate-modal { animation: fadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
   </style>
 </head>
-<body class="bg-[#faf8f5] text-slate-800 min-h-screen selection:bg-orange-500 selection:text-white">
+<body class="bg-[#faf8f5] text-slate-800 min-h-screen selection:bg-orange-500 selection:text-white pb-16">
   <div id="root"></div>
 
   <script type="text/babel">
@@ -167,7 +167,7 @@
         return saved ? JSON.parse(saved) : [];
       });
 
-      const [activeTab, setActiveTab] = useState("pantry");
+      const [activeTab, setActiveTab] = useState("pantry"); // 'pantry', 'family', 'masala', 'cook', 'radar', 'sync', 'scan', 'analytics'
       const [isHouseholdModalOpen, setIsHouseholdModalOpen] = useState(false);
       const [isAddItemModalOpen, setIsAddItemModalOpen] = useState(false);
       const [selectedCategory, setSelectedCategory] = useState("All Items");
@@ -276,7 +276,7 @@
       return (
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           
-          {/* HEADER */}
+          {/* TOP APP HEADER */}
           <header class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 pb-6 border-b border-orange-200/70 mb-6">
             <div class="flex items-center gap-3.5">
               <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-amber-600 to-orange-500 flex items-center justify-center text-white text-2xl shadow-lg shadow-orange-500/25">
@@ -295,43 +295,18 @@
               </div>
             </div>
 
-            {/* CUSTOMIZABLE HOUSEHOLD & GUEST STATUS PILL */}
+            {/* DIRECT PROMINENT BUTTONS IN HEADER */}
             <div class="flex flex-wrap items-center gap-3">
               <button
-                onClick={() => setIsHouseholdModalOpen(true)}
-                class="glass px-4 py-2 rounded-2xl border border-orange-200 hover:border-orange-400 hover:shadow-md transition-all flex items-center gap-4 text-left group"
-                title="Click to customize family members, elders, kids, or guests"
+                onClick={() => setActiveTab("family")}
+                class="px-4 py-2.5 rounded-2xl bg-orange-500 hover:bg-orange-600 text-white font-extrabold text-xs shadow-md shadow-orange-500/20 transition-all flex items-center gap-2"
               >
-                <div>
-                  <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block group-hover:text-orange-600">
-                    âš™ï¸ Family Profile
-                  </span>
-                  <span class="font-extrabold text-xs text-slate-900">{household.name}</span>
-                </div>
-                <div class="h-7 w-px bg-slate-200"></div>
-                <div>
-                  <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Members</span>
-                  <span class="font-bold text-xs text-orange-600">
-                    {household.adults} Adults â€¢ {household.children} Kids {household.elders > 0 && ("â€¢ " + household.elders + " Elders")}
-                  </span>
-                </div>
-                {household.currentGuests > 0 && (
-                  <>
-                    <div class="h-7 w-px bg-slate-200"></div>
-                    <div class="bg-amber-100 px-2.5 py-1 rounded-xl">
-                      <span class="text-[10px] font-bold text-amber-900 block">ðŸŽ‰ Guest Mode</span>
-                      <span class="font-black text-xs text-amber-900">+{household.currentGuests} Visiting</span>
-                    </div>
-                  </>
-                )}
-                <span class="text-xs bg-slate-100 text-slate-700 font-bold px-2.5 py-1 rounded-xl group-hover:bg-orange-500 group-hover:text-white transition-all">
-                  Edit
-                </span>
+                <span>ðŸ‘¨â€ðŸ‘©â€ðŸ‘§â€ðŸ‘¦ Customize Family ({household.adults}A, {household.children}K)</span>
               </button>
 
               <button
                 onClick={() => setIsAddItemModalOpen(true)}
-                class="px-3.5 py-2 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs shadow-sm transition-all flex items-center gap-1.5"
+                class="px-3.5 py-2.5 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs shadow-sm transition-all flex items-center gap-1.5"
               >
                 <span>+ Add Item</span>
               </button>
@@ -342,8 +317,9 @@
           <nav class="flex gap-2 p-1.5 bg-slate-100/90 rounded-2xl mb-8 overflow-x-auto border border-slate-200/80">
             {[
               { id: "pantry", label: "ðŸ“¦ Digital Pantry", count: pantry.length },
+              { id: "family", label: "ðŸ‘¨â€ðŸ‘©â€ðŸ‘§â€ðŸ‘¦ Family & Guests", highlight: true },
               { id: "masala", label: "ðŸŒ¶ï¸ Masala Dabba", count: 5 },
-              { id: "cook", label: "ðŸ³ What Did You Cook?", highlight: true },
+              { id: "cook", label: "ðŸ³ What Did You Cook?" },
               { id: "radar", label: "âš ï¸ Restock Radar", count: lowStockItems.length, alert: lowStockItems.length > 0 },
               { id: "sync", label: "âš¡ Online Order Sync" },
               { id: "scan", label: "ðŸ§¾ OCR Bill Scanner" },
@@ -369,6 +345,162 @@
               </button>
             ))}
           </nav>
+
+          {/* TAB: FAMILY & GUEST CUSTOMIZER */}
+          {activeTab === "family" && (
+            <div class="max-w-2xl mx-auto bg-white rounded-3xl p-6 sm:p-8 border border-orange-200 shadow-lg space-y-6">
+              <div>
+                <span class="text-xs font-black uppercase text-orange-600 bg-orange-100 px-3 py-1 rounded-full">
+                  Family Profile & Guests
+                </span>
+                <h2 class="text-2xl font-black text-slate-900 mt-2">Customize Your Household</h2>
+                <p class="text-xs text-slate-500 mt-0.5">
+                  Set family members and guest counts. DearHome dynamically calculates recipe ingredient deductions and grocery replenishment schedules accordingly.
+                </p>
+              </div>
+
+              <div class="space-y-5">
+                <div>
+                  <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                    Family / House Name
+                  </label>
+                  <input
+                    type="text"
+                    value={household.name}
+                    onChange={(e) => setHousehold({ ...household, name: e.target.value })}
+                    class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:outline-none focus:border-orange-500"
+                  />
+                </div>
+
+                <div>
+                  <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+                    Family Members Count
+                  </label>
+                  <div class="grid grid-cols-3 gap-3">
+                    
+                    {/* Adults */}
+                    <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200 text-center">
+                      <span class="text-xs font-bold text-slate-600 block">Adults</span>
+                      <div class="flex items-center justify-center gap-3 mt-3">
+                        <button
+                          onClick={() => setHousehold(p => ({ ...p, adults: Math.max(1, p.adults - 1) }))}
+                          class="w-9 h-9 rounded-xl bg-white border border-slate-300 font-black text-sm hover:bg-slate-100 shadow-sm"
+                        >
+                          -
+                        </button>
+                        <span class="text-lg font-black text-slate-900 w-6">{household.adults}</span>
+                        <button
+                          onClick={() => setHousehold(p => ({ ...p, adults: p.adults + 1 }))}
+                          class="w-9 h-9 rounded-xl bg-white border border-slate-300 font-black text-sm hover:bg-slate-100 shadow-sm"
+                        >
+                          +
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Children */}
+                    <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200 text-center">
+                      <span class="text-xs font-bold text-slate-600 block">Children</span>
+                      <div class="flex items-center justify-center gap-3 mt-3">
+                        <button
+                          onClick={() => setHousehold(p => ({ ...p, children: Math.max(0, p.children - 1) }))}
+                          class="w-9 h-9 rounded-xl bg-white border border-slate-300 font-black text-sm hover:bg-slate-100 shadow-sm"
+                        >
+                          -
+                        </button>
+                        <span class="text-lg font-black text-slate-900 w-6">{household.children}</span>
+                        <button
+                          onClick={() => setHousehold(p => ({ ...p, children: p.children + 1 }))}
+                          class="w-9 h-9 rounded-xl bg-white border border-slate-300 font-black text-sm hover:bg-slate-100 shadow-sm"
+                        >
+                          +
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Elders */}
+                    <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200 text-center">
+                      <span class="text-xs font-bold text-slate-600 block">Elders</span>
+                      <div class="flex items-center justify-center gap-3 mt-3">
+                        <button
+                          onClick={() => setHousehold(p => ({ ...p, elders: Math.max(0, p.elders - 1) }))}
+                          class="w-9 h-9 rounded-xl bg-white border border-slate-300 font-black text-sm hover:bg-slate-100 shadow-sm"
+                        >
+                          -
+                        </button>
+                        <span class="text-lg font-black text-slate-900 w-6">{household.elders}</span>
+                        <button
+                          onClick={() => setHousehold(p => ({ ...p, elders: p.elders + 1 }))}
+                          class="w-9 h-9 rounded-xl bg-white border border-slate-300 font-black text-sm hover:bg-slate-100 shadow-sm"
+                        >
+                          +
+                        </button>
+                      </div>
+                    </div>
+
+                  </div>
+                </div>
+
+                {/* GUEST MODE CARD */}
+                <div class="p-5 bg-amber-50 rounded-2xl border border-amber-200 space-y-2">
+                  <div class="flex justify-between items-center">
+                    <div>
+                      <span class="text-xs font-black text-amber-950 flex items-center gap-1.5">
+                        <span>ðŸŽ‰ House Guests Staying Over</span>
+                      </span>
+                      <span class="text-[11px] text-amber-800 block mt-0.5">
+                        Temporarily scales total daily kitchen grocery deductions.
+                      </span>
+                    </div>
+                    <div class="flex items-center gap-3">
+                      <button
+                        onClick={() => setHousehold(p => ({ ...p, currentGuests: Math.max(0, (p.currentGuests || 0) - 1) }))}
+                        class="w-9 h-9 rounded-xl bg-white border border-amber-300 font-black text-sm hover:bg-amber-100 shadow-sm"
+                      >
+                        -
+                      </button>
+                      <span class="w-6 text-center font-black text-lg text-amber-950">{household.currentGuests || 0}</span>
+                      <button
+                        onClick={() => setHousehold(p => ({ ...p, currentGuests: (p.currentGuests || 0) + 1 }))}
+                        class="w-9 h-9 rounded-xl bg-white border border-amber-300 font-black text-sm hover:bg-amber-100 shadow-sm"
+                      >
+                        +
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Regional Cuisine Focus */}
+                <div>
+                  <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                    Regional Cooking Focus
+                  </label>
+                  <select
+                    value={household.cuisine}
+                    onChange={(e) => setHousehold({ ...household, cuisine: e.target.value })}
+                    class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800"
+                  >
+                    <option value="North Indian">North Indian (Roti, Dals, Sabzis)</option>
+                    <option value="South Indian">South Indian (Rice, Sambar, Idli)</option>
+                    <option value="Maharashtrian">Maharashtrian (Poha, Poli, Dal)</option>
+                    <option value="Bengali">Bengali (Rice & Curries)</option>
+                    <option value="Gujarati">Gujarati (Rotli, Shaak, Dal, Khichdi)</option>
+                    <option value="Punjabi">Punjabi (Parathas, Rajma, Paneer)</option>
+                  </select>
+                </div>
+
+                <button
+                  onClick={() => {
+                    setActiveTab("pantry");
+                    showToast("ðŸ‘¥ Household settings saved & recipes updated!");
+                  }}
+                  class="w-full py-4 bg-slate-900 hover:bg-slate-800 text-white font-black text-xs rounded-xl shadow-md transition-all mt-2"
+                >
+                  âœ“ Save Profile & Go to Digital Pantry
+                </button>
+              </div>
+            </div>
+          )}
 
           {/* TAB 1: DIGITAL PANTRY */}
           {activeTab === "pantry" && (
@@ -535,7 +667,7 @@
             </div>
           )}
 
-          {/* TAB 3: "WHAT DID YOU COOK?" MEAL AUTO-DEPLETION WITH GUEST SUPPORT */}
+          {/* TAB 3: "WHAT DID YOU COOK?" */}
           {activeTab === "cook" && (
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
               <div class="lg:col-span-7 bg-white rounded-3xl p-6 sm:p-8 border border-orange-100 shadow-sm space-y-6">
@@ -823,172 +955,7 @@
           )}
 
           {/* ========================================================= */}
-          {/* MODAL 1: HOUSEHOLD CUSTOMIZER & GUEST MANAGER */}
-          {/* ========================================================= */}
-          {isHouseholdModalOpen && (
-            <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm animate-modal">
-              <div class="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 border border-orange-100 shadow-2xl space-y-6 relative max-h-[90vh] overflow-y-auto">
-                
-                <button
-                  onClick={() => setIsHouseholdModalOpen(false)}
-                  class="absolute right-5 top-5 p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100"
-                >
-                  âœ•
-                </button>
-
-                <div>
-                  <span class="text-[10px] font-black uppercase tracking-wider text-orange-600 bg-orange-100 px-2.5 py-0.5 rounded-md">
-                    Family & Guest Configuration
-                  </span>
-                  <h2 class="text-2xl font-black text-slate-900 mt-1.5">Customize Your Household</h2>
-                  <p class="text-xs text-slate-500 mt-0.5">
-                    DearHome uses these counts to calculate exact ingredient burn rates for daily meals.
-                  </p>
-                </div>
-
-                <div class="space-y-4">
-                  <div>
-                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                      Family / House Name
-                    </label>
-                    <input
-                      type="text"
-                      value={household.name}
-                      onChange={(e) => setHousehold({ ...household, name: e.target.value })}
-                      class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:outline-none focus:border-orange-500"
-                    />
-                  </div>
-
-                  <div>
-                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
-                      Family Members Count
-                    </label>
-                    <div class="grid grid-cols-3 gap-3">
-                      
-                      <div class="p-3 bg-slate-50 rounded-2xl border border-slate-200 text-center">
-                        <span class="text-[11px] font-bold text-slate-500 block">Adults</span>
-                        <div class="flex items-center justify-center gap-2 mt-2">
-                          <button
-                            onClick={() => setHousehold(p => ({ ...p, adults: Math.max(1, p.adults - 1) }))}
-                            class="w-7 h-7 rounded-lg bg-white border border-slate-300 font-black text-xs hover:bg-slate-100"
-                          >
-                            -
-                          </button>
-                          <span class="text-base font-black text-slate-900 w-6">{household.adults}</span>
-                          <button
-                            onClick={() => setHousehold(p => ({ ...p, adults: p.adults + 1 }))}
-                            class="w-7 h-7 rounded-lg bg-white border border-slate-300 font-black text-xs hover:bg-slate-100"
-                          >
-                            +
-                          </button>
-                        </div>
-                      </div>
-
-                      <div class="p-3 bg-slate-50 rounded-2xl border border-slate-200 text-center">
-                        <span class="text-[11px] font-bold text-slate-500 block">Children</span>
-                        <div class="flex items-center justify-center gap-2 mt-2">
-                          <button
-                            onClick={() => setHousehold(p => ({ ...p, children: Math.max(0, p.children - 1) }))}
-                            class="w-7 h-7 rounded-lg bg-white border border-slate-300 font-black text-xs hover:bg-slate-100"
-                          >
-                            -
-                          </button>
-                          <span class="text-base font-black text-slate-900 w-6">{household.children}</span>
-                          <button
-                            onClick={() => setHousehold(p => ({ ...p, children: p.children + 1 }))}
-                            class="w-7 h-7 rounded-lg bg-white border border-slate-300 font-black text-xs hover:bg-slate-100"
-                          >
-                            +
-                          </button>
-                        </div>
-                      </div>
-
-                      <div class="p-3 bg-slate-50 rounded-2xl border border-slate-200 text-center">
-                        <span class="text-[11px] font-bold text-slate-500 block">Elders</span>
-                        <div class="flex items-center justify-center gap-2 mt-2">
-                          <button
-                            onClick={() => setHousehold(p => ({ ...p, elders: Math.max(0, p.elders - 1) }))}
-                            class="w-7 h-7 rounded-lg bg-white border border-slate-300 font-black text-xs hover:bg-slate-100"
-                          >
-                            -
-                          </button>
-                          <span class="text-base font-black text-slate-900 w-6">{household.elders}</span>
-                          <button
-                            onClick={() => setHousehold(p => ({ ...p, elders: p.elders + 1 }))}
-                            class="w-7 h-7 rounded-lg bg-white border border-slate-300 font-black text-xs hover:bg-slate-100"
-                          >
-                            +
-                          </button>
-                        </div>
-                      </div>
-
-                    </div>
-                  </div>
-
-                  <div class="p-4 bg-amber-50 rounded-2xl border border-amber-200 space-y-2">
-                    <div class="flex justify-between items-center">
-                      <div>
-                        <span class="text-xs font-black text-amber-950 flex items-center gap-1.5">
-                          <span>ðŸŽ‰ House Guests Staying Over</span>
-                        </span>
-                        <span class="text-[11px] text-amber-800 block mt-0.5">
-                          Temporarily scales overall family grocery consumption.
-                        </span>
-                      </div>
-                      <div class="flex items-center gap-2">
-                        <button
-                          onClick={() => setHousehold(p => ({ ...p, currentGuests: Math.max(0, (p.currentGuests || 0) - 1) }))}
-                          class="w-8 h-8 rounded-xl bg-white border border-amber-300 font-black text-xs hover:bg-amber-100"
-                        >
-                          -
-                        </button>
-                        <span class="w-6 text-center font-black text-base text-amber-950">{household.currentGuests || 0}</span>
-                        <button
-                          onClick={() => setHousehold(p => ({ ...p, currentGuests: (p.currentGuests || 0) + 1 }))}
-                          class="w-8 h-8 rounded-xl bg-white border border-amber-300 font-black text-xs hover:bg-amber-100"
-                        >
-                          +
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div>
-                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                      Regional Cooking Focus
-                    </label>
-                    <select
-                      value={household.cuisine}
-                      onChange={(e) => setHousehold({ ...household, cuisine: e.target.value })}
-                      class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800"
-                    >
-                      <option value="North Indian">North Indian (Roti, Dals, Sabzis)</option>
-                      <option value="South Indian">South Indian (Rice, Sambar, Idli)</option>
-                      <option value="Maharashtrian">Maharashtrian (Poha, Poli, Dal)</option>
-                      <option value="Bengali">Bengali (Rice & Curries)</option>
-                      <option value="Gujarati">Gujarati (Rotli, Shaak, Dal, Khichdi)</option>
-                      <option value="Punjabi">Punjabi (Parathas, Rajma, Paneer)</option>
-                    </select>
-                  </div>
-
-                  <button
-                    onClick={() => {
-                      setIsHouseholdModalOpen(false);
-                      showToast("ðŸ‘¥ Household settings updated successfully!");
-                    }}
-                    class="w-full py-3.5 bg-slate-900 hover:bg-slate-800 text-white font-black text-xs rounded-xl shadow-md transition-all mt-2"
-                  >
-                    âœ“ Save Profile & Recalculate Stock Burn Rates
-                  </button>
-
-                </div>
-
-              </div>
-            </div>
-          )}
-
-          {/* ========================================================= */}
-          {/* MODAL 2: ADD CUSTOM PANTRY ITEM */}
+          {/* MODAL: ADD CUSTOM PANTRY ITEM */}
           {/* ========================================================= */}
           {isAddItemModalOpen && (
             <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm animate-modal">
