@@ -8,170 +8,346 @@
   <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
   <style>
     body { font-family: 'Plus Jakarta Sans', sans-serif; }
-    .glass { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); }
+    .glass { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(16px); }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: rgba(0,0,0,0.03); }
+    ::-webkit-scrollbar-thumb { background: rgba(245, 135, 11, 0.3); border-radius: 9999px; }
+    @keyframes fadeIn { from { opacity: 0; transform: scale(0.97); } to { opacity: 1; transform: scale(1); } }
+    .animate-modal { animation: fadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
   </style>
 </head>
-<body class="bg-[#faf8f5] text-slate-800 min-h-screen">
+<body class="bg-[#faf8f5] text-slate-800 min-h-screen selection:bg-orange-500 selection:text-white">
   <div id="root"></div>
 
   <script type="text/babel">
-    const { useState, useMemo } = React;
+    const { useState, useEffect, useMemo } = React;
 
-    const CATEGORIES = ["All Items", "Atta & Grains", "Dals & Pulses", "Oils & Ghee", "Masala Dabba", "Dairy & Fresh", "Vegetables", "Beverages"];
+    const CATEGORIES = ["All Items", "Atta & Grains", "Dals & Pulses", "Oils & Ghee", "Masala Dabba", "Dairy & Fresh", "Vegetables", "Beverages & Snacks"];
 
     const INITIAL_PANTRY = [
-      { id: 1, name: "Chakki Atta", category: "Atta & Grains", current: 8.5, max: 10, unit: "kg", threshold: 2.5, dailyBurn: 0.35, icon: "🌾" },
-      { id: 2, name: "Basmati Rice", category: "Atta & Grains", current: 3.8, max: 5, unit: "kg", threshold: 1.5, dailyBurn: 0.22, icon: "🍚" },
-      { id: 3, name: "Tata Sampann Toor Dal", category: "Dals & Pulses", current: 0.45, max: 2, unit: "kg", threshold: 0.6, dailyBurn: 0.12, icon: "🍲" },
-      { id: 4, name: "Chitra Rajma", category: "Dals & Pulses", current: 1.2, max: 1.5, unit: "kg", threshold: 0.35, dailyBurn: 0.05, icon: "🫘" },
-      { id: 5, name: "Mustard Oil", category: "Oils & Ghee", current: 1.8, max: 3, unit: "L", threshold: 0.75, dailyBurn: 0.07, icon: "🛢️" },
-      { id: 6, name: "Amul Cow Ghee", category: "Oils & Ghee", current: 0.35, max: 1, unit: "L", threshold: 0.3, dailyBurn: 0.03, icon: "🧈" },
-      { id: 7, name: "Haldi (Turmeric)", category: "Masala Dabba", current: 160, max: 250, unit: "g", threshold: 50, dailyBurn: 5, icon: "🟡" },
-      { id: 8, name: "Catch Jeera (Cumin)", category: "Masala Dabba", current: 130, max: 200, unit: "g", threshold: 40, dailyBurn: 4.5, icon: "🟤" },
-      { id: 9, name: "Amul Taaza Milk", category: "Dairy & Fresh", current: 0.5, max: 2, unit: "L", threshold: 1.0, dailyBurn: 1.0, icon: "🥛" },
-      { id: 10, name: "Fresh Red Onions", category: "Vegetables", current: 1.2, max: 4, unit: "kg", threshold: 1.2, dailyBurn: 0.35, icon: "🧅" },
-      { id: 11, name: "Country Tomatoes", category: "Vegetables", current: 0.5, max: 2.5, unit: "kg", threshold: 0.8, dailyBurn: 0.28, icon: "🍅" },
-      { id: 12, name: "Tata Tea Gold", category: "Beverages", current: 350, max: 500, unit: "g", threshold: 100, dailyBurn: 12, icon: "☕" }
+      { id: "item-1", name: "Aashirvaad Shudh Chakki Atta", shortName: "Chakki Atta", category: "Atta & Grains", current: 8.5, max: 10, unit: "kg", threshold: 2.5, dailyBurn: 0.38, icon: "ðŸŒ¾", price: 48 },
+      { id: "item-2", name: "Fortune Daawat Basmati Rice", shortName: "Basmati Rice", category: "Atta & Grains", current: 3.8, max: 5, unit: "kg", threshold: 1.5, dailyBurn: 0.22, icon: "ðŸš", price: 110 },
+      { id: "item-3", name: "Tata Sampann Poha (Thick)", shortName: "Poha", category: "Atta & Grains", current: 0.8, max: 1, unit: "kg", threshold: 0.3, dailyBurn: 0.08, icon: "ðŸ¥£", price: 65 },
+      { id: "item-4", name: "Tata Sampann Toor Dal (Arhar)", shortName: "Toor Dal", category: "Dals & Pulses", current: 0.45, max: 2, unit: "kg", threshold: 0.6, dailyBurn: 0.12, icon: "ðŸ²", price: 175 },
+      { id: "item-5", name: "Chitra Rajma (Kidney Beans)", shortName: "Rajma", category: "Dals & Pulses", current: 1.2, max: 1.5, unit: "kg", threshold: 0.35, dailyBurn: 0.05, icon: "ðŸ«˜", price: 160 },
+      { id: "item-6", name: "Moong Dal (Yellow Dhuli)", shortName: "Moong Dal", category: "Dals & Pulses", current: 1.0, max: 1.5, unit: "kg", threshold: 0.4, dailyBurn: 0.08, icon: "ðŸ¥£", price: 140 },
+      { id: "item-7", name: "Fortune Kachi Ghani Mustard Oil", shortName: "Mustard Oil", category: "Oils & Ghee", current: 1.8, max: 3, unit: "L", threshold: 0.75, dailyBurn: 0.07, icon: "ðŸ›¢ï¸", price: 165 },
+      { id: "item-8", name: "Fortune Refined Sunflower Oil", shortName: "Sunflower Oil", category: "Oils & Ghee", current: 2.2, max: 3, unit: "L", threshold: 0.8, dailyBurn: 0.08, icon: "ðŸŒ»", price: 140 },
+      { id: "item-9", name: "Amul Pure Cow Ghee", shortName: "Desi Ghee", category: "Oils & Ghee", current: 0.35, max: 1, unit: "L", threshold: 0.3, dailyBurn: 0.03, icon: "ðŸ§ˆ", price: 620 },
+      { id: "item-10", name: "Everest Haldi (Turmeric Powder)", shortName: "Haldi (Turmeric)", category: "Masala Dabba", current: 160, max: 250, unit: "g", threshold: 50, dailyBurn: 5, icon: "ðŸŸ¡", price: 38 },
+      { id: "item-11", name: "Catch Jeera (Cumin Seeds)", shortName: "Jeera (Cumin)", category: "Masala Dabba", current: 130, max: 200, unit: "g", threshold: 40, dailyBurn: 4.5, icon: "ðŸŸ¤", price: 55 },
+      { id: "item-12", name: "Everest Lal Mirch Powder", shortName: "Lal Mirch Powder", category: "Masala Dabba", current: 140, max: 200, unit: "g", threshold: 45, dailyBurn: 4, icon: "ðŸŒ¶ï¸", price: 42 },
+      { id: "item-13", name: "Black Mustard Seeds (Rai)", shortName: "Mustard Seeds (Rai)", category: "Masala Dabba", current: 110, max: 200, unit: "g", threshold: 30, dailyBurn: 2.5, icon: "âš«", price: 30 },
+      { id: "item-14", name: "Catch Hing (Asafoetida)", shortName: "Hing (Asafoetida)", category: "Masala Dabba", current: 35, max: 50, unit: "g", threshold: 10, dailyBurn: 0.8, icon: "ðŸ§‚", price: 90 },
+      { id: "item-15", name: "Amul Taaza Toned Milk", shortName: "Amul Milk", category: "Dairy & Fresh", current: 0.5, max: 2, unit: "L", threshold: 1.0, dailyBurn: 1.0, icon: "ðŸ¥›", price: 56 },
+      { id: "item-16", name: "Amul Masti Dahi / Curd", shortName: "Curd / Dahi", category: "Dairy & Fresh", current: 350, max: 500, unit: "g", threshold: 200, dailyBurn: 150, icon: "ðŸ¥£", price: 40 },
+      { id: "item-17", name: "Amul Malai Paneer (Fresh)", shortName: "Fresh Paneer", category: "Dairy & Fresh", current: 200, max: 400, unit: "g", threshold: 200, dailyBurn: 100, icon: "ðŸ§€", price: 95 },
+      { id: "item-18", name: "Fresh Red Onions (Pyaz)", shortName: "Onion (Pyaz)", category: "Vegetables", current: 1.2, max: 4, unit: "kg", threshold: 1.2, dailyBurn: 0.35, icon: "ðŸ§…", price: 35 },
+      { id: "item-19", name: "Fresh Country Tomatoes", shortName: "Tomato (Tamatar)", category: "Vegetables", current: 0.5, max: 2.5, unit: "kg", threshold: 0.8, dailyBurn: 0.28, icon: "ðŸ…", price: 40 },
+      { id: "item-20", name: "Fresh Potatoes (Aloo)", shortName: "Potato (Aloo)", category: "Vegetables", current: 2.5, max: 5, unit: "kg", threshold: 1.5, dailyBurn: 0.35, icon: "ðŸ¥”", price: 30 },
+      { id: "item-21", name: "Fresh Ginger & Garlic", shortName: "Ginger-Garlic", category: "Vegetables", current: 120, max: 250, unit: "g", threshold: 60, dailyBurn: 15, icon: "ðŸ§„", price: 35 },
+      { id: "item-22", name: "Tata Tea Gold (Chai Patti)", shortName: "Chai Patti (Tea)", category: "Beverages & Snacks", current: 350, max: 500, unit: "g", threshold: 100, dailyBurn: 12, icon: "â˜•", price: 165 },
+      { id: "item-23", name: "Madhur Pure Sugar", shortName: "Sugar (Cheeni)", category: "Beverages & Snacks", current: 1.8, max: 3, unit: "kg", threshold: 0.8, dailyBurn: 0.05, icon: "ðŸ¬", price: 48 },
+      { id: "item-24", name: "Tata Salt (Vacuum Evaporated)", shortName: "Tata Salt", category: "Beverages & Snacks", current: 0.8, max: 1, unit: "kg", threshold: 0.3, dailyBurn: 0.02, icon: "ðŸ§‚", price: 28 }
     ];
 
-    const RECIPES = [
+    const INDIAN_RECIPES = [
       {
-        id: "dal_rice",
+        id: "dal_tadka_rice",
         name: "Dal Tadka & Jeera Rice",
+        cuisine: "North Indian",
+        prepTime: "25m",
+        icon: "ðŸ²",
         ingredients: [
-          { name: "Tata Sampann Toor Dal", qty: 35, unit: "g" },
+          { name: "Toor Dal", qty: 35, unit: "g" },
           { name: "Basmati Rice", qty: 65, unit: "g" },
-          { name: "Fresh Red Onions", qty: 30, unit: "g" },
-          { name: "Country Tomatoes", qty: 30, unit: "g" },
-          { name: "Amul Cow Ghee", qty: 8, unit: "ml" },
-          { name: "Catch Jeera (Cumin)", qty: 2.5, unit: "g" },
+          { name: "Onion (Pyaz)", qty: 30, unit: "g" },
+          { name: "Tomato (Tamatar)", qty: 30, unit: "g" },
+          { name: "Desi Ghee", qty: 8, unit: "ml" },
+          { name: "Jeera (Cumin)", qty: 2.5, unit: "g" },
           { name: "Haldi (Turmeric)", qty: 1.5, unit: "g" }
+        ]
+      },
+      {
+        id: "rajma_chawal",
+        name: "Punjabi Rajma & Rice",
+        cuisine: "Punjabi",
+        prepTime: "40m",
+        icon: "ðŸ«˜",
+        ingredients: [
+          { name: "Rajma", qty: 45, unit: "g" },
+          { name: "Basmati Rice", qty: 65, unit: "g" },
+          { name: "Onion (Pyaz)", qty: 40, unit: "g" },
+          { name: "Tomato (Tamatar)", qty: 40, unit: "g" },
+          { name: "Mustard Oil", qty: 10, unit: "ml" },
+          { name: "Ginger-Garlic", qty: 8, unit: "g" }
         ]
       },
       {
         id: "aloo_paratha",
         name: "Aloo Paratha & Makkhan",
+        cuisine: "North Indian",
+        prepTime: "25m",
+        icon: "ðŸ«“",
         ingredients: [
           { name: "Chakki Atta", qty: 75, unit: "g" },
-          { name: "Amul Cow Ghee", qty: 10, unit: "ml" }
+          { name: "Potato (Aloo)", qty: 80, unit: "g" },
+          { name: "Desi Ghee", qty: 10, unit: "ml" },
+          { name: "Curd / Dahi", qty: 80, unit: "g" }
         ]
       },
       {
-        id: "rajma_chawal",
-        name: "Punjabi Rajma Masala & Rice",
+        id: "paneer_butter_masala",
+        name: "Paneer Butter Masala & Roti",
+        cuisine: "North Indian",
+        prepTime: "30m",
+        icon: "ðŸ§€",
         ingredients: [
-          { name: "Chitra Rajma", qty: 45, unit: "g" },
-          { name: "Basmati Rice", qty: 65, unit: "g" },
-          { name: "Mustard Oil", qty: 10, unit: "ml" },
-          { name: "Fresh Red Onions", qty: 40, unit: "g" },
-          { name: "Country Tomatoes", qty: 40, unit: "g" }
+          { name: "Fresh Paneer", qty: 65, unit: "g" },
+          { name: "Chakki Atta", qty: 65, unit: "g" },
+          { name: "Desi Ghee", qty: 10, unit: "ml" },
+          { name: "Tomato (Tamatar)", qty: 50, unit: "g" },
+          { name: "Onion (Pyaz)", qty: 30, unit: "g" }
         ]
       },
       {
-        id: "masala_chai",
-        name: "Adrak Masala Chai",
+        id: "kanda_poha",
+        name: "Batata Kanda Poha",
+        cuisine: "Maharashtrian",
+        prepTime: "15m",
+        icon: "ðŸ¥£",
         ingredients: [
-          { name: "Amul Taaza Milk", qty: 85, unit: "ml" },
-          { name: "Tata Tea Gold", qty: 4.5, unit: "g" }
+          { name: "Poha", qty: 60, unit: "g" },
+          { name: "Onion (Pyaz)", qty: 30, unit: "g" },
+          { name: "Potato (Aloo)", qty: 35, unit: "g" },
+          { name: "Sunflower Oil", qty: 8, unit: "ml" },
+          { name: "Mustard Seeds (Rai)", qty: 1.5, unit: "g" },
+          { name: "Haldi (Turmeric)", qty: 1.5, unit: "g" }
+        ]
+      },
+      {
+        id: "adrak_chai",
+        name: "Kulhad Adrak Masala Chai",
+        cuisine: "All India",
+        prepTime: "10m",
+        icon: "â˜•",
+        ingredients: [
+          { name: "Amul Milk", qty: 85, unit: "ml" },
+          { name: "Chai Patti (Tea)", qty: 4.5, unit: "g" },
+          { name: "Sugar (Cheeni)", qty: 8, unit: "g" },
+          { name: "Ginger-Garlic", qty: 3, unit: "g" }
         ]
       }
     ];
 
     function App() {
-      const [household, setHousehold] = useState({
-        name: "My Family",
-        adults: 3,
-        children: 1,
-        cuisine: "North Indian",
-        diet: "Vegetarian"
+      const [household, setHousehold] = useState(() => {
+        const saved = localStorage.getItem("dearhome_household");
+        return saved ? JSON.parse(saved) : {
+          name: "Ramesh Family",
+          adults: 3,
+          children: 1,
+          elders: 0,
+          currentGuests: 0,
+          cuisine: "North Indian",
+          diet: "Vegetarian"
+        };
       });
 
-      const [pantry, setPantry] = useState(INITIAL_PANTRY);
+      const [pantry, setPantry] = useState(() => {
+        const saved = localStorage.getItem("dearhome_pantry");
+        return saved ? JSON.parse(saved) : INITIAL_PANTRY;
+      });
+
+      const [mealLogs, setMealLogs] = useState(() => {
+        const saved = localStorage.getItem("dearhome_meallogs");
+        return saved ? JSON.parse(saved) : [];
+      });
+
       const [activeTab, setActiveTab] = useState("pantry");
-      const [selectedRecipe, setSelectedRecipe] = useState(RECIPES[0].id);
-      const [servings, setServings] = useState(4);
+      const [isHouseholdModalOpen, setIsHouseholdModalOpen] = useState(false);
+      const [isAddItemModalOpen, setIsAddItemModalOpen] = useState(false);
+      const [selectedCategory, setSelectedCategory] = useState("All Items");
+      const [searchQuery, setSearchQuery] = useState("");
+
+      const [selectedRecipe, setSelectedRecipe] = useState(INDIAN_RECIPES[0].id);
+      const [guestCountForMeal, setGuestCountForMeal] = useState(0);
       const [toast, setToast] = useState(null);
 
-      const lowStockItems = useMemo(() => pantry.filter(i => i.current <= i.threshold), [pantry]);
+      useEffect(() => {
+        localStorage.setItem("dearhome_household", JSON.stringify(household));
+      }, [household]);
+
+      useEffect(() => {
+        localStorage.setItem("dearhome_pantry", JSON.stringify(pantry));
+      }, [pantry]);
+
+      useEffect(() => {
+        localStorage.setItem("dearhome_meallogs", JSON.stringify(mealLogs));
+      }, [mealLogs]);
 
       const showToast = (msg) => {
         setToast(msg);
-        setTimeout(() => setToast(null), 3500);
+        setTimeout(() => setToast(null), 4000);
       };
 
-      const handleCook = () => {
-        const recipe = RECIPES.find(r => r.id === selectedRecipe);
-        if (!recipe) return;
+      const baseFamilyServings = Math.round(household.adults + (household.children * 0.6) + (household.elders * 0.85));
+      const totalMealEaters = baseFamilyServings + guestCountForMeal;
 
+      const lowStockItems = useMemo(() => pantry.filter(i => i.current <= i.threshold), [pantry]);
+
+      const updateStock = (id, delta) => {
         setPantry(prev => prev.map(item => {
-          const ing = recipe.ingredients.find(i => i.name.toLowerCase() === item.name.toLowerCase());
-          if (ing) {
-            let deduction = ing.qty * servings;
-            if (ing.unit === "g" && item.unit === "kg") deduction /= 1000;
-            if (ing.unit === "ml" && item.unit === "L") deduction /= 1000;
-            return { ...item, current: Math.max(0, +(item.current - deduction).toFixed(2)) };
+          if (item.id === id) {
+            const nextVal = Math.max(0, +(item.current + delta).toFixed(2));
+            return { ...item, current: nextVal };
           }
           return item;
         }));
+      };
 
-        showToast("🍳 Cooked " + recipe.name + " for " + servings + " people! Ingredients auto-deducted.");
+      const handleCookMeal = () => {
+        const recipe = INDIAN_RECIPES.find(r => r.id === selectedRecipe);
+        if (!recipe) return;
+
+        let deductions = [];
+        let updatedPantry = [...pantry];
+
+        recipe.ingredients.forEach(ing => {
+          const index = updatedPantry.findIndex(p =>
+            p.shortName.toLowerCase() === ing.name.toLowerCase() ||
+            p.name.toLowerCase().includes(ing.name.toLowerCase()) ||
+            ing.name.toLowerCase().includes(p.shortName.toLowerCase())
+          );
+
+          if (index !== -1) {
+            const item = updatedPantry[index];
+            let deductionAmount = ing.qty * totalMealEaters;
+
+            if (ing.unit === "g" && item.unit === "kg") deductionAmount /= 1000;
+            if (ing.unit === "ml" && item.unit === "L") deductionAmount /= 1000;
+
+            const nextQty = Math.max(0, +(item.current - deductionAmount).toFixed(2));
+            updatedPantry[index] = { ...item, current: nextQty };
+            deductions.push({ name: item.shortName, qty: (ing.qty * totalMealEaters).toFixed(1) + " " + ing.unit });
+          }
+        });
+
+        setPantry(updatedPantry);
+
+        const newLog = {
+          id: "log-" + Date.now(),
+          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          recipeName: recipe.name,
+          servings: totalMealEaters,
+          familyCount: baseFamilyServings,
+          guestCount: guestCountForMeal,
+          deductions
+        };
+
+        setMealLogs(prev => [newLog, ...prev]);
+        showToast("ðŸ³ Cooked " + recipe.name + " (" + baseFamilyServings + " Family + " + guestCountForMeal + " Guests = " + totalMealEaters + " People). Stock reduced!");
       };
 
       const handleQuickSync = (platform) => {
         setPantry(prev => prev.map(item => {
-          if (item.name.includes("Milk")) return { ...item, current: +(item.current + 2).toFixed(1) };
-          if (item.name.includes("Toor Dal")) return { ...item, current: +(item.current + 1).toFixed(1) };
-          if (item.name.includes("Tomatoes")) return { ...item, current: +(item.current + 1.5).toFixed(1) };
+          if (item.shortName.includes("Milk")) return { ...item, current: +(item.current + 2).toFixed(1) };
+          if (item.shortName.includes("Toor Dal")) return { ...item, current: +(item.current + 1).toFixed(1) };
+          if (item.shortName.includes("Tomato")) return { ...item, current: +(item.current + 1.5).toFixed(1) };
+          if (item.shortName.includes("Atta")) return { ...item, current: +(item.current + 5).toFixed(1) };
           return item;
         }));
-        showToast("⚡ Synced with " + platform + "! Added 2L Milk, 1kg Toor Dal, 1.5kg Tomatoes.");
+        showToast("âš¡ Order Ingested from " + platform + "! Added Milk, Toor Dal, Tomatoes & Atta.");
       };
 
-      const handleScanBill = () => {
-        setPantry(prev => prev.map(item => {
-          if (item.name.includes("Chakki Atta")) return { ...item, current: +(item.current + 5).toFixed(1) };
-          if (item.name.includes("Mustard Oil")) return { ...item, current: +(item.current + 1).toFixed(1) };
-          return item;
-        }));
-        showToast("🧾 D-Mart Receipt Scanned! Added 5kg Atta & 1L Mustard Oil.");
-      };
+      const filteredItems = useMemo(() => {
+        return pantry.filter(item => {
+          const matchesCategory = selectedCategory === "All Items" || item.category === selectedCategory;
+          const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                                item.shortName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                                item.category.toLowerCase().includes(searchQuery.toLowerCase());
+          return matchesCategory && matchesSearch;
+        });
+      }, [pantry, selectedCategory, searchQuery]);
 
       return (
-        <div class="max-w-6xl mx-auto px-4 py-8">
-          {/* Header */}
-          <header class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-6 border-b border-orange-200/80 mb-6">
-            <div class="flex items-center gap-3">
-              <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-amber-600 to-orange-500 flex items-center justify-center text-white text-2xl shadow-lg shadow-orange-500/20">
-                🏠
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          
+          {/* HEADER */}
+          <header class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 pb-6 border-b border-orange-200/70 mb-6">
+            <div class="flex items-center gap-3.5">
+              <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-amber-600 to-orange-500 flex items-center justify-center text-white text-2xl shadow-lg shadow-orange-500/25">
+                ðŸ 
               </div>
               <div>
-                <h1 class="text-2xl font-black bg-gradient-to-r from-amber-900 to-orange-700 bg-clip-text text-transparent">
-                  DearHome
-                </h1>
-                <p class="text-xs text-slate-500">Autonomous Indian Kitchen & Pantry Assistant</p>
+                <div class="flex items-center gap-2">
+                  <h1 class="text-2xl font-black bg-gradient-to-r from-amber-950 to-orange-700 bg-clip-text text-transparent">
+                    DearHome
+                  </h1>
+                  <span class="text-[10px] font-black uppercase tracking-wider bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-md">
+                    Cloud Synced
+                  </span>
+                </div>
+                <p class="text-xs text-slate-500 font-medium">Smart Autonomous Indian Kitchen & Grocery Inventory</p>
               </div>
             </div>
 
-            <div class="bg-white px-4 py-2.5 rounded-2xl border border-orange-100 shadow-sm flex items-center gap-4 text-xs">
-              <div><span class="text-slate-400 block text-[10px] font-bold">HOUSEHOLD</span><span class="font-bold">{household.name}</span></div>
-              <div class="h-6 w-px bg-slate-200"></div>
-              <div><span class="text-slate-400 block text-[10px] font-bold">MEMBERS</span><span class="font-bold text-orange-600">{household.adults}A + {household.children}K</span></div>
-              <div class="h-6 w-px bg-slate-200"></div>
-              <div><span class="text-slate-400 block text-[10px] font-bold">CUISINE</span><span class="font-bold text-emerald-700">{household.cuisine}</span></div>
+            {/* CUSTOMIZABLE HOUSEHOLD & GUEST STATUS PILL */}
+            <div class="flex flex-wrap items-center gap-3">
+              <button
+                onClick={() => setIsHouseholdModalOpen(true)}
+                class="glass px-4 py-2 rounded-2xl border border-orange-200 hover:border-orange-400 hover:shadow-md transition-all flex items-center gap-4 text-left group"
+                title="Click to customize family members, elders, kids, or guests"
+              >
+                <div>
+                  <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block group-hover:text-orange-600">
+                    âš™ï¸ Family Profile
+                  </span>
+                  <span class="font-extrabold text-xs text-slate-900">{household.name}</span>
+                </div>
+                <div class="h-7 w-px bg-slate-200"></div>
+                <div>
+                  <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Members</span>
+                  <span class="font-bold text-xs text-orange-600">
+                    {household.adults} Adults â€¢ {household.children} Kids {household.elders > 0 && ("â€¢ " + household.elders + " Elders")}
+                  </span>
+                </div>
+                {household.currentGuests > 0 && (
+                  <>
+                    <div class="h-7 w-px bg-slate-200"></div>
+                    <div class="bg-amber-100 px-2.5 py-1 rounded-xl">
+                      <span class="text-[10px] font-bold text-amber-900 block">ðŸŽ‰ Guest Mode</span>
+                      <span class="font-black text-xs text-amber-900">+{household.currentGuests} Visiting</span>
+                    </div>
+                  </>
+                )}
+                <span class="text-xs bg-slate-100 text-slate-700 font-bold px-2.5 py-1 rounded-xl group-hover:bg-orange-500 group-hover:text-white transition-all">
+                  Edit
+                </span>
+              </button>
+
+              <button
+                onClick={() => setIsAddItemModalOpen(true)}
+                class="px-3.5 py-2 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs shadow-sm transition-all flex items-center gap-1.5"
+              >
+                <span>+ Add Item</span>
+              </button>
             </div>
           </header>
 
-          {/* Navigation Bar */}
-          <nav class="flex gap-2 p-1.5 bg-slate-100/80 rounded-2xl mb-8 overflow-x-auto">
+          {/* MAIN NAVIGATION BAR */}
+          <nav class="flex gap-2 p-1.5 bg-slate-100/90 rounded-2xl mb-8 overflow-x-auto border border-slate-200/80">
             {[
-              { id: "pantry", label: "📦 Digital Pantry", count: pantry.length },
-              { id: "cook", label: "🍳 What Did You Cook?" },
-              { id: "radar", label: "⚠️ Restock Radar", count: lowStockItems.length, alert: lowStockItems.length > 0 },
-              { id: "sync", label: "⚡ Online Delivery Sync" },
-              { id: "scan", label: "🧾 OCR Bill Scanner" }
+              { id: "pantry", label: "ðŸ“¦ Digital Pantry", count: pantry.length },
+              { id: "masala", label: "ðŸŒ¶ï¸ Masala Dabba", count: 5 },
+              { id: "cook", label: "ðŸ³ What Did You Cook?", highlight: true },
+              { id: "radar", label: "âš ï¸ Restock Radar", count: lowStockItems.length, alert: lowStockItems.length > 0 },
+              { id: "sync", label: "âš¡ Online Order Sync" },
+              { id: "scan", label: "ðŸ§¾ OCR Bill Scanner" },
+              { id: "analytics", label: "ðŸ“Š Household Insights" }
             ].map(tab => (
               <button
                 key={tab.id}
@@ -179,12 +355,12 @@
                 class={"flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-xs whitespace-nowrap transition-all " + (
                   activeTab === tab.id
                     ? "bg-white text-orange-800 shadow-sm border border-orange-200/80"
-                    : "text-slate-600 hover:bg-white/50"
+                    : "text-slate-600 hover:text-slate-950 hover:bg-white/50"
                 )}
               >
-                {tab.label}
-                {tab.count !== undefined && (
-                  <span class={"text-[10px] px-1.5 py-0.2 rounded-full " + (
+                <span>{tab.label}</span>
+                {tab.count !== undefined && tab.count > 0 && (
+                  <span class={"text-[10px] px-1.5 py-0.2 rounded-full font-black " + (
                     tab.alert ? "bg-red-500 text-white animate-pulse" : "bg-slate-200 text-slate-700"
                   )}>
                     {tab.count}
@@ -194,188 +370,732 @@
             ))}
           </nav>
 
-          {/* PANTRY TAB */}
+          {/* TAB 1: DIGITAL PANTRY */}
           {activeTab === "pantry" && (
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              {pantry.map(item => {
-                const pct = Math.min(100, Math.round((item.current / item.max) * 100));
-                const isLow = item.current <= item.threshold;
-                const daysLeft = item.dailyBurn ? Math.round(item.current / item.dailyBurn) : 10;
+            <div class="space-y-6">
+              <div class="bg-white rounded-3xl p-5 border border-orange-100 shadow-sm space-y-4">
+                <input
+                  type="text"
+                  placeholder="Search Atta, Toor Dal, Mustard Oil, Haldi, Amul Milk, Tomatoes..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all"
+                />
 
-                return (
-                  <div key={item.id} class={"p-5 rounded-3xl border transition-all " + (
-                    isLow ? "bg-red-50/70 border-red-200" : "bg-white border-orange-100 hover:border-orange-300 shadow-sm"
-                  )}>
-                    <div class="flex items-start justify-between">
-                      <div class="flex items-center gap-2.5">
-                        <span class="text-2xl">{item.icon}</span>
-                        <div>
-                          <span class="text-[10px] font-bold text-slate-400 uppercase block">{item.category}</span>
-                          <h3 class="font-bold text-sm text-slate-900">{item.name}</h3>
-                        </div>
-                      </div>
-                      <span class={"text-xs font-black px-2 py-0.5 rounded-lg " + (
-                        isLow ? "bg-red-100 text-red-700" : "bg-emerald-100 text-emerald-800"
-                      )}>
-                        {item.current} {item.unit}
-                      </span>
-                    </div>
-
-                    <div class="mt-4">
-                      <div class="flex justify-between text-xs text-slate-500 mb-1">
-                        <span>Stock Level</span>
-                        <span class={isLow ? "text-red-600 font-bold" : ""}>{pct}%</span>
-                      </div>
-                      <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
-                        <div
-                          class={"h-full rounded-full " + (isLow ? "bg-red-500" : pct < 50 ? "bg-amber-500" : "bg-emerald-500")}
-                          style={{ width: pct + "%" }}
-                        ></div>
-                      </div>
-                    </div>
-
-                    <div class="mt-3 flex justify-between text-[11px] text-slate-500 border-t border-slate-100 pt-2">
-                      <span>Min: {item.threshold} {item.unit}</span>
-                      <span class="font-bold text-orange-600">~{daysLeft} days left</span>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-
-          {/* COOK TAB */}
-          {activeTab === "cook" && (
-            <div class="max-w-xl mx-auto bg-white p-7 rounded-3xl border border-orange-200 shadow-lg space-y-5">
-              <h2 class="text-xl font-bold text-slate-900">🍳 Log Cooked Meal & Auto-Deduct</h2>
-              <p class="text-xs text-slate-500">Select what you cooked today to automatically reduce ingredients from stock.</p>
-
-              <div>
-                <label class="block text-xs font-bold text-slate-700 mb-1.5">Select Dish</label>
-                <select
-                  value={selectedRecipe}
-                  onChange={(e) => setSelectedRecipe(e.target.value)}
-                  class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold"
-                >
-                  {RECIPES.map(r => (
-                    <option key={r.id} value={r.id}>{r.name}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label class="block text-xs font-bold text-slate-700 mb-1.5">Number of People</label>
-                <div class="flex gap-2">
-                  {[1, 2, 3, 4, 5, 6].map(num => (
+                <div class="flex overflow-x-auto gap-2 pb-1">
+                  {CATEGORIES.map(category => (
                     <button
-                      key={num}
-                      onClick={() => setServings(num)}
-                      class={"w-10 h-10 rounded-xl font-bold text-xs " + (
-                        servings === num ? "bg-orange-500 text-white" : "bg-slate-100 text-slate-700"
+                      key={category}
+                      onClick={() => setSelectedCategory(category)}
+                      class={"px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all " + (
+                        selectedCategory === category
+                          ? "bg-orange-500 text-white shadow-md shadow-orange-500/20"
+                          : "bg-slate-100 text-slate-600 hover:bg-slate-200"
                       )}
                     >
-                      {num}
+                      {category}
                     </button>
                   ))}
                 </div>
               </div>
 
-              <div class="bg-amber-50 p-4 rounded-2xl border border-amber-200 text-xs">
-                <span class="font-bold text-amber-900 block mb-2">Estimated Ingredients Deducted:</span>
-                <ul class="space-y-1 text-amber-800">
-                  {RECIPES.find(r => r.id === selectedRecipe)?.ingredients.map(ing => (
-                    <li key={ing.name} class="flex justify-between">
-                      <span>• {ing.name}</span>
-                      <span class="font-bold">{(ing.qty * servings).toFixed(1)} {ing.unit}</span>
-                    </li>
-                  ))}
-                </ul>
+              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                {filteredItems.map(item => {
+                  const pct = Math.min(100, Math.round((item.current / item.max) * 100));
+                  const isLow = item.current <= item.threshold;
+                  const daysLeft = item.dailyBurn ? Math.round(item.current / item.dailyBurn) : 12;
+
+                  return (
+                    <div
+                      key={item.id}
+                      class={"rounded-3xl p-5 border transition-all duration-300 hover:shadow-lg " + (
+                        isLow ? "bg-red-50/80 border-red-200" : "bg-white border-orange-100 hover:border-orange-300 shadow-sm"
+                      )}
+                    >
+                      <div class="flex items-start justify-between">
+                        <div class="flex items-center gap-2.5">
+                          <span class="text-2xl">{item.icon}</span>
+                          <div>
+                            <span class="text-[10px] font-bold text-slate-400 uppercase block">{item.category}</span>
+                            <h3 class="font-bold text-sm text-slate-900 leading-tight">{item.shortName}</h3>
+                          </div>
+                        </div>
+                        <span class={"text-xs font-black px-2 py-0.5 rounded-lg " + (
+                          isLow ? "bg-red-100 text-red-700 font-bold" : "bg-emerald-100 text-emerald-800"
+                        )}>
+                          {item.current} {item.unit}
+                        </span>
+                      </div>
+
+                      <div class="mt-4">
+                        <div class="flex justify-between text-xs text-slate-500 mb-1">
+                          <span>Stock Gauge</span>
+                          <span class={isLow ? "text-red-600 font-bold" : ""}>{pct}%</span>
+                        </div>
+                        <div class="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden p-0.5">
+                          <div
+                            class={"h-full rounded-full transition-all duration-500 " + (
+                              isLow ? "bg-red-500" : pct < 50 ? "bg-amber-500" : "bg-emerald-500"
+                            )}
+                            style={{ width: pct + "%" }}
+                          ></div>
+                        </div>
+                      </div>
+
+                      <div class="mt-3 flex justify-between text-[11px] text-slate-500 border-t border-slate-100 pt-2">
+                        <span>Threshold: {item.threshold} {item.unit}</span>
+                        <span class="font-bold text-orange-600">~{daysLeft} days left</span>
+                      </div>
+
+                      <div class="mt-3 grid grid-cols-2 gap-2">
+                        <button
+                          onClick={() => updateStock(item.id, item.unit === "g" ? -20 : -0.5)}
+                          class="py-1 bg-slate-100 hover:bg-red-100 hover:text-red-700 text-slate-700 rounded-xl text-xs font-bold transition-all"
+                        >
+                          - {item.unit === "g" ? "20g" : "0.5" + item.unit}
+                        </button>
+                        <button
+                          onClick={() => updateStock(item.id, item.unit === "g" ? 50 : 1.0)}
+                          class="py-1 bg-slate-100 hover:bg-emerald-100 hover:text-emerald-700 text-slate-700 rounded-xl text-xs font-bold transition-all"
+                        >
+                          + {item.unit === "g" ? "50g" : "1" + item.unit}
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* TAB 2: THE MASALA DABBA */}
+          {activeTab === "masala" && (
+            <div class="space-y-6">
+              <div class="bg-gradient-to-r from-amber-950 to-orange-950 rounded-3xl p-8 text-white shadow-xl">
+                <span class="text-xs font-black uppercase text-amber-400 bg-amber-900/60 px-3 py-1 rounded-full border border-amber-700">
+                  Daily Tadka Essentials
+                </span>
+                <h2 class="text-3xl font-black mt-3">The Masala Dabba Organizer</h2>
+                <p class="text-sm text-amber-200/80 mt-1 max-w-2xl">
+                  Track grams remaining in your classic spice canisters. Daily pinches from cooked meals automatically reduce stock levels here.
+                </p>
               </div>
 
-              <button
-                onClick={handleCook}
-                class="w-full py-3.5 bg-gradient-to-r from-orange-500 to-amber-600 text-white font-bold text-xs rounded-xl shadow-md hover:from-orange-600"
-              >
-                ✓ Confirm & Deduct from Live Pantry
-              </button>
+              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                {pantry.filter(i => i.category === "Masala Dabba").map(spice => {
+                  const pct = Math.min(100, Math.round((spice.current / spice.max) * 100));
+                  const isLow = spice.current <= spice.threshold;
+
+                  return (
+                    <div key={spice.id} class="bg-white rounded-3xl p-6 border border-orange-100 shadow-sm flex flex-col justify-between">
+                      <div>
+                        <div class="flex justify-between items-center mb-3">
+                          <span class="text-3xl">{spice.icon}</span>
+                          <span class={"text-[10px] font-black uppercase px-2 py-0.5 rounded-full " + (
+                            isLow ? "bg-red-100 text-red-700" : "bg-emerald-100 text-emerald-800"
+                          )}>
+                            {isLow ? "Refill Soon" : "Fresh"}
+                          </span>
+                        </div>
+                        <h3 class="font-extrabold text-base text-slate-900">{spice.shortName}</h3>
+                        <p class="text-xs text-slate-400">{spice.name}</p>
+
+                        <div class="mt-4 bg-slate-50 p-3 rounded-2xl border border-slate-100">
+                          <div class="flex justify-between text-xs font-bold mb-1">
+                            <span class="text-slate-500">Level</span>
+                            <span class="text-slate-900">{spice.current} {spice.unit}</span>
+                          </div>
+                          <div class="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
+                            <div
+                              class={"h-full rounded-full " + (isLow ? "bg-red-500" : "bg-orange-500")}
+                              style={{ width: pct + "%" }}
+                            ></div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div class="mt-4 pt-3 border-t border-slate-100 grid grid-cols-2 gap-2">
+                        <button
+                          onClick={() => updateStock(spice.id, -10)}
+                          class="py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold"
+                        >
+                          - 10g Tadka
+                        </button>
+                        <button
+                          onClick={() => updateStock(spice.id, 50)}
+                          class="py-1.5 bg-orange-100 hover:bg-orange-200 text-orange-800 rounded-xl text-xs font-bold"
+                        >
+                          + 50g Refill
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           )}
 
-          {/* RADAR TAB */}
-          {activeTab === "radar" && (
-            <div class="bg-white p-7 rounded-3xl border border-orange-200 shadow-sm space-y-4">
-              <h2 class="text-xl font-bold text-slate-900">⚠️ Low Stock Restock Radar</h2>
-              {lowStockItems.length === 0 ? (
-                <div class="text-center py-10 text-slate-400 font-bold">✨ All staples are fully stocked!</div>
-              ) : (
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  {lowStockItems.map(item => (
-                    <div key={item.id} class="p-4 bg-red-50 border border-red-200 rounded-2xl flex justify-between items-center">
-                      <div>
-                        <h4 class="font-bold text-red-900 text-sm">{item.name}</h4>
-                        <p class="text-xs text-red-600">Current: {item.current} {item.unit} (Threshold: {item.threshold} {item.unit})</p>
-                      </div>
-                      <button
-                        onClick={() => {
-                          setPantry(prev => prev.map(p => p.id === item.id ? { ...p, current: p.max } : p));
-                          showToast("Refilled " + item.name + "!");
-                        }}
-                        class="bg-red-600 text-white font-bold text-xs px-3 py-1.5 rounded-lg hover:bg-red-700"
+          {/* TAB 3: "WHAT DID YOU COOK?" MEAL AUTO-DEPLETION WITH GUEST SUPPORT */}
+          {activeTab === "cook" && (
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+              <div class="lg:col-span-7 bg-white rounded-3xl p-6 sm:p-8 border border-orange-100 shadow-sm space-y-6">
+                <div>
+                  <span class="text-[10px] font-black uppercase tracking-wider text-orange-600">
+                    Indian Recipe Intelligence
+                  </span>
+                  <h2 class="text-2xl font-black text-slate-900 mt-0.5">
+                    ðŸ³ What Did You Cook Today?
+                  </h2>
+                  <p class="text-xs text-slate-500 mt-1">
+                    Select the dish and diner count. DearHome computes exact recipe proportions and deducts them from your live pantry.
+                  </p>
+                </div>
+
+                <div>
+                  <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+                    1. Select Dish Cooked
+                  </label>
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 max-h-56 overflow-y-auto pr-1">
+                    {INDIAN_RECIPES.map(recipe => (
+                      <div
+                        key={recipe.id}
+                        onClick={() => setSelectedRecipe(recipe.id)}
+                        class={"p-3 rounded-2xl border-2 cursor-pointer transition-all flex items-center gap-3 " + (
+                          selectedRecipe === recipe.id
+                            ? "border-orange-500 bg-orange-50/70 shadow-sm"
+                            : "border-slate-100 hover:border-slate-300 bg-slate-50/60"
+                        )}
                       >
-                        + Restock
+                        <span class="text-2xl">{recipe.icon}</span>
+                        <div>
+                          <h4 class="font-extrabold text-xs text-slate-900">{recipe.name}</h4>
+                          <p class="text-[10px] text-slate-400">{recipe.cuisine} â€¢ {recipe.prepTime}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* DINER COUNT CONTROLS WITH GUEST MULTIPLIER */}
+                <div class="p-4 bg-orange-50/60 rounded-2xl border border-orange-200/80 space-y-3">
+                  <div class="flex justify-between items-center">
+                    <div>
+                      <span class="text-xs font-black text-slate-900 block">2. Diners & Guest Setup</span>
+                      <span class="text-[11px] text-slate-500">
+                        Family base: <strong>{baseFamilyServings} people</strong> ({household.adults} Adults, {household.children} Kids)
+                      </span>
+                    </div>
+                    <div class="text-right">
+                      <span class="text-xs font-bold text-slate-400 block">Total Servings</span>
+                      <span class="text-xl font-black text-orange-600">{totalMealEaters} People</span>
+                    </div>
+                  </div>
+
+                  <div class="flex items-center justify-between pt-2 border-t border-orange-200/60">
+                    <span class="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+                      <span>ðŸŽ‰ Extra Guests for this meal:</span>
+                    </span>
+                    <div class="flex items-center gap-2">
+                      <button
+                        onClick={() => setGuestCountForMeal(Math.max(0, guestCountForMeal - 1))}
+                        class="w-8 h-8 rounded-xl bg-white border border-slate-300 font-black text-xs hover:bg-slate-100 shadow-sm"
+                      >
+                        -
+                      </button>
+                      <span class="w-6 text-center font-black text-sm text-slate-900">{guestCountForMeal}</span>
+                      <button
+                        onClick={() => setGuestCountForMeal(guestCountForMeal + 1)}
+                        class="w-8 h-8 rounded-xl bg-white border border-slate-300 font-black text-xs hover:bg-slate-100 shadow-sm"
+                      >
+                        +
                       </button>
                     </div>
-                  ))}
+                  </div>
                 </div>
-              )}
+
+                <button
+                  onClick={handleCookMeal}
+                  class="w-full py-4 rounded-2xl bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white font-black text-xs shadow-lg shadow-orange-600/25 transition-all"
+                >
+                  âœ“ Confirm & Auto-Deduct Ingredients for {totalMealEaters} People
+                </button>
+              </div>
+
+              <div class="lg:col-span-5 space-y-6">
+                <div class="bg-gradient-to-br from-amber-50 to-orange-50 rounded-3xl p-6 border border-orange-200/80 shadow-sm">
+                  <div class="flex justify-between items-center pb-3 border-b border-orange-200/60 mb-3">
+                    <h3 class="font-extrabold text-sm text-slate-900">
+                      Calculated Ingredient Deductions
+                    </h3>
+                    <span class="text-[11px] font-black bg-orange-200 text-orange-900 px-2.5 py-0.5 rounded-full">
+                      {totalMealEaters} Servings
+                    </span>
+                  </div>
+
+                  <div class="space-y-2 max-h-52 overflow-y-auto">
+                    {INDIAN_RECIPES.find(r => r.id === selectedRecipe)?.ingredients.map(ing => (
+                      <div key={ing.name} class="flex justify-between text-xs p-2 bg-white/90 rounded-xl border border-orange-100">
+                        <span class="font-medium text-slate-700">â€¢ {ing.name}</span>
+                        <span class="font-black text-orange-700">- {(ing.qty * totalMealEaters).toFixed(1)} {ing.unit}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div class="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm">
+                  <h3 class="font-extrabold text-xs uppercase tracking-wider text-slate-400 mb-3">
+                    Recent Cook Logs
+                  </h3>
+                  {mealLogs.length === 0 ? (
+                    <p class="text-xs text-slate-400 text-center py-4">No meals logged yet today.</p>
+                  ) : (
+                    <div class="space-y-2.5 max-h-48 overflow-y-auto">
+                      {mealLogs.slice(0, 5).map(log => (
+                        <div key={log.id} class="p-3 bg-slate-50 rounded-xl text-xs border border-slate-100">
+                          <div class="flex justify-between font-bold text-slate-800">
+                            <span>{log.recipeName}</span>
+                            <span class="text-[10px] text-slate-400">{log.time}</span>
+                          </div>
+                          <div class="text-[11px] text-slate-500 mt-0.5">
+                            {log.servings} People ({log.familyCount} Family + {log.guestCount} Guests)
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
           )}
 
-          {/* SYNC TAB */}
+          {/* TAB 4: RESTOCK RADAR */}
+          {activeTab === "radar" && (
+            <div class="space-y-6">
+              <div class="bg-white p-7 rounded-3xl border border-orange-200 shadow-sm space-y-4">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                  <div>
+                    <h2 class="text-xl font-bold text-slate-900">âš ï¸ Low Stock Restock Radar</h2>
+                    <p class="text-xs text-slate-500">Autonomous burn-rate prediction warns you before essentials run out.</p>
+                  </div>
+                  {lowStockItems.length > 0 && (
+                    <button
+                      onClick={() => {
+                        lowStockItems.forEach(i => updateStock(i.id, +(i.max - i.current).toFixed(1)));
+                        showToast("ðŸŽ‰ All low stock items marked as restocked!");
+                      }}
+                      class="bg-emerald-600 text-white font-bold text-xs px-4 py-2.5 rounded-xl hover:bg-emerald-700 shadow-sm"
+                    >
+                      âœ“ 1-Click Restock All ({lowStockItems.length} items)
+                    </button>
+                  )}
+                </div>
+
+                {lowStockItems.length === 0 ? (
+                  <div class="text-center py-12 text-slate-400">
+                    <span class="text-4xl block mb-2">âœ¨</span>
+                    <p class="font-bold text-slate-700">Kitchen is fully stocked!</p>
+                    <p class="text-xs mt-1">Zero items are below safety threshold.</p>
+                  </div>
+                ) : (
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-3 pt-2">
+                    {lowStockItems.map(item => (
+                      <div key={item.id} class="p-4 bg-red-50/80 border border-red-200 rounded-2xl flex justify-between items-center">
+                        <div>
+                          <h4 class="font-bold text-red-950 text-sm">{item.shortName}</h4>
+                          <p class="text-xs text-red-700">
+                            Current: <strong>{item.current} {item.unit}</strong> (Min Threshold: {item.threshold} {item.unit})
+                          </p>
+                        </div>
+                        <button
+                          onClick={() => {
+                            updateStock(item.id, +(item.max - item.current).toFixed(1));
+                            showToast("Refilled " + item.shortName + "!");
+                          }}
+                          class="bg-red-600 text-white font-bold text-xs px-3.5 py-1.5 rounded-xl hover:bg-red-700"
+                        >
+                          + Refill
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* TAB 5: ONLINE ORDER SYNC */}
           {activeTab === "sync" && (
-            <div class="max-w-xl mx-auto bg-white p-7 rounded-3xl border border-orange-200 shadow-sm text-center space-y-4">
-              <h2 class="text-xl font-bold text-slate-900">⚡ Connect Quick-Commerce Ingestion</h2>
-              <p class="text-xs text-slate-500">Simulate live order delivery sync from Zepto, Blinkit, and Amazon Fresh:</p>
-              <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2">
-                {["Zepto", "Blinkit", "Instamart", "Amazon Fresh"].map(app => (
+            <div class="max-w-2xl mx-auto bg-white p-8 rounded-3xl border border-orange-200 shadow-sm text-center space-y-6">
+              <div>
+                <span class="text-xs font-black uppercase text-orange-600 bg-orange-100 px-3 py-1 rounded-full">
+                  Quick-Commerce Ingestion
+                </span>
+                <h2 class="text-2xl font-black text-slate-900 mt-2">Connect Delivery Apps</h2>
+                <p class="text-xs text-slate-500 mt-1">
+                  Orders from Zepto, Blinkit, Instamart, or Amazon Fresh automatically increment your live stock.
+                </p>
+              </div>
+
+              <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                {[
+                  { name: "Zepto", color: "bg-purple-600", text: "text-purple-600" },
+                  { name: "Blinkit", color: "bg-yellow-500", text: "text-yellow-600" },
+                  { name: "Instamart", color: "bg-orange-500", text: "text-orange-600" },
+                  { name: "Amazon Fresh", color: "bg-teal-700", text: "text-teal-700" }
+                ].map(app => (
                   <button
-                    key={app}
-                    onClick={() => handleQuickSync(app)}
-                    class="p-4 bg-slate-50 hover:bg-orange-50 border border-slate-200 rounded-2xl font-bold text-xs text-slate-800 transition-all flex flex-col items-center gap-2"
+                    key={app.name}
+                    onClick={() => handleQuickSync(app.name)}
+                    class="p-4 bg-slate-50 hover:bg-orange-50 border border-slate-200 rounded-2xl transition-all flex flex-col items-center gap-2 group hover:border-orange-300"
                   >
-                    <span class="text-2xl">🛍️</span>
-                    <span>{app}</span>
-                    <span class="text-[10px] text-emerald-600">Sync Order</span>
+                    <div class={"w-11 h-11 rounded-xl " + app.color + " text-white font-black flex items-center justify-center text-base shadow-sm"}>
+                      ðŸ›ï¸
+                    </div>
+                    <span class="text-xs font-extrabold text-slate-800">{app.name}</span>
+                    <span class="text-[10px] text-emerald-600 font-bold">Simulate Sync</span>
                   </button>
                 ))}
               </div>
             </div>
           )}
 
-          {/* SCAN TAB */}
+          {/* TAB 6: OCR BILL SCANNER */}
           {activeTab === "scan" && (
-            <div class="max-w-xl mx-auto bg-white p-7 rounded-3xl border border-orange-200 shadow-sm text-center space-y-4">
-              <h2 class="text-xl font-bold text-slate-900">🧾 Supermarket OCR Receipt Scanner</h2>
-              <p class="text-xs text-slate-500">Scan physical cash receipts from D-Mart, Reliance Smart, or Kirana stores:</p>
-              <div class="border-2 border-dashed border-orange-300 p-8 rounded-3xl bg-orange-50/30 space-y-3">
-                <span class="text-4xl block">📸</span>
-                <p class="text-xs font-bold text-slate-700">Drop invoice photo or click simulate</p>
+            <div class="max-w-2xl mx-auto bg-white p-8 rounded-3xl border border-orange-200 shadow-sm text-center space-y-6">
+              <div>
+                <span class="text-xs font-black uppercase text-indigo-600 bg-indigo-100 px-3 py-1 rounded-full">
+                  Gemini Vision OCR
+                </span>
+                <h2 class="text-2xl font-black text-slate-900 mt-2">Supermarket Bill Scanner</h2>
+                <p class="text-xs text-slate-500 mt-1">
+                  Snap physical receipts from D-Mart, Reliance Smart, or Kirana stores to auto-itemize groceries.
+                </p>
+              </div>
+
+              <div class="border-2 border-dashed border-orange-300 p-8 rounded-3xl bg-orange-50/40 space-y-4">
+                <span class="text-4xl block">ðŸ“¸</span>
+                <div>
+                  <p class="text-xs font-bold text-slate-800">Drop receipt image or simulate scanning</p>
+                  <p class="text-[10px] text-slate-400 mt-0.5">Supports thermal cash receipts & GST supermarket invoices</p>
+                </div>
                 <button
-                  onClick={handleScanBill}
-                  class="px-5 py-2.5 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-xl shadow-sm"
+                  onClick={() => {
+                    handleQuickSync("D-Mart Store #402");
+                    showToast("ðŸ§¾ D-Mart Invoice Parsed! Added 5kg Atta, 1L Mustard Oil & 1kg Dal.");
+                  }}
+                  class="px-6 py-3 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-xl shadow-md"
                 >
-                  Simulate D-Mart Bill OCR Scan
+                  ðŸ“¸ Simulate D-Mart Receipt Scan
                 </button>
               </div>
             </div>
           )}
 
-          {/* Toast */}
-          {toast && (
-            <div class="fixed bottom-6 right-6 bg-slate-900 text-white px-5 py-3 rounded-2xl shadow-2xl text-xs font-bold animate-pulse">
-              {toast}
+          {/* TAB 7: HOUSEHOLD INSIGHTS */}
+          {activeTab === "analytics" && (
+            <div class="space-y-6">
+              <div class="bg-gradient-to-r from-slate-900 via-emerald-950 to-slate-900 rounded-3xl p-8 text-white shadow-xl">
+                <span class="text-xs font-black uppercase text-emerald-400 bg-emerald-950 px-3 py-1 rounded-full border border-emerald-700">
+                  Consumption Intelligence
+                </span>
+                <h2 class="text-3xl font-black mt-3">Monthly Household Usage Patterns</h2>
+                <p class="text-sm text-slate-300 mt-1">
+                  Derived dynamically from your household size ({household.adults} Adults, {household.children} Kids) and daily cooking habits.
+                </p>
+              </div>
+
+              <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                {[
+                  { label: "Atta (Wheat)", value: (0.38 * 30).toFixed(1) + " kg", icon: "ðŸŒ¾" },
+                  { label: "Basmati Rice", value: (0.22 * 30).toFixed(1) + " kg", icon: "ðŸš" },
+                  { label: "Cooking Oils", value: (0.15 * 30).toFixed(1) + " L", icon: "ðŸ›¢ï¸" },
+                  { label: "Monthly Milk", value: (1.0 * 30).toFixed(0) + " L", icon: "ðŸ¥›" }
+                ].map((item, idx) => (
+                  <div key={idx} class="bg-white p-5 rounded-3xl border border-orange-100 text-center shadow-sm">
+                    <span class="text-3xl block mb-2">{item.icon}</span>
+                    <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">{item.label}</span>
+                    <span class="text-xl font-black text-slate-900 my-1 block">{item.value}</span>
+                    <span class="text-[10px] text-slate-500 font-semibold">per month</span>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
+
+          {/* ========================================================= */}
+          {/* MODAL 1: HOUSEHOLD CUSTOMIZER & GUEST MANAGER */}
+          {/* ========================================================= */}
+          {isHouseholdModalOpen && (
+            <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm animate-modal">
+              <div class="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 border border-orange-100 shadow-2xl space-y-6 relative max-h-[90vh] overflow-y-auto">
+                
+                <button
+                  onClick={() => setIsHouseholdModalOpen(false)}
+                  class="absolute right-5 top-5 p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100"
+                >
+                  âœ•
+                </button>
+
+                <div>
+                  <span class="text-[10px] font-black uppercase tracking-wider text-orange-600 bg-orange-100 px-2.5 py-0.5 rounded-md">
+                    Family & Guest Configuration
+                  </span>
+                  <h2 class="text-2xl font-black text-slate-900 mt-1.5">Customize Your Household</h2>
+                  <p class="text-xs text-slate-500 mt-0.5">
+                    DearHome uses these counts to calculate exact ingredient burn rates for daily meals.
+                  </p>
+                </div>
+
+                <div class="space-y-4">
+                  <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                      Family / House Name
+                    </label>
+                    <input
+                      type="text"
+                      value={household.name}
+                      onChange={(e) => setHousehold({ ...household, name: e.target.value })}
+                      class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:outline-none focus:border-orange-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+                      Family Members Count
+                    </label>
+                    <div class="grid grid-cols-3 gap-3">
+                      
+                      <div class="p-3 bg-slate-50 rounded-2xl border border-slate-200 text-center">
+                        <span class="text-[11px] font-bold text-slate-500 block">Adults</span>
+                        <div class="flex items-center justify-center gap-2 mt-2">
+                          <button
+                            onClick={() => setHousehold(p => ({ ...p, adults: Math.max(1, p.adults - 1) }))}
+                            class="w-7 h-7 rounded-lg bg-white border border-slate-300 font-black text-xs hover:bg-slate-100"
+                          >
+                            -
+                          </button>
+                          <span class="text-base font-black text-slate-900 w-6">{household.adults}</span>
+                          <button
+                            onClick={() => setHousehold(p => ({ ...p, adults: p.adults + 1 }))}
+                            class="w-7 h-7 rounded-lg bg-white border border-slate-300 font-black text-xs hover:bg-slate-100"
+                          >
+                            +
+                          </button>
+                        </div>
+                      </div>
+
+                      <div class="p-3 bg-slate-50 rounded-2xl border border-slate-200 text-center">
+                        <span class="text-[11px] font-bold text-slate-500 block">Children</span>
+                        <div class="flex items-center justify-center gap-2 mt-2">
+                          <button
+                            onClick={() => setHousehold(p => ({ ...p, children: Math.max(0, p.children - 1) }))}
+                            class="w-7 h-7 rounded-lg bg-white border border-slate-300 font-black text-xs hover:bg-slate-100"
+                          >
+                            -
+                          </button>
+                          <span class="text-base font-black text-slate-900 w-6">{household.children}</span>
+                          <button
+                            onClick={() => setHousehold(p => ({ ...p, children: p.children + 1 }))}
+                            class="w-7 h-7 rounded-lg bg-white border border-slate-300 font-black text-xs hover:bg-slate-100"
+                          >
+                            +
+                          </button>
+                        </div>
+                      </div>
+
+                      <div class="p-3 bg-slate-50 rounded-2xl border border-slate-200 text-center">
+                        <span class="text-[11px] font-bold text-slate-500 block">Elders</span>
+                        <div class="flex items-center justify-center gap-2 mt-2">
+                          <button
+                            onClick={() => setHousehold(p => ({ ...p, elders: Math.max(0, p.elders - 1) }))}
+                            class="w-7 h-7 rounded-lg bg-white border border-slate-300 font-black text-xs hover:bg-slate-100"
+                          >
+                            -
+                          </button>
+                          <span class="text-base font-black text-slate-900 w-6">{household.elders}</span>
+                          <button
+                            onClick={() => setHousehold(p => ({ ...p, elders: p.elders + 1 }))}
+                            class="w-7 h-7 rounded-lg bg-white border border-slate-300 font-black text-xs hover:bg-slate-100"
+                          >
+                            +
+                          </button>
+                        </div>
+                      </div>
+
+                    </div>
+                  </div>
+
+                  <div class="p-4 bg-amber-50 rounded-2xl border border-amber-200 space-y-2">
+                    <div class="flex justify-between items-center">
+                      <div>
+                        <span class="text-xs font-black text-amber-950 flex items-center gap-1.5">
+                          <span>ðŸŽ‰ House Guests Staying Over</span>
+                        </span>
+                        <span class="text-[11px] text-amber-800 block mt-0.5">
+                          Temporarily scales overall family grocery consumption.
+                        </span>
+                      </div>
+                      <div class="flex items-center gap-2">
+                        <button
+                          onClick={() => setHousehold(p => ({ ...p, currentGuests: Math.max(0, (p.currentGuests || 0) - 1) }))}
+                          class="w-8 h-8 rounded-xl bg-white border border-amber-300 font-black text-xs hover:bg-amber-100"
+                        >
+                          -
+                        </button>
+                        <span class="w-6 text-center font-black text-base text-amber-950">{household.currentGuests || 0}</span>
+                        <button
+                          onClick={() => setHousehold(p => ({ ...p, currentGuests: (p.currentGuests || 0) + 1 }))}
+                          class="w-8 h-8 rounded-xl bg-white border border-amber-300 font-black text-xs hover:bg-amber-100"
+                        >
+                          +
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                      Regional Cooking Focus
+                    </label>
+                    <select
+                      value={household.cuisine}
+                      onChange={(e) => setHousehold({ ...household, cuisine: e.target.value })}
+                      class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800"
+                    >
+                      <option value="North Indian">North Indian (Roti, Dals, Sabzis)</option>
+                      <option value="South Indian">South Indian (Rice, Sambar, Idli)</option>
+                      <option value="Maharashtrian">Maharashtrian (Poha, Poli, Dal)</option>
+                      <option value="Bengali">Bengali (Rice & Curries)</option>
+                      <option value="Gujarati">Gujarati (Rotli, Shaak, Dal, Khichdi)</option>
+                      <option value="Punjabi">Punjabi (Parathas, Rajma, Paneer)</option>
+                    </select>
+                  </div>
+
+                  <button
+                    onClick={() => {
+                      setIsHouseholdModalOpen(false);
+                      showToast("ðŸ‘¥ Household settings updated successfully!");
+                    }}
+                    class="w-full py-3.5 bg-slate-900 hover:bg-slate-800 text-white font-black text-xs rounded-xl shadow-md transition-all mt-2"
+                  >
+                    âœ“ Save Profile & Recalculate Stock Burn Rates
+                  </button>
+
+                </div>
+
+              </div>
+            </div>
+          )}
+
+          {/* ========================================================= */}
+          {/* MODAL 2: ADD CUSTOM PANTRY ITEM */}
+          {/* ========================================================= */}
+          {isAddItemModalOpen && (
+            <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm animate-modal">
+              <div class="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 border border-orange-100 shadow-2xl space-y-5 relative">
+                
+                <button
+                  onClick={() => setIsAddItemModalOpen(false)}
+                  class="absolute right-5 top-5 p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100"
+                >
+                  âœ•
+                </button>
+
+                <h2 class="text-xl font-black text-slate-900">Add New Grocery Staple</h2>
+
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    const name = e.target.name.value;
+                    const category = e.target.category.value;
+                    const unit = e.target.unit.value;
+                    const qty = parseFloat(e.target.qty.value) || 1.0;
+
+                    if (name) {
+                      setPantry(prev => [{
+                        id: "item-" + Date.now(),
+                        name: name,
+                        shortName: name,
+                        category: category,
+                        current: qty,
+                        max: qty * 1.5,
+                        unit: unit,
+                        threshold: qty * 0.25,
+                        dailyBurn: 0.05,
+                        icon: "ðŸ“¦",
+                        price: 50
+                      }, ...prev]);
+                      setIsAddItemModalOpen(false);
+                      showToast("Added " + name + " to your digital pantry!");
+                    }
+                  }}
+                  class="space-y-4"
+                >
+                  <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Item Name</label>
+                    <input
+                      name="name"
+                      type="text"
+                      placeholder="e.g. Fortune Besan (Gram Flour)"
+                      class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold"
+                      required
+                    />
+                  </div>
+
+                  <div class="grid grid-cols-2 gap-3">
+                    <div>
+                      <label class="block text-xs font-bold text-slate-700 mb-1">Category</label>
+                      <select name="category" class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold">
+                        {CATEGORIES.filter(c => c !== "All Items").map(c => (
+                          <option key={c} value={c}>{c}</option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div>
+                      <label class="block text-xs font-bold text-slate-700 mb-1">Unit</label>
+                      <select name="unit" class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold">
+                        <option value="kg">kg</option>
+                        <option value="g">g</option>
+                        <option value="L">L</option>
+                        <option value="ml">ml</option>
+                        <option value="pcs">pcs</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Current Quantity</label>
+                    <input
+                      name="qty"
+                      type="number"
+                      step="0.1"
+                      defaultValue="1.0"
+                      class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold"
+                      required
+                    />
+                  </div>
+
+                  <button
+                    type="submit"
+                    class="w-full py-3 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-xl shadow-sm"
+                  >
+                    Add to Stock
+                  </button>
+                </form>
+
+              </div>
+            </div>
+          )}
+
+          {/* FLOATING TOAST NOTIFICATION */}
+          {toast && (
+            <div class="fixed bottom-6 right-6 z-50 bg-slate-900 text-white px-5 py-3.5 rounded-2xl shadow-2xl text-xs font-bold border border-slate-700 animate-modal flex items-center gap-2.5">
+              <span>âœ¨</span>
+              <span>{toast}</span>
+            </div>
+          )}
+
         </div>
       );
     }
