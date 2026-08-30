@@ -79,42 +79,36 @@ graph TD
 
 ---
 
-## 5. Multi-Phase Implementation Plan
+## 5. Rapid Week-by-Week Implementation Plan (2-Week Execution)
+
+The project follows a rapid 2-week execution schedule designed for swift deployment and completion:
 
 ```mermaid
 gantt
-    title DearHome Initiative Implementation Roadmap
+    title DearHome 2-Week Rapid Execution Roadmap
     dateFormat  YYYY-MM-DD
-    section Phase 1: Prototype
-    Frontend Core and Meal-Depletion Engine :done, p1, 2026-08-01, 2026-08-30
-    Cloud GitHub Repo and Deploy :done, p2, 2026-08-30, 2026-08-31
-    section Phase 2: Google AI Integration
-    Gemini Vision Multimodal OCR Pipeline :active, p3, 2026-09-01, 2026-09-20
-    Cloud Firestore Live Sync and Auth :p4, 2026-09-15, 2026-10-05
-    section Phase 3: Automation
-    Gmail API Quick-Commerce Parser :p5, 2026-10-01, 2026-10-25
-    Perishability and Recipe Suggestion Engine :p6, 2026-10-20, 2026-11-15
-    section Phase 4: Pilot and Scale
-    Household Pilot in Bangalore and Pune :p7, 2026-11-15, 2026-12-15
-    Final Google Initiative Showcase :p8, 2026-12-15, 2026-12-31
+    section Week 1: Core Foundation & Prototype
+    Digital Pantry & Household Engine        :done, w1_1, 2026-08-25, 2026-08-28
+    Meal-Depletion Engine & Guest Mode      :done, w1_2, 2026-08-28, 2026-08-30
+    Cloud GitHub Repo & Live Web Deployment :done, w1_3, 2026-08-30, 2026-08-31
+    section Week 2: Google AI & Final Delivery
+    Gemini 2.0 Flash Vision OCR API Hookup  :active, w2_1, 2026-09-01, 2026-09-03
+    Cloud Firestore Multi-Device Sync       :w2_2, 2026-09-03, 2026-09-05
+    Perishability & Food-Waste Engine       :w2_3, 2026-09-05, 2026-09-06
+    Final QA, Demo Video & Submission       :w2_4, 2026-09-06, 2026-09-07
 ```
 
-### Phase 1: Foundation and Prototype (Completed)
-- Built interactive digital pantry with Indian staples, Masala Dabba spice box, and Days-of-Supply gauges.
-- Developed the "What Did You Cook?" meal logger with dynamic family and guest multiplier.
-- Deployed cloud-hosted interactive prototype.
+### Week 1: Core Architecture, Multi-Agent Logic & Live Web App (Completed)
+- Day 1-2: Designed the Indian pantry database, Si units unit conversion, and 7-spice Masala Dabba tracker.
+- Day 3-4: Developed the "What Did You Cook?" dynamic recipe deduction engine with family and guest multipliers.
+- Day 5-6: Integrated Restock Radar, Quick-Commerce simulation (Zepto, Blinkit), and OCR simulation (D-Mart).
+- Day 7: Deployed 100% cloud-hosted interactive prototype live on GitHub Pages with persistent browser storage.
 
-### Phase 2: Google Cloud and AI Integration (Month 1-2)
-- Connect Gemini 2.0 Flash API endpoint for live camera photo uploads of supermarket cash receipts.
-- Set up Google Cloud Firestore for real-time multi-user family synchronization and Firebase Authentication (Google Sign-In).
-
-### Phase 3: Autonomous Webhooks and Perishability Engine (Month 2-3)
-- Deploy Google Cloud Run microservice linked with the Gmail API to securely ingest digital invoices from Zepto, Blinkit, Instamart, and Amazon Fresh.
-- Implement the Eco-Agent's perishable shelf-life tracking and spoilage prevention notifications.
-
-### Phase 4: Pilot Testing and Showcase (Month 3-4)
-- Run a closed beta pilot across 100 Indian households in Bangalore and Pune to refine machine-learned portion estimates.
-- Prepare final demonstration metrics showcasing reduced food waste percentage and elimination of household stockout events.
+### Week 2: Google AI Integration, Cloud Backend & Final Delivery (Target Completion: Within 7 Days)
+- Day 8-9 (Days 1-2 of Week 2): Connect live Google Gemini 2.0 Flash Vision API endpoint for camera receipt scanning.
+- Day 10-11 (Days 3-4 of Week 2): Connect Google Cloud Firestore for real-time cloud multi-user sync and Firebase Auth.
+- Day 12-13 (Days 5-6 of Week 2): Complete the Eco-Agent food-waste perishability notifications and quick-commerce 1-click cart exporter.
+- Day 14 (Day 7 of Week 2): Final end-to-end verification, demo video recording, and official submission to Google Patchamomma.
 
 ---
 
