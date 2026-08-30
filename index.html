@@ -38,7 +38,9 @@
       Sparkles: () => <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/></svg>,
       Plus: () => <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4"/></svg>,
       Check: () => <svg className="w-4 h-4 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"/></svg>,
-      Send: () => <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
+      Send: () => <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>,
+      Video: () => <svg className="w-3.5 h-3.5 text-red-500" fill="currentColor" viewBox="0 0 24 24"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/></svg>,
+      BookOpen: () => <svg className="w-3.5 h-3.5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
     };
 
     const CATEGORIES = ["All Items", "Atta & Grains", "Dals & Pulses", "Oils & Ghee", "Masala Dabba", "Dairy & Fresh", "Vegetables", "Beverages & Snacks"];
@@ -76,6 +78,8 @@
         name: "Dal Tadka & Jeera Rice",
         cuisine: "North Indian",
         prepTime: "25 mins",
+        youtubeQuery: "Authentic Dal Tadka and Jeera Rice Recipe Chef Ranveer Brar",
+        recipeUrl: "https://hebbarskitchen.com/dal-tadka-recipe-yellow-toor-dal-tadka/",
         ingredients: [
           { name: "Toor Dal", qty: 35, unit: "g" },
           { name: "Basmati Rice", qty: 65, unit: "g" },
@@ -91,6 +95,8 @@
         name: "Punjabi Rajma Masala & Rice",
         cuisine: "Punjabi",
         prepTime: "40 mins",
+        youtubeQuery: "Punjabi Rajma Masala Recipe Ranveer Brar",
+        recipeUrl: "https://hebbarskitchen.com/rajma-recipe-rajma-masala-curry-recipe/",
         ingredients: [
           { name: "Rajma", qty: 45, unit: "g" },
           { name: "Basmati Rice", qty: 65, unit: "g" },
@@ -105,6 +111,8 @@
         name: "Aloo Paratha & Makkhan",
         cuisine: "North Indian",
         prepTime: "25 mins",
+        youtubeQuery: "Dhaba Style Punjabi Aloo Paratha Recipe Ranveer Brar",
+        recipeUrl: "https://hebbarskitchen.com/aloo-paratha-recipe-aloo-ka-paratha/",
         ingredients: [
           { name: "Chakki Atta", qty: 75, unit: "g" },
           { name: "Potato (Aloo)", qty: 80, unit: "g" },
@@ -117,6 +125,8 @@
         name: "Paneer Butter Masala & Roti",
         cuisine: "North Indian",
         prepTime: "30 mins",
+        youtubeQuery: "Restaurant Style Paneer Butter Masala Recipe Chef Ranveer Brar",
+        recipeUrl: "https://hebbarskitchen.com/paneer-butter-masala-recipe/",
         ingredients: [
           { name: "Fresh Paneer", qty: 65, unit: "g" },
           { name: "Chakki Atta", qty: 65, unit: "g" },
@@ -130,6 +140,8 @@
         name: "Batata Kanda Poha",
         cuisine: "Maharashtrian",
         prepTime: "15 mins",
+        youtubeQuery: "Authentic Maharashtrian Kanda Poha Recipe Ranveer Brar",
+        recipeUrl: "https://hebbarskitchen.com/kanda-poha-recipe-onion-poha-recipe/",
         ingredients: [
           { name: "Poha", qty: 60, unit: "g" },
           { name: "Onion (Pyaz)", qty: 30, unit: "g" },
@@ -144,6 +156,8 @@
         name: "Adrak Masala Chai",
         cuisine: "All India",
         prepTime: "10 mins",
+        youtubeQuery: "Perfect Adrak Masala Chai Recipe Ranveer Brar",
+        recipeUrl: "https://hebbarskitchen.com/masala-chai-recipe-masala-tea-recipe/",
         ingredients: [
           { name: "Amul Milk", qty: 85, unit: "ml" },
           { name: "Chai Patti (Tea)", qty: 4.5, unit: "g" },
@@ -164,9 +178,9 @@
           currentGuests: 0,
           cuisine: "North Indian",
           diet: "Vegetarian",
-          appetiteLevel: "Regular (1.0x)", // 'Light (0.75x)', 'Regular (1.0x)', 'Hearty (1.3x)'
-          staplePreference: "Balanced (50/50)", // 'Roti Dominant', 'Rice Dominant', 'Balanced (50/50)'
-          oilIntensity: "Standard Tadka (1.0x)" // 'Low Oil (0.7x)', 'Standard Tadka (1.0x)', 'Rich Tadka (1.3x)'
+          appetiteLevel: "Regular (1.0x)",
+          staplePreference: "Balanced (50/50)",
+          oilIntensity: "Standard Tadka (1.0x)"
         };
       });
 
@@ -194,7 +208,7 @@
         {
           id: "m-1",
           sender: "ai",
-          text: "Namaste Sinduja! I am your DearHome AI Kitchen Assistant. What did you cook today, or would you like me to suggest recipes based on your available pantry stock?",
+          text: "Namaste Sinduja! I am your DearHome AI Kitchen Assistant. What did you cook today, or would you like me to suggest recipes with direct YouTube videos and step-by-step guides based on your available groceries?",
           suggestions: [
             "What can I cook with what I have?",
             "I cooked Dal Tadka and Rice for 4 people today",
@@ -228,14 +242,12 @@
         setTimeout(() => setToast(null), 4000);
       };
 
-      // APPETITE MULTIPLIER
       const appetiteMultiplier = useMemo(() => {
         if (household.appetiteLevel?.includes("Light")) return 0.75;
         if (household.appetiteLevel?.includes("Hearty")) return 1.30;
         return 1.0;
       }, [household.appetiteLevel]);
 
-      // BASE SERVINGS COMBINING AGE AND APPETITE
       const baseFamilyServings = useMemo(() => {
         const rawEaters = (household.adults * 1.0) + (household.children * 0.6) + (household.elders * 0.85);
         return Math.max(1, +(rawEaters * appetiteMultiplier).toFixed(1));
@@ -309,7 +321,7 @@
           setIsAiThinking(false);
           const lower = query.toLowerCase();
 
-          if (lower.includes("what can i cook") || lower.includes("suggest") || lower.includes("recipe") || lower.includes("available") || lower.includes("dinner") || lower.includes("lunch")) {
+          if (lower.includes("what can i cook") || lower.includes("suggest") || lower.includes("recipe") || lower.includes("available") || lower.includes("dinner") || lower.includes("lunch") || lower.includes("video") || lower.includes("youtube")) {
             const hasAtta = (pantry.find(i => i.shortName.includes("Atta"))?.current || 0) >= 1;
             const hasRice = (pantry.find(i => i.shortName.includes("Rice"))?.current || 0) >= 1;
             const hasPaneer = (pantry.find(i => i.shortName.includes("Paneer"))?.current || 0) >= 100;
@@ -318,17 +330,29 @@
             const hasAloo = (pantry.find(i => i.shortName.includes("Potato"))?.current || 0) >= 1;
 
             let suggestionsList = [];
-            if (hasAtta && hasAloo) suggestionsList.push({ name: "Stuffed Aloo Paratha with Curd", id: "aloo_paratha", reason: "8.5kg Atta & 2.5kg Potatoes available (" + household.appetiteLevel + " portions)" });
-            if (hasDal && hasRice) suggestionsList.push({ name: "Dal Tadka and Jeera Rice", id: "dal_tadka_rice", reason: "Toor dal & Basmati rice available" });
-            if (hasPaneer && hasAtta) suggestionsList.push({ name: "Paneer Butter Masala with Phulkas", id: "paneer_butter_masala", reason: "Fresh paneer & Atta ready" });
-            if (hasRajma && hasRice) suggestionsList.push({ name: "Punjabi Rajma Masala & Rice", id: "rajma_chawal", reason: "1.2kg Rajma in stock" });
+            if (hasAtta && hasAloo) {
+              const r = INDIAN_RECIPES[2];
+              suggestionsList.push({ ...r, reason: "8.5kg Atta & 2.5kg Potatoes available" });
+            }
+            if (hasDal && hasRice) {
+              const r = INDIAN_RECIPES[0];
+              suggestionsList.push({ ...r, reason: "Toor dal & Basmati rice ready in stock" });
+            }
+            if (hasPaneer && hasAtta) {
+              const r = INDIAN_RECIPES[3];
+              suggestionsList.push({ ...r, reason: "Fresh Malai Paneer & Atta ready" });
+            }
+            if (hasRajma && hasRice) {
+              const r = INDIAN_RECIPES[1];
+              suggestionsList.push({ ...r, reason: "1.2kg Rajma & Basmati in stock" });
+            }
 
             setChatMessages(prev => [
               ...prev,
               {
                 id: "ai-" + Date.now(),
                 sender: "ai",
-                text: "Based on your live pantry and your family's " + household.appetiteLevel + " eating profile, here are top dishes you can cook:",
+                text: "Based on your live pantry groceries, here are dishes you can cook right now with curated YouTube tutorials & recipe steps:",
                 dishRecommendations: suggestionsList,
                 suggestions: ["What groceries are running low?", "I cooked one of these dishes"]
               }
@@ -355,7 +379,7 @@
               {
                 id: "ai-" + Date.now(),
                 sender: "ai",
-                text: "Understood! Prepared " + matchedRecipe.name + " (" + effectiveDiners + " portion units for " + household.appetiteLevel + " eaters). Click below to deduct ingredients:",
+                text: "Understood! Prepared " + matchedRecipe.name + " (" + effectiveDiners + " portion units). Click below to deduct ingredients or view recipe details:",
                 actionableMeal: {
                   recipe: matchedRecipe,
                   servings: effectiveDiners
@@ -384,7 +408,7 @@
               {
                 id: "ai-" + Date.now(),
                 sender: "ai",
-                text: "I am ready to help manage your kitchen! Tell me what you cooked today, or ask for dish recommendations tailored to your family's " + household.appetiteLevel + " appetite profile.",
+                text: "I am ready to help manage your kitchen! Ask for recipe recommendations with YouTube video links, tell me what you cooked today, or check items running low.",
                 suggestions: [
                   "What can I cook with my current pantry?",
                   "I cooked Dal Tadka for 4 people today",
@@ -472,7 +496,7 @@
             {[
               { id: "assistant", label: "AI Kitchen Assistant", icon: <Icons.Chat /> },
               { id: "pantry", label: "Digital Pantry", count: pantry.length, icon: <Icons.Box /> },
-              { id: "family", label: "Family, Appetite & Guests", icon: <Icons.Users />, highlight: true },
+              { id: "family", label: "Family, Appetite & Guests", icon: <Icons.Users /> },
               { id: "masala", label: "Masala Dabba", count: 5, icon: <Icons.Flame /> },
               { id: "cook", label: "What Did You Cook?", icon: <Icons.Flame /> },
               { id: "radar", label: "Restock Radar", count: lowStockItems.length, alert: lowStockItems.length > 0, icon: <Icons.Alert /> },
@@ -502,7 +526,7 @@
             ))}
           </nav>
 
-          {/* TAB 1: CONVERSATIONAL AI KITCHEN ASSISTANT */}
+          {/* TAB 1: CONVERSATIONAL AI KITCHEN ASSISTANT WITH YOUTUBE & RECIPE LINKS */}
           {activeTab === "assistant" && (
             <div class="max-w-3xl mx-auto space-y-4">
               <div class="bg-gradient-to-r from-amber-600 via-orange-600 to-amber-700 rounded-3xl p-6 text-white shadow-xl flex items-center justify-between">
@@ -512,7 +536,7 @@
                   </span>
                   <h2 class="text-2xl font-black mt-2">DearHome Conversational Agent</h2>
                   <p class="text-xs text-orange-100 mt-1">
-                    Tell me what you cooked, or ask for meal suggestions matching your {household.appetiteLevel} appetite.
+                    Smart meal suggestions with direct YouTube cooking tutorials & automatic pantry deduction.
                   </p>
                 </div>
                 <div class="w-14 h-14 rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center text-white text-2xl border border-white/20">
@@ -520,7 +544,7 @@
                 </div>
               </div>
 
-              <div class="bg-white rounded-3xl p-6 border border-orange-100 shadow-sm min-h-[420px] max-h-[500px] overflow-y-auto space-y-4">
+              <div class="bg-white rounded-3xl p-6 border border-orange-100 shadow-sm min-h-[440px] max-h-[520px] overflow-y-auto space-y-4">
                 {chatMessages.map(msg => (
                   <div
                     key={msg.id}
@@ -535,40 +559,101 @@
                     >
                       <p class="font-medium">{msg.text}</p>
 
+                      {/* DISH RECOMMENDATION CARDS WITH YOUTUBE & WEBSITE LINKS */}
                       {msg.dishRecommendations && (
-                        <div class="mt-3 space-y-2 pt-2 border-t border-orange-200">
-                          {msg.dishRecommendations.map((rec, idx) => (
-                            <div key={idx} class="p-3 bg-white rounded-xl border border-orange-200 flex items-center justify-between gap-3">
-                              <div>
-                                <span class="font-bold text-slate-900 block">{rec.name}</span>
-                                <span class="text-[10px] text-slate-500 block">{rec.reason}</span>
+                        <div class="mt-3 space-y-2.5 pt-2 border-t border-orange-200">
+                          {msg.dishRecommendations.map((rec, idx) => {
+                            const ytSearchUrl = "https://www.youtube.com/results?search_query=" + encodeURIComponent(rec.youtubeQuery || (rec.name + " Recipe Ranveer Brar"));
+                            return (
+                              <div key={idx} class="p-3.5 bg-white rounded-2xl border border-orange-200 shadow-sm space-y-2.5">
+                                <div class="flex justify-between items-start">
+                                  <div>
+                                    <span class="font-extrabold text-sm text-slate-900 block">{rec.name}</span>
+                                    <span class="text-[10px] text-slate-500 block mt-0.5">{rec.reason} â€¢ {rec.prepTime}</span>
+                                  </div>
+                                  <span class="text-[10px] font-bold bg-amber-100 text-amber-900 px-2 py-0.5 rounded-md">
+                                    {rec.cuisine}
+                                  </span>
+                                </div>
+
+                                <div class="flex flex-wrap items-center gap-2 pt-1 border-t border-slate-100">
+                                  {/* YOUTUBE VIDEO BUTTON */}
+                                  <a
+                                    href={ytSearchUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-700 font-bold text-[11px] rounded-xl border border-red-200 transition-all"
+                                  >
+                                    <Icons.Video />
+                                    <span>Watch on YouTube</span>
+                                  </a>
+
+                                  {/* RECIPE WEB GUIDE BUTTON */}
+                                  {rec.recipeUrl && (
+                                    <a
+                                      href={rec.recipeUrl}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-orange-50 hover:bg-orange-100 text-orange-800 font-bold text-[11px] rounded-xl border border-orange-200 transition-all"
+                                    >
+                                      <Icons.BookOpen />
+                                      <span>Recipe Steps</span>
+                                    </a>
+                                  )}
+
+                                  {/* AUTO DEDUCT COOKED THIS BUTTON */}
+                                  <button
+                                    onClick={() => handleCookMealDirect(rec.id, baseFamilyServings)}
+                                    class="inline-flex items-center gap-1 px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-white font-bold text-[11px] rounded-xl shadow-sm ml-auto transition-all"
+                                  >
+                                    <Icons.Check />
+                                    <span>Cooked This ({baseFamilyServings} portions)</span>
+                                  </button>
+                                </div>
                               </div>
-                              <button
-                                onClick={() => handleCookMealDirect(rec.id, baseFamilyServings)}
-                                class="px-3 py-1.5 bg-orange-500 hover:bg-orange-600 text-white font-bold text-[10px] rounded-lg shadow-sm whitespace-nowrap"
-                              >
-                                âœ“ Cooked This ({baseFamilyServings} portions)
-                              </button>
-                            </div>
-                          ))}
+                            );
+                          })}
                         </div>
                       )}
 
+                      {/* ACTIONABLE MEAL DEDUCTION CARD */}
                       {msg.actionableMeal && (
-                        <div class="mt-3 p-3 bg-white rounded-xl border border-emerald-300 space-y-2">
-                          <div class="flex justify-between items-center text-xs font-bold text-emerald-900">
-                            <span>{msg.actionableMeal.recipe.name}</span>
-                            <span class="text-orange-600">{msg.actionableMeal.servings} Servings</span>
+                        <div class="mt-3 p-3.5 bg-white rounded-2xl border border-emerald-300 shadow-sm space-y-2.5">
+                          <div class="flex justify-between items-center text-xs font-bold text-emerald-950">
+                            <span class="text-sm font-extrabold">{msg.actionableMeal.recipe.name}</span>
+                            <span class="text-orange-600 font-black">{msg.actionableMeal.servings} Servings</span>
                           </div>
-                          <p class="text-[10px] text-slate-500">
-                            Ingredients scaled for your {household.appetiteLevel} appetite profile.
-                          </p>
+                          
+                          <div class="flex flex-wrap items-center gap-2">
+                            <a
+                              href={"https://www.youtube.com/results?search_query=" + encodeURIComponent(msg.actionableMeal.recipe.youtubeQuery || (msg.actionableMeal.recipe.name + " Recipe Ranveer Brar"))}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-red-50 hover:bg-red-100 text-red-700 font-bold text-[10px] rounded-lg border border-red-200"
+                            >
+                              <Icons.Video />
+                              <span>YouTube Video</span>
+                            </a>
+
+                            {msg.actionableMeal.recipe.recipeUrl && (
+                              <a
+                                href={msg.actionableMeal.recipe.recipeUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-orange-50 hover:bg-orange-100 text-orange-800 font-bold text-[10px] rounded-lg border border-orange-200"
+                              >
+                                <Icons.BookOpen />
+                                <span>Written Recipe</span>
+                              </a>
+                            )}
+                          </div>
+
                           <button
                             onClick={() => handleCookMealDirect(msg.actionableMeal.recipe.id, msg.actionableMeal.servings)}
-                            class="w-full py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs rounded-lg shadow-sm flex items-center justify-center gap-1.5"
+                            class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs rounded-xl shadow-md flex items-center justify-center gap-1.5 transition-all"
                           >
                             <Icons.Check />
-                            <span>Auto-Deduct {msg.actionableMeal.recipe.ingredients.length} Ingredients</span>
+                            <span>Confirm & Auto-Deduct {msg.actionableMeal.recipe.ingredients.length} Ingredients</span>
                           </button>
                         </div>
                       )}
@@ -593,7 +678,7 @@
                 {isAiThinking && (
                   <div class="flex items-center gap-2 p-3 bg-orange-50 rounded-2xl max-w-xs text-xs text-orange-800 font-semibold border border-orange-200 animate-pulse">
                     <Icons.Sparkles />
-                    <span>Analyzing pantry stock & recipes...</span>
+                    <span>Analyzing pantry stock, recipes & YouTube tutorials...</span>
                   </div>
                 )}
                 <div ref={chatEndRef} />
@@ -608,7 +693,7 @@
               >
                 <input
                   type="text"
-                  placeholder="e.g. 'I cooked Dal Tadka and rice for 4 people' or 'What can I make for dinner?'"
+                  placeholder="e.g. 'What can I make for dinner with YouTube video?' or 'Cooked Rajma Chawal for 4'"
                   value={userChatInput}
                   onChange={(e) => setUserChatInput(e.target.value)}
                   class="flex-1 px-4 py-3.5 bg-white border border-slate-200 rounded-2xl text-xs font-semibold focus:outline-none focus:border-orange-500 shadow-sm"
@@ -719,7 +804,7 @@
             </div>
           )}
 
-          {/* TAB 3: FAMILY CUSTOMIZER WITH APPETITE PROFILE */}
+          {/* TAB 3: FAMILY CUSTOMIZER */}
           {activeTab === "family" && (
             <div class="max-w-2xl mx-auto bg-white rounded-3xl p-6 sm:p-8 border border-orange-200 shadow-lg space-y-6">
               <div>
@@ -809,7 +894,6 @@
                   </div>
                 </div>
 
-                {/* APPETITE PROFILE LEVEL */}
                 <div class="p-5 bg-orange-50/70 rounded-2xl border border-orange-200 space-y-3">
                   <div>
                     <label class="block text-xs font-bold text-orange-950 uppercase tracking-wider">
@@ -842,7 +926,6 @@
                   </div>
                 </div>
 
-                {/* STAPLE PREFERENCE */}
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
@@ -875,7 +958,6 @@
                   </div>
                 </div>
 
-                {/* GUEST MODE CARD */}
                 <div class="p-5 bg-amber-50 rounded-2xl border border-amber-200 space-y-2">
                   <div class="flex justify-between items-center">
                     <div>
