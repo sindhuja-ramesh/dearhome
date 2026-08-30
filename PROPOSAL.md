@@ -5,8 +5,7 @@
 
 * **Lead Submitter:** Sinduja
 * **Contact Email:** [Sinduja1219@gmail.com](mailto:Sinduja1219@gmail.com)
-* **Live Working App:** [https://sindhuja-ramesh.github.io/dearhome/](https://sindhuja-ramesh.github.io/dearhome/)
-* **Cloud Source Repository:** [https://github.com/sindhuja-ramesh/dearhome](https://github.com/sindhuja-ramesh/dearhome)
+* **Live Working App:** [https://sindujag.github.io/dearhome/](https://sindujag.github.io/dearhome/)
 * **Target Initiative:** Google Pachamama / AI for Sustainability
 * **Aligned UN Sustainable Development Goals:** **UN SDG 12** (*Responsible Consumption & Food Waste Reduction*), **UN SDG 11** (*Sustainable Cities & Logistics*)
 
@@ -87,7 +86,7 @@ gantt
     dateFormat  YYYY-MM-DD
     section Phase 1: Prototype
     Frontend Core & Meal-Depletion Engine :done, p1, 2026-08-01, 2026-08-30
-    Cloud GitHub Repo & GitHub Pages Deploy :done, p2, 2026-08-30, 2026-08-31
+    Cloud GitHub Repo & Deploy :done, p2, 2026-08-30, 2026-08-31
     section Phase 2: Google AI Integration
     Gemini Vision Multimodal OCR Pipeline :active, p3, 2026-09-01, 2026-09-20
     Cloud Firestore Live Sync & Auth :p4, 2026-09-15, 2026-10-05
@@ -102,7 +101,7 @@ gantt
 ### **Phase 1: Foundation & Prototype (Completed)**
 * âœ… Built interactive digital pantry with Indian staples, Masala Dabba spice box, and Days-of-Supply gauges.
 * âœ… Developed the **"What Did You Cook?"** meal logger with dynamic family and guest multiplier.
-* âœ… Deployed 100% cloud-hosted interactive prototype on GitHub Pages.
+* âœ… Deployed cloud-hosted interactive prototype.
 
 ### **Phase 2: Google Cloud & AI Integration (Month 1â€“2)**
 * Connect **Gemini 2.0 Flash API** endpoint for live camera photo uploads of supermarket cash receipts.
@@ -129,4 +128,4 @@ gantt
 ## ðŸ‘¥ Submitter Contact
 * **Lead Submitter:** Sinduja
 * **Contact Email:** [Sinduja1219@gmail.com](mailto:Sinduja1219@gmail.com)
-* **Live Demonstration:** [https://sindhuja-ramesh.github.io/dearhome/](https://sindhuja-ramesh.github.io/dearhome/)
+* **Live Demonstration:** [https://sindujag.github.io/dearhome/](https://sindujag.github.io/dearhome/)

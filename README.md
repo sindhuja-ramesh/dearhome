@@ -4,7 +4,7 @@
 
 * **Lead Submitter:** Sinduja
 * **Email:** Sinduja1219@gmail.com
-* **Live Web App:** [https://sindhuja-ramesh.github.io/dearhome/](https://sindhuja-ramesh.github.io/dearhome/)
+* **Live Web App:** [https://sindujag.github.io/dearhome/](https://sindujag.github.io/dearhome/)
 * **Initiative:** Google Pachamama / AI for Sustainability (UN SDG 12 & SDG 11)
 
 ---
@@ -49,3 +49,4 @@
 ## ðŸ‘¥ Lead Contact
 * **Lead Submitter:** Sinduja
 * **Contact Email:** [Sinduja1219@gmail.com](mailto:Sinduja1219@gmail.com)
+* **Live Application:** [https://sindujag.github.io/dearhome/](https://sindujag.github.io/dearhome/)
