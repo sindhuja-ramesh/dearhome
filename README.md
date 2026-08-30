@@ -5,7 +5,7 @@ Autonomous Multi-Agent Kitchen Inventory and Food-Waste Prevention Engine Powere
 - Lead Submitter: Sinduja
 - Email: Sinduja1219@gmail.com
 - Live Web Application: https://sindhuja-ramesh.github.io/dearhome/
-- Target Initiative: Google Pachamama / AI for Sustainability (UN SDG 12 and SDG 11)
+- Target Initiative: Google Patchamomma / AI for Sustainability (UN SDG 12 and SDG 11)
 
 ---
 
@@ -49,4 +49,5 @@ Autonomous Multi-Agent Kitchen Inventory and Food-Waste Prevention Engine Powere
 ## Submitter Contact
 - Lead Submitter: Sinduja
 - Contact Email: Sinduja1219@gmail.com
+- Target Initiative: Google Patchamomma / AI for Sustainability
 - Live Application: https://sindhuja-ramesh.github.io/dearhome/

@@ -7,7 +7,7 @@
 - Contact Email: Sinduja1219@gmail.com
 - Live Working App: https://sindhuja-ramesh.github.io/dearhome/
 - Cloud Source Repository: https://github.com/sindhuja-ramesh/dearhome
-- Target Initiative: Google Pachamama / AI for Sustainability
+- Target Initiative: Google Patchamomma / AI for Sustainability
 - Aligned UN Sustainable Development Goals: UN SDG 12 (Responsible Consumption and Food Waste Reduction), UN SDG 11 (Sustainable Cities and Logistics)
 
 ---
@@ -118,7 +118,7 @@ gantt
 
 ---
 
-## 6. Social and Sustainability Impact (Google Pachamama Alignment)
+## 6. Social and Sustainability Impact (Google Patchamomma Alignment)
 
 1. Halving Household Food Waste (UN SDG 12.3): Proactive perishability warnings ensure fresh vegetables and dairy are consumed before spoiling.
 2. Consolidated Logistics and Carbon Footprint Reduction (UN SDG 11): By forecasting weekly kitchen needs and grouping restocks into consolidated baskets, DearHome reduces erratic single-item quick-commerce delivery trips.
@@ -129,4 +129,5 @@ gantt
 ## Submitter Contact
 - Lead Submitter: Sinduja
 - Contact Email: Sinduja1219@gmail.com
+- Target Initiative: Google Patchamomma / AI for Sustainability
 - Live Demonstration: https://sindhuja-ramesh.github.io/dearhome/
