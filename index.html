@@ -23,9 +23,8 @@
   <div id="root"></div>
 
   <script type="text/babel">
-    const { useState, useEffect, useMemo } = React;
+    const { useState, useEffect, useMemo, useRef } = React;
 
-    // SVG ICONS FOR CLEAN RENDERING ACROSS ALL BROWSERS (NO EMOJI MOJIBAKE)
     const Icons = {
       Home: () => <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>,
       Users: () => <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>,
@@ -35,8 +34,11 @@
       Zap: () => <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>,
       Camera: () => <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg>,
       Chart: () => <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>,
+      Chat: () => <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg>,
+      Sparkles: () => <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/></svg>,
       Plus: () => <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4"/></svg>,
-      Check: () => <svg className="w-4 h-4 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"/></svg>
+      Check: () => <svg className="w-4 h-4 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"/></svg>,
+      Send: () => <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
     };
 
     const CATEGORIES = ["All Items", "Atta & Grains", "Dals & Pulses", "Oils & Ghee", "Masala Dabba", "Dairy & Fresh", "Vegetables", "Beverages & Snacks"];
@@ -175,7 +177,7 @@
         return saved ? JSON.parse(saved) : [];
       });
 
-      const [activeTab, setActiveTab] = useState("pantry");
+      const [activeTab, setActiveTab] = useState("assistant"); // 'assistant', 'pantry', 'family', 'masala', 'cook', 'radar', 'sync', 'scan', 'analytics'
       const [isAddItemModalOpen, setIsAddItemModalOpen] = useState(false);
       const [selectedCategory, setSelectedCategory] = useState("All Items");
       const [searchQuery, setSearchQuery] = useState("");
@@ -183,6 +185,24 @@
       const [selectedRecipe, setSelectedRecipe] = useState(INDIAN_RECIPES[0].id);
       const [guestCountForMeal, setGuestCountForMeal] = useState(0);
       const [toast, setToast] = useState(null);
+
+      // CONVERSATIONAL AGENT STATE
+      const [chatMessages, setChatMessages] = useState([
+        {
+          id: "m-1",
+          sender: "ai",
+          text: "Namaste Sinduja! I am your DearHome AI Kitchen Assistant. What did you cook today, or would you like me to suggest recipes based on your available pantry stock?",
+          suggestions: [
+            "What can I cook with what I have?",
+            "I cooked Dal Tadka and Rice for 4 people today",
+            "I cooked Aloo Paratha for breakfast",
+            "Which groceries are running low?"
+          ]
+        }
+      ]);
+      const [userChatInput, setUserChatInput] = useState("");
+      const [isAiThinking, setIsAiThinking] = useState(false);
+      const chatEndRef = useRef(null);
 
       useEffect(() => {
         localStorage.setItem("dearhome_household", JSON.stringify(household));
@@ -196,6 +216,10 @@
         localStorage.setItem("dearhome_meallogs", JSON.stringify(mealLogs));
       }, [mealLogs]);
 
+      useEffect(() => {
+        chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+      }, [chatMessages, isAiThinking]);
+
       const showToast = (msg) => {
         setToast(msg);
         setTimeout(() => setToast(null), 4000);
@@ -203,7 +227,6 @@
 
       const baseFamilyServings = Math.round(household.adults + (household.children * 0.6) + (household.elders * 0.85));
       const totalMealEaters = baseFamilyServings + guestCountForMeal;
-
       const lowStockItems = useMemo(() => pantry.filter(i => i.current <= i.threshold), [pantry]);
 
       const updateStock = (id, delta) => {
@@ -216,8 +239,8 @@
         }));
       };
 
-      const handleCookMeal = () => {
-        const recipe = INDIAN_RECIPES.find(r => r.id === selectedRecipe);
+      const handleCookMealDirect = (recipeId, servingsCount) => {
+        const recipe = INDIAN_RECIPES.find(r => r.id === recipeId);
         if (!recipe) return;
 
         let deductions = [];
@@ -232,14 +255,14 @@
 
           if (index !== -1) {
             const item = updatedPantry[index];
-            let deductionAmount = ing.qty * totalMealEaters;
+            let deductionAmount = ing.qty * servingsCount;
 
             if (ing.unit === "g" && item.unit === "kg") deductionAmount /= 1000;
             if (ing.unit === "ml" && item.unit === "L") deductionAmount /= 1000;
 
             const nextQty = Math.max(0, +(item.current - deductionAmount).toFixed(2));
             updatedPantry[index] = { ...item, current: nextQty };
-            deductions.push({ name: item.shortName, qty: (ing.qty * totalMealEaters).toFixed(1) + " " + ing.unit });
+            deductions.push({ name: item.shortName, qty: (ing.qty * servingsCount).toFixed(1) + " " + ing.unit });
           }
         });
 
@@ -249,14 +272,121 @@
           id: "log-" + Date.now(),
           time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
           recipeName: recipe.name,
-          servings: totalMealEaters,
-          familyCount: baseFamilyServings,
-          guestCount: guestCountForMeal,
+          servings: servingsCount,
+          familyCount: servingsCount,
+          guestCount: 0,
           deductions
         };
 
         setMealLogs(prev => [newLog, ...prev]);
-        showToast("Cooked " + recipe.name + " (" + baseFamilyServings + " Family + " + guestCountForMeal + " Guests = " + totalMealEaters + " People). Stock reduced!");
+        showToast("Cooked " + recipe.name + " for " + servingsCount + " people. Inventory auto-deducted!");
+      };
+
+      // CONVERSATIONAL AI BRAIN
+      const handleSendMessage = (textToSend) => {
+        const query = textToSend || userChatInput;
+        if (!query.trim()) return;
+
+        const userMsg = { id: "user-" + Date.now(), sender: "user", text: query };
+        setChatMessages(prev => [...prev, userMsg]);
+        setUserChatInput("");
+        setIsAiThinking(true);
+
+        setTimeout(() => {
+          setIsAiThinking(false);
+          const lower = query.toLowerCase();
+
+          // 1. Suggest Dishes Query
+          if (lower.includes("what can i cook") || lower.includes("suggest") || lower.includes("recipe") || lower.includes("available") || lower.includes("dinner") || lower.includes("lunch")) {
+            // Check available staples
+            const hasAtta = (pantry.find(i => i.shortName.includes("Atta"))?.current || 0) >= 1;
+            const hasRice = (pantry.find(i => i.shortName.includes("Rice"))?.current || 0) >= 1;
+            const hasPaneer = (pantry.find(i => i.shortName.includes("Paneer"))?.current || 0) >= 100;
+            const hasDal = (pantry.find(i => i.shortName.includes("Toor Dal"))?.current || 0) >= 0.3;
+            const hasRajma = (pantry.find(i => i.shortName.includes("Rajma"))?.current || 0) >= 0.5;
+            const hasAloo = (pantry.find(i => i.shortName.includes("Potato"))?.current || 0) >= 1;
+
+            let suggestionsList = [];
+            if (hasAtta && hasAloo) suggestionsList.push({ name: "Stuffed Aloo Paratha with Curd", id: "aloo_paratha", reason: "You have 8.5kg Atta and 2.5kg Potatoes ready in stock." });
+            if (hasDal && hasRice) suggestionsList.push({ name: "Dal Tadka and Jeera Rice", id: "dal_tadka_rice", reason: "Toor dal and Basmati rice are available." });
+            if (hasPaneer && hasAtta) suggestionsList.push({ name: "Paneer Butter Masala with Phulkas", id: "paneer_butter_masala", reason: "Fresh paneer and atta are in prime condition." });
+            if (hasRajma && hasRice) suggestionsList.push({ name: "Punjabi Rajma Masala & Rice", id: "rajma_chawal", reason: "1.2kg Rajma in stock." });
+
+            setChatMessages(prev => [
+              ...prev,
+              {
+                id: "ai-" + Date.now(),
+                sender: "ai",
+                text: "Based on your live pantry stock, here are top dishes you can make right now without needing any grocery store run:",
+                dishRecommendations: suggestionsList,
+                suggestions: ["What groceries are running low?", "I cooked one of these dishes"]
+              }
+            ]);
+          }
+          // 2. Meal Logging Query (e.g. "I cooked Dal Tadka for 4 people")
+          else if (lower.includes("cook") || lower.includes("made") || lower.includes("prepared") || lower.includes("ate") || lower.includes("dal") || lower.includes("paratha") || lower.includes("rajma") || lower.includes("poha") || lower.includes("chai")) {
+            let matchedRecipe = INDIAN_RECIPES.find(r => lower.includes(r.name.toLowerCase()) || lower.includes(r.id.toLowerCase()) || lower.includes(r.cuisine.toLowerCase()));
+            if (!matchedRecipe) {
+              if (lower.includes("dal") || lower.includes("rice")) matchedRecipe = INDIAN_RECIPES[0];
+              else if (lower.includes("rajma")) matchedRecipe = INDIAN_RECIPES[1];
+              else if (lower.includes("paratha") || lower.includes("aloo")) matchedRecipe = INDIAN_RECIPES[2];
+              else if (lower.includes("paneer")) matchedRecipe = INDIAN_RECIPES[3];
+              else if (lower.includes("poha")) matchedRecipe = INDIAN_RECIPES[4];
+              else if (lower.includes("chai") || lower.includes("tea")) matchedRecipe = INDIAN_RECIPES[5];
+              else matchedRecipe = INDIAN_RECIPES[0];
+            }
+
+            // Extract servings number if mentioned (e.g. "for 5 people")
+            let extractedServings = baseFamilyServings;
+            const numberMatch = lower.match(/\b([1-9]|10)\b/);
+            if (numberMatch) extractedServings = parseInt(numberMatch[0]);
+
+            setChatMessages(prev => [
+              ...prev,
+              {
+                id: "ai-" + Date.now(),
+                sender: "ai",
+                text: "Understood! You prepared " + matchedRecipe.name + " for " + extractedServings + " diners. Click below to automatically deduct ingredients from your live stock:",
+                actionableMeal: {
+                  recipe: matchedRecipe,
+                  servings: extractedServings
+                },
+                suggestions: ["What can I cook for next meal?", "Check pantry levels"]
+              }
+            ]);
+          }
+          // 3. Low Stock / Restock Query
+          else if (lower.includes("low") || lower.includes("stock") || lower.includes("radar") || lower.includes("empty") || lower.includes("running out")) {
+            const lowItemsNames = lowStockItems.map(i => i.shortName + " (" + i.current + " " + i.unit + " left)").join(", ");
+            setChatMessages(prev => [
+              ...prev,
+              {
+                id: "ai-" + Date.now(),
+                sender: "ai",
+                text: lowStockItems.length > 0
+                  ? "âš ï¸ Warning: You have " + lowStockItems.length + " items running low: " + lowItemsNames + ". I recommend restocking them today!"
+                  : "âœ¨ All grocery staples in your pantry are above safety threshold! You are fully stocked.",
+                suggestions: ["What can I cook with what I have?", "Simulate Zepto Order Sync"]
+              }
+            ]);
+          }
+          // 4. Default Assistant Response
+          else {
+            setChatMessages(prev => [
+              ...prev,
+              {
+                id: "ai-" + Date.now(),
+                sender: "ai",
+                text: "I am ready to help manage your kitchen! You can tell me what you cooked today (e.g. 'Cooked Aloo Paratha for 4'), ask for dish recommendations based on available stock, or check items running low.",
+                suggestions: [
+                  "What can I cook with my current pantry?",
+                  "I cooked Dal Tadka for 4 people today",
+                  "Which groceries will run out first?"
+                ]
+              }
+            ]);
+          }
+        }, 600);
       };
 
       const handleQuickSync = (platform) => {
@@ -305,11 +435,19 @@
             {/* ACTION BUTTONS */}
             <div class="flex flex-wrap items-center gap-3">
               <button
+                onClick={() => setActiveTab("assistant")}
+                class="px-4 py-2.5 rounded-2xl bg-gradient-to-r from-orange-500 to-amber-500 text-white font-extrabold text-xs shadow-md shadow-orange-500/20 transition-all flex items-center gap-2"
+              >
+                <Icons.Sparkles />
+                <span>AI Kitchen Assistant</span>
+              </button>
+
+              <button
                 onClick={() => setActiveTab("family")}
-                class="px-4 py-2.5 rounded-2xl bg-orange-500 hover:bg-orange-600 text-white font-extrabold text-xs shadow-md shadow-orange-500/20 transition-all flex items-center gap-2"
+                class="px-4 py-2.5 rounded-2xl bg-white border border-slate-200 hover:bg-slate-50 text-slate-800 font-extrabold text-xs shadow-sm transition-all flex items-center gap-2"
               >
                 <Icons.Users />
-                <span>Customize Family ({household.adults} Adults, {household.children} Kids)</span>
+                <span>Family ({household.adults}A, {household.children}K)</span>
               </button>
 
               <button
@@ -325,6 +463,7 @@
           {/* MAIN NAVIGATION BAR */}
           <nav class="flex gap-2 p-1.5 bg-slate-100/90 rounded-2xl mb-8 overflow-x-auto border border-slate-200/80">
             {[
+              { id: "assistant", label: "AI Kitchen Assistant", icon: <Icons.Chat />, highlight: true },
               { id: "pantry", label: "Digital Pantry", count: pantry.length, icon: <Icons.Box /> },
               { id: "family", label: "Family & Guests", icon: <Icons.Users /> },
               { id: "masala", label: "Masala Dabba", count: 5, icon: <Icons.Flame /> },
@@ -356,163 +495,138 @@
             ))}
           </nav>
 
-          {/* TAB: FAMILY & GUEST CUSTOMIZER */}
-          {activeTab === "family" && (
-            <div class="max-w-2xl mx-auto bg-white rounded-3xl p-6 sm:p-8 border border-orange-200 shadow-lg space-y-6">
-              <div>
-                <span class="text-xs font-black uppercase text-orange-600 bg-orange-100 px-3 py-1 rounded-full">
-                  Family Profile & Guests
-                </span>
-                <h2 class="text-2xl font-black text-slate-900 mt-2">Customize Your Household</h2>
-                <p class="text-xs text-slate-500 mt-0.5">
-                  Set family members and guest counts. DearHome dynamically calculates recipe ingredient deductions and grocery replenishment schedules accordingly.
-                </p>
+          {/* ========================================================= */}
+          {/* TAB: CONVERSATIONAL AI KITCHEN ASSISTANT */}
+          {/* ========================================================= */}
+          {activeTab === "assistant" && (
+            <div class="max-w-3xl mx-auto space-y-4">
+              
+              <div class="bg-gradient-to-r from-amber-600 via-orange-600 to-amber-700 rounded-3xl p-6 text-white shadow-xl flex items-center justify-between">
+                <div>
+                  <span class="text-[10px] font-black uppercase tracking-wider bg-white/20 px-3 py-1 rounded-full">
+                    Powered by Google Gemini 2.0 Flash
+                  </span>
+                  <h2 class="text-2xl font-black mt-2">DearHome Conversational Agent</h2>
+                  <p class="text-xs text-orange-100 mt-1">
+                    Tell me what you cooked, or ask for meal suggestions matching ingredients in your pantry.
+                  </p>
+                </div>
+                <div class="w-14 h-14 rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center text-white text-2xl border border-white/20">
+                  <Icons.Sparkles />
+                </div>
               </div>
 
-              <div class="space-y-5">
-                <div>
-                  <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                    Family / House Name
-                  </label>
-                  <input
-                    type="text"
-                    value={household.name}
-                    onChange={(e) => setHousehold({ ...household, name: e.target.value })}
-                    class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:outline-none focus:border-orange-500"
-                  />
-                </div>
-
-                <div>
-                  <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
-                    Family Members Count
-                  </label>
-                  <div class="grid grid-cols-3 gap-3">
-                    
-                    {/* Adults */}
-                    <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200 text-center">
-                      <span class="text-xs font-bold text-slate-600 block">Adults</span>
-                      <div class="flex items-center justify-center gap-3 mt-3">
-                        <button
-                          onClick={() => setHousehold(p => ({ ...p, adults: Math.max(1, p.adults - 1) }))}
-                          class="w-9 h-9 rounded-xl bg-white border border-slate-300 font-black text-sm hover:bg-slate-100 shadow-sm"
-                        >
-                          -
-                        </button>
-                        <span class="text-lg font-black text-slate-900 w-6">{household.adults}</span>
-                        <button
-                          onClick={() => setHousehold(p => ({ ...p, adults: p.adults + 1 }))}
-                          class="w-9 h-9 rounded-xl bg-white border border-slate-300 font-black text-sm hover:bg-slate-100 shadow-sm"
-                        >
-                          +
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* Children */}
-                    <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200 text-center">
-                      <span class="text-xs font-bold text-slate-600 block">Children</span>
-                      <div class="flex items-center justify-center gap-3 mt-3">
-                        <button
-                          onClick={() => setHousehold(p => ({ ...p, children: Math.max(0, p.children - 1) }))}
-                          class="w-9 h-9 rounded-xl bg-white border border-slate-300 font-black text-sm hover:bg-slate-100 shadow-sm"
-                        >
-                          -
-                        </button>
-                        <span class="text-lg font-black text-slate-900 w-6">{household.children}</span>
-                        <button
-                          onClick={() => setHousehold(p => ({ ...p, children: p.children + 1 }))}
-                          class="w-9 h-9 rounded-xl bg-white border border-slate-300 font-black text-sm hover:bg-slate-100 shadow-sm"
-                        >
-                          +
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* Elders */}
-                    <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200 text-center">
-                      <span class="text-xs font-bold text-slate-600 block">Elders</span>
-                      <div class="flex items-center justify-center gap-3 mt-3">
-                        <button
-                          onClick={() => setHousehold(p => ({ ...p, elders: Math.max(0, p.elders - 1) }))}
-                          class="w-9 h-9 rounded-xl bg-white border border-slate-300 font-black text-sm hover:bg-slate-100 shadow-sm"
-                        >
-                          -
-                        </button>
-                        <span class="text-lg font-black text-slate-900 w-6">{household.elders}</span>
-                        <button
-                          onClick={() => setHousehold(p => ({ ...p, elders: p.elders + 1 }))}
-                          class="w-9 h-9 rounded-xl bg-white border border-slate-300 font-black text-sm hover:bg-slate-100 shadow-sm"
-                        >
-                          +
-                        </button>
-                      </div>
-                    </div>
-
-                  </div>
-                </div>
-
-                {/* GUEST MODE CARD */}
-                <div class="p-5 bg-amber-50 rounded-2xl border border-amber-200 space-y-2">
-                  <div class="flex justify-between items-center">
-                    <div>
-                      <span class="text-xs font-black text-amber-950 block">
-                        House Guests Staying Over
-                      </span>
-                      <span class="text-[11px] text-amber-800 block mt-0.5">
-                        Temporarily scales total daily kitchen grocery deductions.
-                      </span>
-                    </div>
-                    <div class="flex items-center gap-3">
-                      <button
-                        onClick={() => setHousehold(p => ({ ...p, currentGuests: Math.max(0, (p.currentGuests || 0) - 1) }))}
-                        class="w-9 h-9 rounded-xl bg-white border border-amber-300 font-black text-sm hover:bg-amber-100 shadow-sm"
-                      >
-                        -
-                      </button>
-                      <span class="w-6 text-center font-black text-lg text-amber-950">{household.currentGuests || 0}</span>
-                      <button
-                        onClick={() => setHousehold(p => ({ ...p, currentGuests: (p.currentGuests || 0) + 1 }))}
-                        class="w-9 h-9 rounded-xl bg-white border border-amber-300 font-black text-sm hover:bg-amber-100 shadow-sm"
-                      >
-                        +
-                      </button>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Regional Cuisine Focus */}
-                <div>
-                  <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                    Regional Cooking Focus
-                  </label>
-                  <select
-                    value={household.cuisine}
-                    onChange={(e) => setHousehold({ ...household, cuisine: e.target.value })}
-                    class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800"
+              {/* Chat Messages Log Container */}
+              <div class="bg-white rounded-3xl p-6 border border-orange-100 shadow-sm min-h-[420px] max-h-[500px] overflow-y-auto space-y-4">
+                {chatMessages.map(msg => (
+                  <div
+                    key={msg.id}
+                    class={"flex flex-col " + (msg.sender === "user" ? "items-end" : "items-start")}
                   >
-                    <option value="North Indian">North Indian (Roti, Dals, Sabzis)</option>
-                    <option value="South Indian">South Indian (Rice, Sambar, Idli)</option>
-                    <option value="Maharashtrian">Maharashtrian (Poha, Poli, Dal)</option>
-                    <option value="Bengali">Bengali (Rice & Curries)</option>
-                    <option value="Gujarati">Gujarati (Rotli, Shaak, Dal, Khichdi)</option>
-                    <option value="Punjabi">Punjabi (Parathas, Rajma, Paneer)</option>
-                  </select>
-                </div>
+                    <div
+                      class={"p-4 rounded-2xl max-w-lg text-xs leading-relaxed " + (
+                        msg.sender === "user"
+                          ? "bg-slate-900 text-white rounded-br-none"
+                          : "bg-orange-50 border border-orange-200/80 text-slate-800 rounded-bl-none shadow-sm"
+                      )}
+                    >
+                      <p class="font-medium">{msg.text}</p>
 
-                <button
-                  onClick={() => {
-                    setActiveTab("pantry");
-                    showToast("Household settings saved & recipes updated!");
-                  }}
-                  class="w-full py-4 bg-slate-900 hover:bg-slate-800 text-white font-black text-xs rounded-xl shadow-md transition-all mt-2"
-                >
-                  Save Profile & Go to Digital Pantry
-                </button>
+                      {/* DISH RECOMMENDATION CARDS FROM INVENTORY */}
+                      {msg.dishRecommendations && (
+                        <div class="mt-3 space-y-2 pt-2 border-t border-orange-200">
+                          {msg.dishRecommendations.map((rec, idx) => (
+                            <div key={idx} class="p-3 bg-white rounded-xl border border-orange-200 flex items-center justify-between gap-3">
+                              <div>
+                                <span class="font-bold text-slate-900 block">{rec.name}</span>
+                                <span class="text-[10px] text-slate-500 block">{rec.reason}</span>
+                              </div>
+                              <button
+                                onClick={() => handleCookMealDirect(rec.id, baseFamilyServings)}
+                                class="px-3 py-1.5 bg-orange-500 hover:bg-orange-600 text-white font-bold text-[10px] rounded-lg shadow-sm whitespace-nowrap"
+                              >
+                                âœ“ Cooked This ({baseFamilyServings} ppl)
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* ACTIONABLE COOKED MEAL DEDUCTION CARD */}
+                      {msg.actionableMeal && (
+                        <div class="mt-3 p-3 bg-white rounded-xl border border-emerald-300 space-y-2">
+                          <div class="flex justify-between items-center text-xs font-bold text-emerald-900">
+                            <span>{msg.actionableMeal.recipe.name}</span>
+                            <span class="text-orange-600">{msg.actionableMeal.servings} Servings</span>
+                          </div>
+                          <p class="text-[10px] text-slate-500">
+                            Ingredients will be calculated and deducted from live stock.
+                          </p>
+                          <button
+                            onClick={() => handleCookMealDirect(msg.actionableMeal.recipe.id, msg.actionableMeal.servings)}
+                            class="w-full py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs rounded-lg shadow-sm flex items-center justify-center gap-1.5"
+                          >
+                            <Icons.Check />
+                            <span>Auto-Deduct {msg.actionableMeal.recipe.ingredients.length} Ingredients</span>
+                          </button>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* SUGGESTION CHIPS */}
+                    {msg.suggestions && (
+                      <div class="flex flex-wrap gap-1.5 mt-2">
+                        {msg.suggestions.map((sug, sIdx) => (
+                          <button
+                            key={sIdx}
+                            onClick={() => handleSendMessage(sug)}
+                            class="text-[10px] bg-slate-100 hover:bg-orange-100 hover:text-orange-900 border border-slate-200 text-slate-600 px-2.5 py-1 rounded-full font-bold transition-all"
+                          >
+                            {sug}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ))}
+
+                {isAiThinking && (
+                  <div class="flex items-center gap-2 p-3 bg-orange-50 rounded-2xl max-w-xs text-xs text-orange-800 font-semibold border border-orange-200 animate-pulse">
+                    <Icons.Sparkles />
+                    <span>Analyzing pantry stock & recipes...</span>
+                  </div>
+                )}
+                <div ref={chatEndRef} />
               </div>
+
+              {/* Chat Input Box */}
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  handleSendMessage();
+                }}
+                class="flex gap-2"
+              >
+                <input
+                  type="text"
+                  placeholder="e.g. 'I cooked Dal Tadka and rice for 4 people' or 'What can I make for dinner?'"
+                  value={userChatInput}
+                  onChange={(e) => setUserChatInput(e.target.value)}
+                  class="flex-1 px-4 py-3.5 bg-white border border-slate-200 rounded-2xl text-xs font-semibold focus:outline-none focus:border-orange-500 shadow-sm"
+                />
+                <button
+                  type="submit"
+                  class="px-6 py-3.5 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-2xl shadow-md flex items-center gap-2"
+                >
+                  <Icons.Send />
+                  <span>Send</span>
+                </button>
+              </form>
+
             </div>
           )}
 
-          {/* TAB 1: DIGITAL PANTRY */}
+          {/* TAB 2: DIGITAL PANTRY */}
           {activeTab === "pantry" && (
             <div class="space-y-6">
               <div class="bg-white rounded-3xl p-5 border border-orange-100 shadow-sm space-y-4">
@@ -607,7 +721,156 @@
             </div>
           )}
 
-          {/* TAB 2: THE MASALA DABBA */}
+          {/* TAB 3: FAMILY CUSTOMIZER */}
+          {activeTab === "family" && (
+            <div class="max-w-2xl mx-auto bg-white rounded-3xl p-6 sm:p-8 border border-orange-200 shadow-lg space-y-6">
+              <div>
+                <span class="text-xs font-black uppercase text-orange-600 bg-orange-100 px-3 py-1 rounded-full">
+                  Family Profile & Guests
+                </span>
+                <h2 class="text-2xl font-black text-slate-900 mt-2">Customize Your Household</h2>
+                <p class="text-xs text-slate-500 mt-0.5">
+                  Set family members and guest counts. DearHome dynamically calculates recipe ingredient deductions and grocery replenishment schedules accordingly.
+                </p>
+              </div>
+
+              <div class="space-y-5">
+                <div>
+                  <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                    Family / House Name
+                  </label>
+                  <input
+                    type="text"
+                    value={household.name}
+                    onChange={(e) => setHousehold({ ...household, name: e.target.value })}
+                    class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:outline-none focus:border-orange-500"
+                  />
+                </div>
+
+                <div>
+                  <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+                    Family Members Count
+                  </label>
+                  <div class="grid grid-cols-3 gap-3">
+                    <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200 text-center">
+                      <span class="text-xs font-bold text-slate-600 block">Adults</span>
+                      <div class="flex items-center justify-center gap-3 mt-3">
+                        <button
+                          onClick={() => setHousehold(p => ({ ...p, adults: Math.max(1, p.adults - 1) }))}
+                          class="w-9 h-9 rounded-xl bg-white border border-slate-300 font-black text-sm hover:bg-slate-100 shadow-sm"
+                        >
+                          -
+                        </button>
+                        <span class="text-lg font-black text-slate-900 w-6">{household.adults}</span>
+                        <button
+                          onClick={() => setHousehold(p => ({ ...p, adults: p.adults + 1 }))}
+                          class="w-9 h-9 rounded-xl bg-white border border-slate-300 font-black text-sm hover:bg-slate-100 shadow-sm"
+                        >
+                          +
+                        </button>
+                      </div>
+                    </div>
+
+                    <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200 text-center">
+                      <span class="text-xs font-bold text-slate-600 block">Children</span>
+                      <div class="flex items-center justify-center gap-3 mt-3">
+                        <button
+                          onClick={() => setHousehold(p => ({ ...p, children: Math.max(0, p.children - 1) }))}
+                          class="w-9 h-9 rounded-xl bg-white border border-slate-300 font-black text-sm hover:bg-slate-100 shadow-sm"
+                        >
+                          -
+                        </button>
+                        <span class="text-lg font-black text-slate-900 w-6">{household.children}</span>
+                        <button
+                          onClick={() => setHousehold(p => ({ ...p, children: p.children + 1 }))}
+                          class="w-9 h-9 rounded-xl bg-white border border-slate-300 font-black text-sm hover:bg-slate-100 shadow-sm"
+                        >
+                          +
+                        </button>
+                      </div>
+                    </div>
+
+                    <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200 text-center">
+                      <span class="text-xs font-bold text-slate-600 block">Elders</span>
+                      <div class="flex items-center justify-center gap-3 mt-3">
+                        <button
+                          onClick={() => setHousehold(p => ({ ...p, elders: Math.max(0, p.elders - 1) }))}
+                          class="w-9 h-9 rounded-xl bg-white border border-slate-300 font-black text-sm hover:bg-slate-100 shadow-sm"
+                        >
+                          -
+                        </button>
+                        <span class="text-lg font-black text-slate-900 w-6">{household.elders}</span>
+                        <button
+                          onClick={() => setHousehold(p => ({ ...p, elders: p.elders + 1 }))}
+                          class="w-9 h-9 rounded-xl bg-white border border-slate-300 font-black text-sm hover:bg-slate-100 shadow-sm"
+                        >
+                          +
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="p-5 bg-amber-50 rounded-2xl border border-amber-200 space-y-2">
+                  <div class="flex justify-between items-center">
+                    <div>
+                      <span class="text-xs font-black text-amber-950 block">
+                        House Guests Staying Over
+                      </span>
+                      <span class="text-[11px] text-amber-800 block mt-0.5">
+                        Temporarily scales total daily kitchen grocery deductions.
+                      </span>
+                    </div>
+                    <div class="flex items-center gap-3">
+                      <button
+                        onClick={() => setHousehold(p => ({ ...p, currentGuests: Math.max(0, (p.currentGuests || 0) - 1) }))}
+                        class="w-9 h-9 rounded-xl bg-white border border-amber-300 font-black text-sm hover:bg-amber-100 shadow-sm"
+                      >
+                        -
+                      </button>
+                      <span class="w-6 text-center font-black text-lg text-amber-950">{household.currentGuests || 0}</span>
+                      <button
+                        onClick={() => setHousehold(p => ({ ...p, currentGuests: (p.currentGuests || 0) + 1 }))}
+                        class="w-9 h-9 rounded-xl bg-white border border-amber-300 font-black text-sm hover:bg-amber-100 shadow-sm"
+                      >
+                        +
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                    Regional Cooking Focus
+                  </label>
+                  <select
+                    value={household.cuisine}
+                    onChange={(e) => setHousehold({ ...household, cuisine: e.target.value })}
+                    class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800"
+                  >
+                    <option value="North Indian">North Indian (Roti, Dals, Sabzis)</option>
+                    <option value="South Indian">South Indian (Rice, Sambar, Idli)</option>
+                    <option value="Maharashtrian">Maharashtrian (Poha, Poli, Dal)</option>
+                    <option value="Bengali">Bengali (Rice & Curries)</option>
+                    <option value="Gujarati">Gujarati (Rotli, Shaak, Dal, Khichdi)</option>
+                    <option value="Punjabi">Punjabi (Parathas, Rajma, Paneer)</option>
+                  </select>
+                </div>
+
+                <button
+                  onClick={() => {
+                    setActiveTab("pantry");
+                    showToast("Household settings saved & recipes updated!");
+                  }}
+                  class="w-full py-4 bg-slate-900 hover:bg-slate-800 text-white font-black text-xs rounded-xl shadow-md transition-all mt-2"
+                >
+                  Save Profile & Go to Digital Pantry
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* TAB 4: THE MASALA DABBA */}
           {activeTab === "masala" && (
             <div class="space-y-6">
               <div class="bg-gradient-to-r from-amber-950 to-orange-950 rounded-3xl p-8 text-white shadow-xl">
@@ -673,7 +936,7 @@
             </div>
           )}
 
-          {/* TAB 3: "WHAT DID YOU COOK?" */}
+          {/* TAB 5: "WHAT DID YOU COOK?" */}
           {activeTab === "cook" && (
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
               <div class="lg:col-span-7 bg-white rounded-3xl p-6 sm:p-8 border border-orange-100 shadow-sm space-y-6">
@@ -713,7 +976,6 @@
                   </div>
                 </div>
 
-                {/* DINER COUNT CONTROLS WITH GUEST MULTIPLIER */}
                 <div class="p-4 bg-orange-50/60 rounded-2xl border border-orange-200/80 space-y-3">
                   <div class="flex justify-between items-center">
                     <div>
@@ -751,7 +1013,7 @@
                 </div>
 
                 <button
-                  onClick={handleCookMeal}
+                  onClick={() => handleCookMealDirect(selectedRecipe, totalMealEaters)}
                   class="w-full py-4 rounded-2xl bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white font-black text-xs shadow-lg shadow-orange-600/25 transition-all"
                 >
                   Confirm & Auto-Deduct Ingredients for {totalMealEaters} People
@@ -794,7 +1056,7 @@
                             <span class="text-[10px] text-slate-400">{log.time}</span>
                           </div>
                           <div class="text-[11px] text-slate-500 mt-0.5">
-                            {log.servings} People ({log.familyCount} Family + {log.guestCount} Guests)
+                            {log.servings} People
                           </div>
                         </div>
                       ))}
@@ -805,7 +1067,7 @@
             </div>
           )}
 
-          {/* TAB 4: RESTOCK RADAR */}
+          {/* TAB 6: RESTOCK RADAR */}
           {activeTab === "radar" && (
             <div class="space-y-6">
               <div class="bg-white p-7 rounded-3xl border border-orange-200 shadow-sm space-y-4">
@@ -859,7 +1121,7 @@
             </div>
           )}
 
-          {/* TAB 5: ONLINE ORDER SYNC */}
+          {/* TAB 7: ONLINE ORDER SYNC */}
           {activeTab === "sync" && (
             <div class="max-w-2xl mx-auto bg-white p-8 rounded-3xl border border-orange-200 shadow-sm text-center space-y-6">
               <div>
@@ -895,7 +1157,7 @@
             </div>
           )}
 
-          {/* TAB 6: OCR BILL SCANNER */}
+          {/* TAB 8: OCR BILL SCANNER */}
           {activeTab === "scan" && (
             <div class="max-w-2xl mx-auto bg-white p-8 rounded-3xl border border-orange-200 shadow-sm text-center space-y-6">
               <div>
@@ -929,7 +1191,7 @@
             </div>
           )}
 
-          {/* TAB 7: HOUSEHOLD INSIGHTS */}
+          {/* TAB 9: HOUSEHOLD INSIGHTS */}
           {activeTab === "analytics" && (
             <div class="space-y-6">
               <div class="bg-gradient-to-r from-slate-900 via-emerald-950 to-slate-900 rounded-3xl p-8 text-white shadow-xl">
