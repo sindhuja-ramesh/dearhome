@@ -1,0 +1,386 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DearHome - AI Smart Indian Kitchen & Pantry Assistant</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    .glass { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); }
+  </style>
+</head>
+<body class="bg-[#faf8f5] text-slate-800 min-h-screen">
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useMemo } = React;
+
+    const CATEGORIES = ["All Items", "Atta & Grains", "Dals & Pulses", "Oils & Ghee", "Masala Dabba", "Dairy & Fresh", "Vegetables", "Beverages"];
+
+    const INITIAL_PANTRY = [
+      { id: 1, name: "Chakki Atta", category: "Atta & Grains", current: 8.5, max: 10, unit: "kg", threshold: 2.5, dailyBurn: 0.35, icon: "🌾" },
+      { id: 2, name: "Basmati Rice", category: "Atta & Grains", current: 3.8, max: 5, unit: "kg", threshold: 1.5, dailyBurn: 0.22, icon: "🍚" },
+      { id: 3, name: "Tata Sampann Toor Dal", category: "Dals & Pulses", current: 0.45, max: 2, unit: "kg", threshold: 0.6, dailyBurn: 0.12, icon: "🍲" },
+      { id: 4, name: "Chitra Rajma", category: "Dals & Pulses", current: 1.2, max: 1.5, unit: "kg", threshold: 0.35, dailyBurn: 0.05, icon: "🫘" },
+      { id: 5, name: "Mustard Oil", category: "Oils & Ghee", current: 1.8, max: 3, unit: "L", threshold: 0.75, dailyBurn: 0.07, icon: "🛢️" },
+      { id: 6, name: "Amul Cow Ghee", category: "Oils & Ghee", current: 0.35, max: 1, unit: "L", threshold: 0.3, dailyBurn: 0.03, icon: "🧈" },
+      { id: 7, name: "Haldi (Turmeric)", category: "Masala Dabba", current: 160, max: 250, unit: "g", threshold: 50, dailyBurn: 5, icon: "🟡" },
+      { id: 8, name: "Catch Jeera (Cumin)", category: "Masala Dabba", current: 130, max: 200, unit: "g", threshold: 40, dailyBurn: 4.5, icon: "🟤" },
+      { id: 9, name: "Amul Taaza Milk", category: "Dairy & Fresh", current: 0.5, max: 2, unit: "L", threshold: 1.0, dailyBurn: 1.0, icon: "🥛" },
+      { id: 10, name: "Fresh Red Onions", category: "Vegetables", current: 1.2, max: 4, unit: "kg", threshold: 1.2, dailyBurn: 0.35, icon: "🧅" },
+      { id: 11, name: "Country Tomatoes", category: "Vegetables", current: 0.5, max: 2.5, unit: "kg", threshold: 0.8, dailyBurn: 0.28, icon: "🍅" },
+      { id: 12, name: "Tata Tea Gold", category: "Beverages", current: 350, max: 500, unit: "g", threshold: 100, dailyBurn: 12, icon: "☕" }
+    ];
+
+    const RECIPES = [
+      {
+        id: "dal_rice",
+        name: "Dal Tadka & Jeera Rice",
+        ingredients: [
+          { name: "Tata Sampann Toor Dal", qty: 35, unit: "g" },
+          { name: "Basmati Rice", qty: 65, unit: "g" },
+          { name: "Fresh Red Onions", qty: 30, unit: "g" },
+          { name: "Country Tomatoes", qty: 30, unit: "g" },
+          { name: "Amul Cow Ghee", qty: 8, unit: "ml" },
+          { name: "Catch Jeera (Cumin)", qty: 2.5, unit: "g" },
+          { name: "Haldi (Turmeric)", qty: 1.5, unit: "g" }
+        ]
+      },
+      {
+        id: "aloo_paratha",
+        name: "Aloo Paratha & Makkhan",
+        ingredients: [
+          { name: "Chakki Atta", qty: 75, unit: "g" },
+          { name: "Amul Cow Ghee", qty: 10, unit: "ml" }
+        ]
+      },
+      {
+        id: "rajma_chawal",
+        name: "Punjabi Rajma Masala & Rice",
+        ingredients: [
+          { name: "Chitra Rajma", qty: 45, unit: "g" },
+          { name: "Basmati Rice", qty: 65, unit: "g" },
+          { name: "Mustard Oil", qty: 10, unit: "ml" },
+          { name: "Fresh Red Onions", qty: 40, unit: "g" },
+          { name: "Country Tomatoes", qty: 40, unit: "g" }
+        ]
+      },
+      {
+        id: "masala_chai",
+        name: "Adrak Masala Chai",
+        ingredients: [
+          { name: "Amul Taaza Milk", qty: 85, unit: "ml" },
+          { name: "Tata Tea Gold", qty: 4.5, unit: "g" }
+        ]
+      }
+    ];
+
+    function App() {
+      const [household, setHousehold] = useState({
+        name: "My Family",
+        adults: 3,
+        children: 1,
+        cuisine: "North Indian",
+        diet: "Vegetarian"
+      });
+
+      const [pantry, setPantry] = useState(INITIAL_PANTRY);
+      const [activeTab, setActiveTab] = useState("pantry");
+      const [selectedRecipe, setSelectedRecipe] = useState(RECIPES[0].id);
+      const [servings, setServings] = useState(4);
+      const [toast, setToast] = useState(null);
+
+      const lowStockItems = useMemo(() => pantry.filter(i => i.current <= i.threshold), [pantry]);
+
+      const showToast = (msg) => {
+        setToast(msg);
+        setTimeout(() => setToast(null), 3500);
+      };
+
+      const handleCook = () => {
+        const recipe = RECIPES.find(r => r.id === selectedRecipe);
+        if (!recipe) return;
+
+        setPantry(prev => prev.map(item => {
+          const ing = recipe.ingredients.find(i => i.name.toLowerCase() === item.name.toLowerCase());
+          if (ing) {
+            let deduction = ing.qty * servings;
+            if (ing.unit === "g" && item.unit === "kg") deduction /= 1000;
+            if (ing.unit === "ml" && item.unit === "L") deduction /= 1000;
+            return { ...item, current: Math.max(0, +(item.current - deduction).toFixed(2)) };
+          }
+          return item;
+        }));
+
+        showToast("🍳 Cooked " + recipe.name + " for " + servings + " people! Ingredients auto-deducted.");
+      };
+
+      const handleQuickSync = (platform) => {
+        setPantry(prev => prev.map(item => {
+          if (item.name.includes("Milk")) return { ...item, current: +(item.current + 2).toFixed(1) };
+          if (item.name.includes("Toor Dal")) return { ...item, current: +(item.current + 1).toFixed(1) };
+          if (item.name.includes("Tomatoes")) return { ...item, current: +(item.current + 1.5).toFixed(1) };
+          return item;
+        }));
+        showToast("⚡ Synced with " + platform + "! Added 2L Milk, 1kg Toor Dal, 1.5kg Tomatoes.");
+      };
+
+      const handleScanBill = () => {
+        setPantry(prev => prev.map(item => {
+          if (item.name.includes("Chakki Atta")) return { ...item, current: +(item.current + 5).toFixed(1) };
+          if (item.name.includes("Mustard Oil")) return { ...item, current: +(item.current + 1).toFixed(1) };
+          return item;
+        }));
+        showToast("🧾 D-Mart Receipt Scanned! Added 5kg Atta & 1L Mustard Oil.");
+      };
+
+      return (
+        <div class="max-w-6xl mx-auto px-4 py-8">
+          {/* Header */}
+          <header class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-6 border-b border-orange-200/80 mb-6">
+            <div class="flex items-center gap-3">
+              <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-amber-600 to-orange-500 flex items-center justify-center text-white text-2xl shadow-lg shadow-orange-500/20">
+                🏠
+              </div>
+              <div>
+                <h1 class="text-2xl font-black bg-gradient-to-r from-amber-900 to-orange-700 bg-clip-text text-transparent">
+                  DearHome
+                </h1>
+                <p class="text-xs text-slate-500">Autonomous Indian Kitchen & Pantry Assistant</p>
+              </div>
+            </div>
+
+            <div class="bg-white px-4 py-2.5 rounded-2xl border border-orange-100 shadow-sm flex items-center gap-4 text-xs">
+              <div><span class="text-slate-400 block text-[10px] font-bold">HOUSEHOLD</span><span class="font-bold">{household.name}</span></div>
+              <div class="h-6 w-px bg-slate-200"></div>
+              <div><span class="text-slate-400 block text-[10px] font-bold">MEMBERS</span><span class="font-bold text-orange-600">{household.adults}A + {household.children}K</span></div>
+              <div class="h-6 w-px bg-slate-200"></div>
+              <div><span class="text-slate-400 block text-[10px] font-bold">CUISINE</span><span class="font-bold text-emerald-700">{household.cuisine}</span></div>
+            </div>
+          </header>
+
+          {/* Navigation Bar */}
+          <nav class="flex gap-2 p-1.5 bg-slate-100/80 rounded-2xl mb-8 overflow-x-auto">
+            {[
+              { id: "pantry", label: "📦 Digital Pantry", count: pantry.length },
+              { id: "cook", label: "🍳 What Did You Cook?" },
+              { id: "radar", label: "⚠️ Restock Radar", count: lowStockItems.length, alert: lowStockItems.length > 0 },
+              { id: "sync", label: "⚡ Online Delivery Sync" },
+              { id: "scan", label: "🧾 OCR Bill Scanner" }
+            ].map(tab => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                class={"flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-xs whitespace-nowrap transition-all " + (
+                  activeTab === tab.id
+                    ? "bg-white text-orange-800 shadow-sm border border-orange-200/80"
+                    : "text-slate-600 hover:bg-white/50"
+                )}
+              >
+                {tab.label}
+                {tab.count !== undefined && (
+                  <span class={"text-[10px] px-1.5 py-0.2 rounded-full " + (
+                    tab.alert ? "bg-red-500 text-white animate-pulse" : "bg-slate-200 text-slate-700"
+                  )}>
+                    {tab.count}
+                  </span>
+                )}
+              </button>
+            ))}
+          </nav>
+
+          {/* PANTRY TAB */}
+          {activeTab === "pantry" && (
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+              {pantry.map(item => {
+                const pct = Math.min(100, Math.round((item.current / item.max) * 100));
+                const isLow = item.current <= item.threshold;
+                const daysLeft = item.dailyBurn ? Math.round(item.current / item.dailyBurn) : 10;
+
+                return (
+                  <div key={item.id} class={"p-5 rounded-3xl border transition-all " + (
+                    isLow ? "bg-red-50/70 border-red-200" : "bg-white border-orange-100 hover:border-orange-300 shadow-sm"
+                  )}>
+                    <div class="flex items-start justify-between">
+                      <div class="flex items-center gap-2.5">
+                        <span class="text-2xl">{item.icon}</span>
+                        <div>
+                          <span class="text-[10px] font-bold text-slate-400 uppercase block">{item.category}</span>
+                          <h3 class="font-bold text-sm text-slate-900">{item.name}</h3>
+                        </div>
+                      </div>
+                      <span class={"text-xs font-black px-2 py-0.5 rounded-lg " + (
+                        isLow ? "bg-red-100 text-red-700" : "bg-emerald-100 text-emerald-800"
+                      )}>
+                        {item.current} {item.unit}
+                      </span>
+                    </div>
+
+                    <div class="mt-4">
+                      <div class="flex justify-between text-xs text-slate-500 mb-1">
+                        <span>Stock Level</span>
+                        <span class={isLow ? "text-red-600 font-bold" : ""}>{pct}%</span>
+                      </div>
+                      <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+                        <div
+                          class={"h-full rounded-full " + (isLow ? "bg-red-500" : pct < 50 ? "bg-amber-500" : "bg-emerald-500")}
+                          style={{ width: pct + "%" }}
+                        ></div>
+                      </div>
+                    </div>
+
+                    <div class="mt-3 flex justify-between text-[11px] text-slate-500 border-t border-slate-100 pt-2">
+                      <span>Min: {item.threshold} {item.unit}</span>
+                      <span class="font-bold text-orange-600">~{daysLeft} days left</span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          {/* COOK TAB */}
+          {activeTab === "cook" && (
+            <div class="max-w-xl mx-auto bg-white p-7 rounded-3xl border border-orange-200 shadow-lg space-y-5">
+              <h2 class="text-xl font-bold text-slate-900">🍳 Log Cooked Meal & Auto-Deduct</h2>
+              <p class="text-xs text-slate-500">Select what you cooked today to automatically reduce ingredients from stock.</p>
+
+              <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1.5">Select Dish</label>
+                <select
+                  value={selectedRecipe}
+                  onChange={(e) => setSelectedRecipe(e.target.value)}
+                  class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold"
+                >
+                  {RECIPES.map(r => (
+                    <option key={r.id} value={r.id}>{r.name}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1.5">Number of People</label>
+                <div class="flex gap-2">
+                  {[1, 2, 3, 4, 5, 6].map(num => (
+                    <button
+                      key={num}
+                      onClick={() => setServings(num)}
+                      class={"w-10 h-10 rounded-xl font-bold text-xs " + (
+                        servings === num ? "bg-orange-500 text-white" : "bg-slate-100 text-slate-700"
+                      )}
+                    >
+                      {num}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div class="bg-amber-50 p-4 rounded-2xl border border-amber-200 text-xs">
+                <span class="font-bold text-amber-900 block mb-2">Estimated Ingredients Deducted:</span>
+                <ul class="space-y-1 text-amber-800">
+                  {RECIPES.find(r => r.id === selectedRecipe)?.ingredients.map(ing => (
+                    <li key={ing.name} class="flex justify-between">
+                      <span>• {ing.name}</span>
+                      <span class="font-bold">{(ing.qty * servings).toFixed(1)} {ing.unit}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <button
+                onClick={handleCook}
+                class="w-full py-3.5 bg-gradient-to-r from-orange-500 to-amber-600 text-white font-bold text-xs rounded-xl shadow-md hover:from-orange-600"
+              >
+                ✓ Confirm & Deduct from Live Pantry
+              </button>
+            </div>
+          )}
+
+          {/* RADAR TAB */}
+          {activeTab === "radar" && (
+            <div class="bg-white p-7 rounded-3xl border border-orange-200 shadow-sm space-y-4">
+              <h2 class="text-xl font-bold text-slate-900">⚠️ Low Stock Restock Radar</h2>
+              {lowStockItems.length === 0 ? (
+                <div class="text-center py-10 text-slate-400 font-bold">✨ All staples are fully stocked!</div>
+              ) : (
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {lowStockItems.map(item => (
+                    <div key={item.id} class="p-4 bg-red-50 border border-red-200 rounded-2xl flex justify-between items-center">
+                      <div>
+                        <h4 class="font-bold text-red-900 text-sm">{item.name}</h4>
+                        <p class="text-xs text-red-600">Current: {item.current} {item.unit} (Threshold: {item.threshold} {item.unit})</p>
+                      </div>
+                      <button
+                        onClick={() => {
+                          setPantry(prev => prev.map(p => p.id === item.id ? { ...p, current: p.max } : p));
+                          showToast("Refilled " + item.name + "!");
+                        }}
+                        class="bg-red-600 text-white font-bold text-xs px-3 py-1.5 rounded-lg hover:bg-red-700"
+                      >
+                        + Restock
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* SYNC TAB */}
+          {activeTab === "sync" && (
+            <div class="max-w-xl mx-auto bg-white p-7 rounded-3xl border border-orange-200 shadow-sm text-center space-y-4">
+              <h2 class="text-xl font-bold text-slate-900">⚡ Connect Quick-Commerce Ingestion</h2>
+              <p class="text-xs text-slate-500">Simulate live order delivery sync from Zepto, Blinkit, and Amazon Fresh:</p>
+              <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2">
+                {["Zepto", "Blinkit", "Instamart", "Amazon Fresh"].map(app => (
+                  <button
+                    key={app}
+                    onClick={() => handleQuickSync(app)}
+                    class="p-4 bg-slate-50 hover:bg-orange-50 border border-slate-200 rounded-2xl font-bold text-xs text-slate-800 transition-all flex flex-col items-center gap-2"
+                  >
+                    <span class="text-2xl">🛍️</span>
+                    <span>{app}</span>
+                    <span class="text-[10px] text-emerald-600">Sync Order</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* SCAN TAB */}
+          {activeTab === "scan" && (
+            <div class="max-w-xl mx-auto bg-white p-7 rounded-3xl border border-orange-200 shadow-sm text-center space-y-4">
+              <h2 class="text-xl font-bold text-slate-900">🧾 Supermarket OCR Receipt Scanner</h2>
+              <p class="text-xs text-slate-500">Scan physical cash receipts from D-Mart, Reliance Smart, or Kirana stores:</p>
+              <div class="border-2 border-dashed border-orange-300 p-8 rounded-3xl bg-orange-50/30 space-y-3">
+                <span class="text-4xl block">📸</span>
+                <p class="text-xs font-bold text-slate-700">Drop invoice photo or click simulate</p>
+                <button
+                  onClick={handleScanBill}
+                  class="px-5 py-2.5 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-xl shadow-sm"
+                >
+                  Simulate D-Mart Bill OCR Scan
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Toast */}
+          {toast && (
+            <div class="fixed bottom-6 right-6 bg-slate-900 text-white px-5 py-3 rounded-2xl shadow-2xl text-xs font-bold animate-pulse">
+              {toast}
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+  </script>
+</body>
+</html>
