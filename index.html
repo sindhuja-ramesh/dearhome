@@ -211,12 +211,12 @@
         {
           id: "m-1",
           sender: "ai",
-          text: "Namaste Sinduja! I am your DearHome AI Kitchen Assistant. First, what ingredients and groceries are currently present in your kitchen? You can type what you have (e.g. '5kg Atta, 2kg Basmati Rice, 1kg Toor Dal, 1L Ghee, Milk, and Potatoes'), load a standard Indian kitchen starter pack, or scan your grocery bill.",
+          text: "Namaste Sinduja! I am your DearHome AI Kitchen Assistant. First, what ingredients and groceries are currently present in your kitchen? You can type what you have (e.g. 'I have 2 kg Atta 2 bread packets and 1 kg tomato'), load a standard Indian kitchen starter pack, or scan your grocery bill.",
           suggestions: [
-            "I have 5kg Atta, 2kg Basmati Rice, 1kg Toor Dal, 1L Ghee, and Potatoes",
+            "I have 2 kg Atta 2 bread packets and 1 kg tomato",
+            "I have 5kg Atta, 2kg Basmati Rice, 1kg Toor Dal, Ghee, Milk, and Potatoes",
             "Load standard Indian Kitchen starter pack",
-            "What can I cook with what I already have?",
-            "Which groceries are running low?"
+            "What can I cook with what I already have?"
           ]
         }
       ]);
@@ -311,6 +311,47 @@
         showToast("Cooked " + recipe.name + " (" + effectiveServings + " portion units). Inventory auto-deducted!");
       };
 
+      // NATURAL LANGUAGE GROCERY PARSER
+      const parseGroceriesFromText = (text) => {
+        let clean = text.replace(/^(i have|we have|present in my kitchen|in my kitchen|my groceries are|i bought|please add|add|stocked)\s*/i, '');
+        const results = [];
+        const re = /(\d+(?:\.\d+)?)\s*(kg|g|l|ml|litres|litre|packets|packet|pack|packs|pcs|pieces|bottles|bottle)?\s*(?:of\s+)?([a-zA-Z]+(?:\s+[a-zA-Z]+)?)(?:\s+(packets|packet|pack|packs|pcs|pieces|bottles|bottle))?/gi;
+        
+        let match;
+        while ((match = re.exec(clean)) !== null) {
+          let qty = parseFloat(match[1]);
+          let unit1 = match[2];
+          let rawName = match[3].trim();
+          let unit2 = match[4];
+          
+          rawName = rawName.replace(/^and\s+/i, '').replace(/\s+and$/i, '').trim();
+          if (!rawName || ['and', 'have', 'the', 'my', 'in', 'kitchen', 'to', 'for'].includes(rawName.toLowerCase())) continue;
+          
+          let unit = (unit1 || unit2 || '').toLowerCase();
+          if (!unit) {
+            if (rawName.match(/\b(packets|packet|pack|packs)\b/i)) unit = 'packets';
+            else if (rawName.match(/\b(bottles|bottle)\b/i)) unit = 'bottles';
+            else if (rawName.match(/\b(kg|kilo|kilos)\b/i)) unit = 'kg';
+            else if (rawName.match(/\b(litres|litre|liter|liters|l)\b/i)) unit = 'L';
+            else if (rawName.match(/\b(g|grams|gm)\b/i)) unit = 'g';
+            else unit = 'pcs';
+          }
+          
+          if (unit.startsWith('packet') || unit.startsWith('pack')) unit = 'packets';
+          else if (unit === 'litres' || unit === 'litre') unit = 'L';
+          else if (unit === 'pieces' || unit === 'piece') unit = 'pcs';
+          else if (unit === 'kg') unit = 'kg';
+          else if (unit === 'g') unit = 'g';
+          else if (unit === 'l') unit = 'L';
+          else if (unit === 'ml') unit = 'ml';
+          
+          rawName = rawName.replace(/\s+(packets|packet|pack|packs|bottles|bottle|kg|g|l|ml|pcs)$/i, '').trim();
+          const formattedName = rawName.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
+          results.push({ name: formattedName, qty, unit });
+        }
+        return results;
+      };
+
       const handleSendMessage = (textToSend) => {
         const query = textToSend || userChatInput;
         if (!query.trim()) return;
@@ -325,7 +366,7 @@
           const lower = query.toLowerCase();
 
           // 1. STARTER PACK REQUEST
-          if (lower.indexOf("starter pack") !== -1 || lower.indexOf("standard indian") !== -1 || lower.indexOf("starter pack") !== -1 || lower.indexOf("starter kit") !== -1) {
+          if (lower.indexOf("starter pack") !== -1 || lower.indexOf("standard indian") !== -1 || lower.indexOf("starter kit") !== -1) {
             setPantry(INITIAL_PANTRY);
             setChatMessages(prev => [
               ...prev,
@@ -346,102 +387,94 @@
             return;
           }
 
-          // 2. KITCHEN INVENTORY DECLARATION (e.g. "I have...", "In my kitchen...", listing items with kg/L/g)
-          const isListingKitchen = (
-            lower.indexOf("i have") !== -1 ||
-            lower.indexOf("in my kitchen") !== -1 ||
-            lower.indexOf("present in") !== -1 ||
-            lower.indexOf("stocked") !== -1 ||
-            lower.indexOf("we have") !== -1 ||
-            lower.indexOf("my groceries") !== -1 ||
-            (lower.indexOf("kg") !== -1 && (lower.indexOf("atta") !== -1 || lower.indexOf("rice") !== -1 || lower.indexOf("dal") !== -1 || lower.indexOf("potato") !== -1))
-          );
+          // 2. KITCHEN GROCERY INGESTION (e.g. "I have 2 kg Atta 2 bread packets and 1 kg tomato")
+          const isNotQueryingRecipe = lower.indexOf("what can i cook") === -1 && lower.indexOf("cooked") === -1 && lower.indexOf("prepared") === -1 && lower.indexOf("made") === -1;
+          const parsedGroceries = parseGroceriesFromText(query);
 
-          if (isListingKitchen && lower.indexOf("what can i cook") === -1 && lower.indexOf("cooked") === -1 && lower.indexOf("made") === -1) {
+          if (parsedGroceries.length > 0 && isNotQueryingRecipe) {
             let updatedPantry = [...pantry];
-            let recognized = [];
+            let confirmedList = [];
 
-            const ingredientKeywords = [
-              { key: "atta", id: "item-1", defaultQty: 5, unit: "kg" },
-              { key: "flour", id: "item-1", defaultQty: 5, unit: "kg" },
-              { key: "rice", id: "item-2", defaultQty: 3, unit: "kg" },
-              { key: "basmati", id: "item-2", defaultQty: 3, unit: "kg" },
-              { key: "poha", id: "item-3", defaultQty: 1, unit: "kg" },
-              { key: "toor dal", id: "item-4", defaultQty: 1, unit: "kg" },
-              { key: "arhar", id: "item-4", defaultQty: 1, unit: "kg" },
-              { key: "rajma", id: "item-5", defaultQty: 1, unit: "kg" },
-              { key: "moong", id: "item-6", defaultQty: 1, unit: "kg" },
-              { key: "mustard oil", id: "item-7", defaultQty: 2, unit: "L" },
-              { key: "sunflower oil", id: "item-8", defaultQty: 2, unit: "L" },
-              { key: "ghee", id: "item-9", defaultQty: 1, unit: "L" },
-              { key: "haldi", id: "item-10", defaultQty: 200, unit: "g" },
-              { key: "turmeric", id: "item-10", defaultQty: 200, unit: "g" },
-              { key: "jeera", id: "item-11", defaultQty: 150, unit: "g" },
-              { key: "cumin", id: "item-11", defaultQty: 150, unit: "g" },
-              { key: "mirch", id: "item-12", defaultQty: 150, unit: "g" },
-              { key: "rai", id: "item-13", defaultQty: 100, unit: "g" },
-              { key: "mustard seed", id: "item-13", defaultQty: 100, unit: "g" },
-              { key: "hing", id: "item-14", defaultQty: 40, unit: "g" },
-              { key: "milk", id: "item-15", defaultQty: 2, unit: "L" },
-              { key: "dahi", id: "item-16", defaultQty: 400, unit: "g" },
-              { key: "curd", id: "item-16", defaultQty: 400, unit: "g" },
-              { key: "paneer", id: "item-17", defaultQty: 250, unit: "g" },
-              { key: "onion", id: "item-18", defaultQty: 2, unit: "kg" },
-              { key: "pyaz", id: "item-18", defaultQty: 2, unit: "kg" },
-              { key: "tomato", id: "item-19", defaultQty: 1.5, unit: "kg" },
-              { key: "tamatar", id: "item-19", defaultQty: 1.5, unit: "kg" },
-              { key: "potato", id: "item-20", defaultQty: 2.5, unit: "kg" },
-              { key: "aloo", id: "item-20", defaultQty: 2.5, unit: "kg" },
-              { key: "ginger", id: "item-21", defaultQty: 150, unit: "g" },
-              { key: "garlic", id: "item-21", defaultQty: 150, unit: "g" },
-              { key: "chai", id: "item-22", defaultQty: 300, unit: "g" },
-              { key: "tea", id: "item-22", defaultQty: 300, unit: "g" },
-              { key: "sugar", id: "item-23", defaultQty: 2, unit: "kg" },
-              { key: "salt", id: "item-24", defaultQty: 1, unit: "kg" }
-            ];
+            parsedGroceries.forEach((item, idx) => {
+              const lowerName = item.name.toLowerCase();
+              
+              // Find matching pantry item
+              let matchIndex = updatedPantry.findIndex(p =>
+                p.shortName.toLowerCase() === lowerName ||
+                p.name.toLowerCase().indexOf(lowerName) !== -1 ||
+                lowerName.indexOf(p.shortName.toLowerCase()) !== -1 ||
+                (lowerName.indexOf("atta") !== -1 && p.shortName.indexOf("Atta") !== -1) ||
+                (lowerName.indexOf("tomato") !== -1 && p.shortName.indexOf("Tomato") !== -1) ||
+                (lowerName.indexOf("potato") !== -1 && p.shortName.indexOf("Potato") !== -1) ||
+                (lowerName.indexOf("rice") !== -1 && p.shortName.indexOf("Rice") !== -1) ||
+                (lowerName.indexOf("dal") !== -1 && p.shortName.indexOf("Dal") !== -1) ||
+                (lowerName.indexOf("milk") !== -1 && p.shortName.indexOf("Milk") !== -1) ||
+                (lowerName.indexOf("oil") !== -1 && p.shortName.indexOf("Oil") !== -1) ||
+                (lowerName.indexOf("bread") !== -1 && p.shortName.indexOf("Bread") !== -1)
+              );
 
-            let handledIds = new Set();
-
-            ingredientKeywords.forEach(ik => {
-              if (lower.indexOf(ik.key) !== -1 && !handledIds.has(ik.id)) {
-                handledIds.add(ik.id);
-                
-                // Extract quantity if present near keyword
-                let qty = ik.defaultQty;
-                const reg = new RegExp("([0-9]+(?:\\.[0-9]+)?)\\s*(kg|g|l|ml|litres|litre|packets|pcs)?\\s*(?:of\\s*)?" + ik.key, "i");
-                const match = query.match(reg);
-                if (match && match[1]) {
-                  qty = parseFloat(match[1]);
+              if (matchIndex !== -1) {
+                // Update existing item
+                const existing = updatedPantry[matchIndex];
+                updatedPantry[matchIndex] = {
+                  ...existing,
+                  current: item.qty,
+                  unit: item.unit || existing.unit,
+                  max: Math.max(existing.max, item.qty * 1.5)
+                };
+                confirmedList.push({ name: existing.shortName, qty: item.qty + " " + (item.unit || existing.unit) });
+              } else {
+                // Dynamically add new item (e.g., Bread, Butter, Eggs, etc.)
+                let category = "Beverages and Snacks";
+                if (lowerName.indexOf("milk") !== -1 || lowerName.indexOf("paneer") !== -1 || lowerName.indexOf("curd") !== -1 || lowerName.indexOf("dahi") !== -1 || lowerName.indexOf("butter") !== -1 || lowerName.indexOf("egg") !== -1 || lowerName.indexOf("cheese") !== -1) {
+                  category = "Dairy and Fresh";
+                } else if (lowerName.indexOf("tomato") !== -1 || lowerName.indexOf("potato") !== -1 || lowerName.indexOf("onion") !== -1 || lowerName.indexOf("vegetable") !== -1 || lowerName.indexOf("garlic") !== -1 || lowerName.indexOf("ginger") !== -1) {
+                  category = "Vegetables";
+                } else if (lowerName.indexOf("bread") !== -1 || lowerName.indexOf("biscuit") !== -1 || lowerName.indexOf("tea") !== -1 || lowerName.indexOf("coffee") !== -1 || lowerName.indexOf("sugar") !== -1 || lowerName.indexOf("snack") !== -1) {
+                  category = "Beverages and Snacks";
+                } else if (lowerName.indexOf("oil") !== -1 || lowerName.indexOf("ghee") !== -1) {
+                  category = "Oils and Ghee";
+                } else if (lowerName.indexOf("dal") !== -1 || lowerName.indexOf("rajma") !== -1 || lowerName.indexOf("chana") !== -1) {
+                  category = "Dals and Pulses";
+                } else if (lowerName.indexOf("atta") !== -1 || lowerName.indexOf("flour") !== -1 || lowerName.indexOf("rice") !== -1 || lowerName.indexOf("poha") !== -1) {
+                  category = "Atta and Grains";
                 }
 
-                const pIndex = updatedPantry.findIndex(p => p.id === ik.id);
-                if (pIndex !== -1) {
-                  updatedPantry[pIndex] = { ...updatedPantry[pIndex], current: qty };
-                  recognized.push({ name: updatedPantry[pIndex].shortName, qty: qty + " " + updatedPantry[pIndex].unit });
-                }
+                const newItem = {
+                  id: "item-" + Date.now() + "-" + idx,
+                  name: item.name,
+                  shortName: item.name,
+                  category: category,
+                  current: item.qty,
+                  max: item.qty * 1.5,
+                  unit: item.unit,
+                  threshold: Math.max(1, +(item.qty * 0.25).toFixed(1)),
+                  dailyBurn: 0.1,
+                  price: 45
+                };
+                updatedPantry = [newItem, ...updatedPantry];
+                confirmedList.push({ name: item.name, qty: item.qty + " " + item.unit });
               }
             });
 
-            if (recognized.length > 0) {
-              setPantry(updatedPantry);
-              setChatMessages(prev => [
-                ...prev,
-                {
-                  id: "ai-" + Date.now(),
-                  sender: "ai",
-                  text: "Great! I have updated your live kitchen inventory with the " + recognized.length + " items you reported present in your kitchen:",
-                  stockedItems: recognized,
-                  totalStockedCount: recognized.length,
-                  suggestions: [
-                    "What can I cook with what I have?",
-                    "I cooked Dal Tadka and Rice for 4 people today",
-                    "Which groceries are running low?"
-                  ]
-                }
-              ]);
-              showToast("Recorded " + recognized.length + " kitchen ingredients into pantry!");
-              return;
-            }
+            setPantry(updatedPantry);
+            setChatMessages(prev => [
+              ...prev,
+              {
+                id: "ai-" + Date.now(),
+                sender: "ai",
+                text: "Great! I have added and updated " + confirmedList.length + " items in your kitchen grocery list and digital pantry:",
+                stockedItems: confirmedList,
+                totalStockedCount: confirmedList.length,
+                suggestions: [
+                  "What can I cook with what I have?",
+                  "I cooked Dal Tadka and Rice for 4 people today",
+                  "Which groceries are running low?"
+                ]
+              }
+            ]);
+            showToast("Added " + confirmedList.map(c => c.qty + " " + c.name).join(", ") + " to your grocery list!");
+            return;
           }
 
           // 3. RECIPE SUGGESTIONS
@@ -539,9 +572,9 @@
               {
                 id: "ai-" + Date.now(),
                 sender: "ai",
-                text: "I am ready to help manage your kitchen! You can tell me what groceries are present in your kitchen, ask for recipe suggestions with YouTube tutorials, or tell me what meal you cooked today to auto-deduct ingredients.",
+                text: "I am ready to help manage your kitchen! You can tell me what groceries are present in your kitchen (e.g. 'I have 2 kg Atta 2 bread packets and 1 kg tomato'), ask for recipe suggestions with YouTube tutorials, or tell me what meal you cooked today.",
                 suggestions: [
-                  "I have 5kg Atta, 2kg Basmati Rice, 1kg Toor Dal, 1L Ghee, and Potatoes",
+                  "I have 2 kg Atta 2 bread packets and 1 kg tomato",
                   "What can I cook with my current pantry?",
                   "I cooked Dal Tadka for 4 people today"
                 ]
@@ -667,7 +700,7 @@
                   </span>
                   <h2 class="text-2xl font-black mt-2">DearHome Conversational Agent</h2>
                   <p class="text-xs text-orange-100 mt-1">
-                    First step kitchen onboarding, meal suggestions with YouTube cooking tutorials, and live auto-depletion.
+                    Instant kitchen grocery ingestion, meal suggestions with YouTube tutorials, and live auto-depletion.
                   </p>
                 </div>
                 <div class="w-14 h-14 rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center text-white text-2xl border border-white/20">
@@ -696,20 +729,20 @@
                           <div class="flex items-center justify-between">
                             <span class="text-xs font-black text-emerald-900 flex items-center gap-1.5">
                               <Icons.Check />
-                              <span>Kitchen Inventory Updated ({msg.totalStockedCount} Staples)</span>
+                              <span>Grocery List & Pantry Updated ({msg.totalStockedCount} Items)</span>
                             </span>
                             <button
                               onClick={() => setActiveTab("pantry")}
                               class="text-[10px] font-bold text-orange-700 bg-orange-100 hover:bg-orange-200 px-2 py-0.5 rounded-md transition-all"
                             >
-                              View Pantry
+                              View in Pantry
                             </button>
                           </div>
                           <div class="flex flex-wrap gap-1.5 pt-1 border-t border-slate-100">
                             {msg.stockedItems.map((stk, sidx) => (
-                              <span key={sidx} class="inline-flex items-center gap-1 px-2 py-1 bg-emerald-50 border border-emerald-200 text-emerald-900 rounded-lg text-[10px] font-bold">
+                              <span key={sidx} class="inline-flex items-center gap-1 px-2.5 py-1 bg-emerald-50 border border-emerald-200 text-emerald-900 rounded-lg text-[11px] font-bold">
                                 <span>{stk.name}:</span>
-                                <span class="text-emerald-700">{stk.qty}</span>
+                                <span class="text-emerald-700 font-black">{stk.qty}</span>
                               </span>
                             ))}
                           </div>
@@ -847,7 +880,7 @@
               >
                 <input
                   type="text"
-                  placeholder="e.g. 'I have 5kg Atta, 2kg Basmati Rice, 1kg Toor Dal, Ghee, Milk, Potatoes' or 'What can I cook?'"
+                  placeholder="e.g. 'I have 2 kg Atta 2 bread packets and 1 kg tomato' or 'What can I cook?'"
                   value={userChatInput}
                   onChange={(e) => setUserChatInput(e.target.value)}
                   class="flex-1 px-4 py-3.5 bg-white border border-slate-200 rounded-2xl text-xs font-semibold focus:outline-none focus:border-orange-500 shadow-sm"
@@ -869,7 +902,7 @@
               <div class="bg-white rounded-3xl p-5 border border-orange-100 shadow-sm space-y-4">
                 <input
                   type="text"
-                  placeholder="Search Atta, Toor Dal, Mustard Oil, Haldi, Amul Milk, Tomatoes..."
+                  placeholder="Search Atta, Bread, Tomatoes, Toor Dal, Mustard Oil, Haldi, Amul Milk..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all"
@@ -1504,6 +1537,7 @@
                         <option value="g">g</option>
                         <option value="L">L</option>
                         <option value="ml">ml</option>
+                        <option value="packets">packets</option>
                         <option value="pcs">pcs</option>
                       </select>
                     </div>
