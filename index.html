@@ -329,6 +329,28 @@
         chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
       }, [chatMessages, isAiThinking]);
 
+      // AUTONOMOUS BACKGROUND LISTENER SIMULATION
+      useEffect(() => {
+        if (!isEmailAutoSyncOn) return;
+
+        // Auto-triggers an autonomous background delivery ingestion after 25s
+        const timer = setTimeout(() => {
+          const sample = SAMPLE_INVOICES[0];
+          handleIngestInvoiceItems(sample.items, "Zepto (Autonomous Background Route)");
+          const newMail = {
+            id: "mail-" + Date.now(),
+            sender: "orders@zepto.co.in",
+            subject: "Tax Invoice & Order Receipt " + sample.orderId,
+            time: "Just now (Autonomous Background Ingestion)",
+            status: "Autonomous Ingestion Completed",
+            itemsSummary: sample.items.map(i => i.qty + " " + i.unit + " " + i.shortName).join(", ")
+          };
+          setEmailInboundFeed(prev => [newMail, ...prev]);
+        }, 25000);
+
+        return () => clearTimeout(timer);
+      }, [isEmailAutoSyncOn]);
+
       const showToast = (msg) => {
         setToast(msg);
         setTimeout(() => setToast(null), 4000);
