@@ -515,7 +515,68 @@
           setIsAiThinking(false);
           const lower = query.toLowerCase();
 
-          // 1. STARTER PACK
+          // 1. SIMULATE ZEPTO / BLINKIT EMAIL WEBHOOK TRIGGER
+          if (lower.indexOf("simulate zepto") !== -1 || lower.indexOf("zepto email") !== -1 || lower.indexOf("zepto ingest") !== -1) {
+            const sample = SAMPLE_INVOICES[0];
+            handleIngestInvoiceItems(sample.items, "Zepto");
+            const newMail = {
+              id: "mail-" + Date.now(),
+              sender: "orders@zepto.co.in",
+              subject: "Tax Invoice & Order Receipt " + sample.orderId,
+              time: "Just now (Triggered via Assistant)",
+              status: "Autonomous Ingestion Completed",
+              itemsSummary: sample.items.map(i => i.qty + " " + i.unit + " " + i.shortName).join(", ")
+            };
+            setEmailInboundFeed(prev => [newMail, ...prev]);
+            setChatMessages(prev => [
+              ...prev,
+              {
+                id: "ai-" + Date.now(),
+                sender: "ai",
+                text: "Simulated incoming webhook from orders@zepto.co.in (Order #ZPT-88492)! Gemini 2.0 Flash extracted and ingested all items into your live kitchen pantry:",
+                stockedItems: sample.items.map(i => ({ name: i.shortName, qty: "+" + i.qty + " " + i.unit })),
+                totalStockedCount: sample.items.length,
+                suggestions: [
+                  "What can I cook with what I have?",
+                  "Check Restock Radar",
+                  "Simulate Blinkit Email Ingest"
+                ]
+              }
+            ]);
+            return;
+          }
+
+          if (lower.indexOf("simulate blinkit") !== -1 || lower.indexOf("blinkit email") !== -1 || lower.indexOf("blinkit ingest") !== -1) {
+            const sample = SAMPLE_INVOICES[1];
+            handleIngestInvoiceItems(sample.items, "Blinkit");
+            const newMail = {
+              id: "mail-" + Date.now(),
+              sender: "receipts@blinkit.com",
+              subject: "Tax Invoice & Order Receipt " + sample.orderId,
+              time: "Just now (Triggered via Assistant)",
+              status: "Autonomous Ingestion Completed",
+              itemsSummary: sample.items.map(i => i.qty + " " + i.unit + " " + i.shortName).join(", ")
+            };
+            setEmailInboundFeed(prev => [newMail, ...prev]);
+            setChatMessages(prev => [
+              ...prev,
+              {
+                id: "ai-" + Date.now(),
+                sender: "ai",
+                text: "Simulated incoming webhook from receipts@blinkit.com (Order #BLK-19402)! Gemini 2.0 Flash extracted and ingested all items into your live kitchen pantry:",
+                stockedItems: sample.items.map(i => ({ name: i.shortName, qty: "+" + i.qty + " " + i.unit })),
+                totalStockedCount: sample.items.length,
+                suggestions: [
+                  "What can I cook with what I have?",
+                  "Check Restock Radar",
+                  "Simulate Zepto Email Ingest"
+                ]
+              }
+            ]);
+            return;
+          }
+
+          // 2. STARTER PACK
           if (lower.indexOf("starter pack") !== -1 || lower.indexOf("standard indian") !== -1 || lower.indexOf("starter kit") !== -1) {
             setPantry(INITIAL_PANTRY);
             setChatMessages(prev => [
