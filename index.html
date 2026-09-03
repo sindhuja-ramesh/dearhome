@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -25,7 +25,7 @@
   <script type="text/babel">
     const { useState, useEffect, useMemo, useRef } = React;
 
-    // VECTOR SVG ICONS (CLEAN NO GLITCHES)
+    // VECTOR SVG ICONS
     const Icons = {
       Home: () => <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>,
       Users: () => <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>,
@@ -43,7 +43,10 @@
       Send: () => <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>,
       Video: () => <svg className="w-3.5 h-3.5 text-red-600" fill="currentColor" viewBox="0 0 24 24"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/></svg>,
       BookOpen: () => <svg className="w-3.5 h-3.5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>,
-      Package: () => <svg className="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/></svg>
+      Mail: () => <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>,
+      Copy: () => <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>,
+      FileText: () => <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>,
+      Download: () => <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
     };
 
     const CATEGORIES = ["All Items", "Atta and Grains", "Dals and Pulses", "Oils and Ghee", "Masala Dabba", "Dairy and Fresh", "Vegetables", "Beverages and Snacks"];
@@ -170,6 +173,65 @@
       }
     ];
 
+    // PHASE 1 SAMPLE BILL INVOICES
+    const SAMPLE_INVOICES = [
+      {
+        id: "inv-zepto",
+        platform: "Zepto Instant Grocery",
+        badgeColor: "bg-purple-100 text-purple-800 border-purple-200",
+        orderId: "#ZPT-88492",
+        time: "Just now (Delivered in 9 mins)",
+        totalAmount: "₹385",
+        items: [
+          { name: "Amul Taaza Toned Milk (1L)", shortName: "Amul Milk", qty: 2, unit: "L", rate: "₹56", category: "Dairy and Fresh" },
+          { name: "Aashirvaad Shudh Chakki Atta (5kg)", shortName: "Chakki Atta", qty: 5, unit: "kg", rate: "₹240", category: "Atta and Grains" },
+          { name: "Fresh Country Tomatoes (1kg)", shortName: "Tomato (Tamatar)", qty: 1, unit: "kg", rate: "₹33", category: "Vegetables" }
+        ]
+      },
+      {
+        id: "inv-blinkit",
+        platform: "Blinkit Superstore",
+        badgeColor: "bg-yellow-100 text-yellow-900 border-yellow-300",
+        orderId: "#BLK-19402",
+        time: "15 mins ago",
+        totalAmount: "₹465",
+        items: [
+          { name: "English Oven Whole Wheat Bread", shortName: "Bread", qty: 2, unit: "packets", rate: "₹45", category: "Beverages and Snacks" },
+          { name: "Tata Sampann Toor Dal (1kg)", shortName: "Toor Dal", qty: 1, unit: "kg", rate: "₹175", category: "Dals and Pulses" },
+          { name: "Amul Masti Dahi (400g)", shortName: "Curd / Dahi", qty: 800, unit: "g", rate: "₹70", category: "Dairy and Fresh" },
+          { name: "Fresh Red Onions (2kg)", shortName: "Onion (Pyaz)", qty: 2, unit: "kg", rate: "₹65", category: "Vegetables" }
+        ]
+      },
+      {
+        id: "inv-amazon",
+        platform: "Amazon Fresh Bulk Pantry",
+        badgeColor: "bg-slate-100 text-slate-900 border-slate-300",
+        orderId: "#AMZ-99318",
+        time: "1 hour ago",
+        totalAmount: "₹1,240",
+        items: [
+          { name: "Fortune Refined Sunflower Oil (3L)", shortName: "Sunflower Oil", qty: 3, unit: "L", rate: "₹420", category: "Oils and Ghee" },
+          { name: "Fortune Daawat Basmati Rice (5kg)", shortName: "Basmati Rice", qty: 5, unit: "kg", rate: "₹550", category: "Atta and Grains" },
+          { name: "Catch Jeera Seeds (200g)", shortName: "Jeera (Cumin)", qty: 200, unit: "g", rate: "₹110", category: "Masala Dabba" },
+          { name: "Everest Haldi Powder (250g)", shortName: "Haldi (Turmeric)", qty: 250, unit: "g", rate: "₹160", category: "Masala Dabba" }
+        ]
+      },
+      {
+        id: "inv-dmart",
+        platform: "D-Mart Offline Supermarket",
+        badgeColor: "bg-emerald-100 text-emerald-900 border-emerald-300",
+        orderId: "#DMT-40192",
+        time: "Yesterday (Thermal Receipt OCR)",
+        totalAmount: "₹890",
+        items: [
+          { name: "Aashirvaad Chakki Atta (10kg)", shortName: "Chakki Atta", qty: 10, unit: "kg", rate: "₹480", category: "Atta and Grains" },
+          { name: "Madhur Pure Sugar (3kg)", shortName: "Sugar (Cheeni)", qty: 3, unit: "kg", rate: "₹144", category: "Beverages and Snacks" },
+          { name: "Fresh Potatoes (Aloo) (5kg)", shortName: "Potato (Aloo)", qty: 5, unit: "kg", rate: "₹150", category: "Vegetables" },
+          { name: "Tata Salt Vacuum Evaporated (1kg)", shortName: "Tata Salt", qty: 2, unit: "kg", rate: "₹56", category: "Beverages and Snacks" }
+        ]
+      }
+    ];
+
     function App() {
       const [household, setHousehold] = useState(() => {
         const saved = localStorage.getItem("dearhome_household");
@@ -197,7 +259,7 @@
         return saved ? JSON.parse(saved) : [];
       });
 
-      const [activeTab, setActiveTab] = useState("assistant");
+      const [activeTab, setActiveTab] = useState("scan");
       const [isAddItemModalOpen, setIsAddItemModalOpen] = useState(false);
       const [selectedCategory, setSelectedCategory] = useState("All Items");
       const [searchQuery, setSearchQuery] = useState("");
@@ -206,12 +268,39 @@
       const [guestCountForMeal, setGuestCountForMeal] = useState(0);
       const [toast, setToast] = useState(null);
 
-      // CONVERSATIONAL AGENT STATE: First step asks what is present in kitchen
+      // PHASE 1: SCANNER STATE
+      const [selectedInvoice, setSelectedInvoice] = useState(SAMPLE_INVOICES[0]);
+      const [isScanning, setIsScanning] = useState(false);
+      const [scanResult, setScanResult] = useState(SAMPLE_INVOICES[0]);
+
+      // PHASE 2: INBOUND EMAIL WEBHOOK STATE
+      const [isEmailAutoSyncOn, setIsEmailAutoSyncOn] = useState(true);
+      const [emailInboundFeed, setEmailInboundFeed] = useState([
+        {
+          id: "mail-1",
+          sender: "orders@zepto.co.in",
+          subject: "Tax Invoice for Zepto Order #ZPT-88492",
+          time: "2 mins ago",
+          status: "Processed & Stock Added",
+          itemsSummary: "2L Milk, 5kg Atta, 1kg Tomato"
+        },
+        {
+          id: "mail-2",
+          sender: "receipts@blinkit.com",
+          subject: "Your Order Summary for #BLK-19402",
+          time: "1 hour ago",
+          status: "Processed & Stock Added",
+          itemsSummary: "2 Bread Packets, 1kg Toor Dal, 800g Dahi"
+        }
+      ]);
+      const [isSimulatingEmail, setIsSimulatingEmail] = useState(false);
+
+      // CONVERSATIONAL AGENT STATE
       const [chatMessages, setChatMessages] = useState([
         {
           id: "m-1",
           sender: "ai",
-          text: "Namaste Sinduja! I am your DearHome AI Kitchen Assistant. First, what ingredients and groceries are currently present in your kitchen? You can type what you have (e.g. 'I have 2 kg Atta 2 bread packets and 1 kg tomato'), load a standard Indian kitchen starter pack, or scan your grocery bill.",
+          text: "Namaste Sinduja! I am your DearHome AI Kitchen Assistant. First, what ingredients and groceries are currently present in your kitchen? You can type what you have (e.g. 'I have 2 kg Atta 2 bread packets and 1 kg tomato'), forward delivery invoices, or scan a grocery bill.",
           suggestions: [
             "I have 2 kg Atta 2 bread packets and 1 kg tomato",
             "I have 5kg Atta, 2kg Basmati Rice, 1kg Toor Dal, Ghee, Milk, and Potatoes",
@@ -352,6 +441,67 @@
         return results;
       };
 
+      const handleIngestInvoiceItems = (items, platformName) => {
+        let updatedPantry = [...pantry];
+        let ingestedList = [];
+
+        items.forEach((item, idx) => {
+          const lowerName = (item.shortName || item.name).toLowerCase();
+          
+          let matchIndex = updatedPantry.findIndex(p =>
+            p.shortName.toLowerCase() === lowerName ||
+            p.name.toLowerCase().indexOf(lowerName) !== -1 ||
+            lowerName.indexOf(p.shortName.toLowerCase()) !== -1
+          );
+
+          if (matchIndex !== -1) {
+            const existing = updatedPantry[matchIndex];
+            const newQty = +(existing.current + item.qty).toFixed(2);
+            updatedPantry[matchIndex] = {
+              ...existing,
+              current: newQty,
+              max: Math.max(existing.max, newQty * 1.2)
+            };
+            ingestedList.push({ name: existing.shortName, qty: "+" + item.qty + " " + item.unit });
+          } else {
+            const newItem = {
+              id: "item-" + Date.now() + "-" + idx,
+              name: item.name,
+              shortName: item.shortName || item.name,
+              category: item.category || "Beverages and Snacks",
+              current: item.qty,
+              max: item.qty * 1.5,
+              unit: item.unit,
+              threshold: Math.max(1, +(item.qty * 0.25).toFixed(1)),
+              dailyBurn: 0.1,
+              price: parseInt(item.rate?.replace(/[^\d]/g, '') || 50)
+            };
+            updatedPantry = [newItem, ...updatedPantry];
+            ingestedList.push({ name: newItem.shortName, qty: "+" + item.qty + " " + item.unit });
+          }
+        });
+
+        setPantry(updatedPantry);
+        showToast("Ingested " + items.length + " grocery items from " + platformName + " into your Pantry!");
+      };
+
+      const handleSimulateInboundEmail = (platformName, sampleData) => {
+        setIsSimulatingEmail(true);
+        setTimeout(() => {
+          setIsSimulatingEmail(false);
+          const newMail = {
+            id: "mail-" + Date.now(),
+            sender: platformName === "Zepto" ? "orders@zepto.co.in" : "receipts@blinkit.com",
+            subject: "Tax Invoice & Order Receipt " + sampleData.orderId,
+            time: "Just now (Webhook Trigger)",
+            status: "Autonomous Ingestion Completed",
+            itemsSummary: sampleData.items.map(i => i.qty + " " + i.unit + " " + i.shortName).join(", ")
+          };
+          setEmailInboundFeed(prev => [newMail, ...prev]);
+          handleIngestInvoiceItems(sampleData.items, platformName);
+        }, 1200);
+      };
+
       const handleSendMessage = (textToSend) => {
         const query = textToSend || userChatInput;
         if (!query.trim()) return;
@@ -365,7 +515,7 @@
           setIsAiThinking(false);
           const lower = query.toLowerCase();
 
-          // 1. STARTER PACK REQUEST
+          // 1. STARTER PACK
           if (lower.indexOf("starter pack") !== -1 || lower.indexOf("standard indian") !== -1 || lower.indexOf("starter kit") !== -1) {
             setPantry(INITIAL_PANTRY);
             setChatMessages(prev => [
@@ -387,7 +537,7 @@
             return;
           }
 
-          // 2. KITCHEN GROCERY INGESTION (e.g. "I have 2 kg Atta 2 bread packets and 1 kg tomato")
+          // 2. GROCERY INGESTION
           const isNotQueryingRecipe = lower.indexOf("what can i cook") === -1 && lower.indexOf("cooked") === -1 && lower.indexOf("prepared") === -1 && lower.indexOf("made") === -1;
           const parsedGroceries = parseGroceriesFromText(query);
 
@@ -397,24 +547,13 @@
 
             parsedGroceries.forEach((item, idx) => {
               const lowerName = item.name.toLowerCase();
-              
-              // Find matching pantry item
               let matchIndex = updatedPantry.findIndex(p =>
                 p.shortName.toLowerCase() === lowerName ||
                 p.name.toLowerCase().indexOf(lowerName) !== -1 ||
-                lowerName.indexOf(p.shortName.toLowerCase()) !== -1 ||
-                (lowerName.indexOf("atta") !== -1 && p.shortName.indexOf("Atta") !== -1) ||
-                (lowerName.indexOf("tomato") !== -1 && p.shortName.indexOf("Tomato") !== -1) ||
-                (lowerName.indexOf("potato") !== -1 && p.shortName.indexOf("Potato") !== -1) ||
-                (lowerName.indexOf("rice") !== -1 && p.shortName.indexOf("Rice") !== -1) ||
-                (lowerName.indexOf("dal") !== -1 && p.shortName.indexOf("Dal") !== -1) ||
-                (lowerName.indexOf("milk") !== -1 && p.shortName.indexOf("Milk") !== -1) ||
-                (lowerName.indexOf("oil") !== -1 && p.shortName.indexOf("Oil") !== -1) ||
-                (lowerName.indexOf("bread") !== -1 && p.shortName.indexOf("Bread") !== -1)
+                lowerName.indexOf(p.shortName.toLowerCase()) !== -1
               );
 
               if (matchIndex !== -1) {
-                // Update existing item
                 const existing = updatedPantry[matchIndex];
                 updatedPantry[matchIndex] = {
                   ...existing,
@@ -424,7 +563,6 @@
                 };
                 confirmedList.push({ name: existing.shortName, qty: item.qty + " " + (item.unit || existing.unit) });
               } else {
-                // Dynamically add new item (e.g., Bread, Butter, Eggs, etc.)
                 let category = "Beverages and Snacks";
                 if (lowerName.indexOf("milk") !== -1 || lowerName.indexOf("paneer") !== -1 || lowerName.indexOf("curd") !== -1 || lowerName.indexOf("dahi") !== -1 || lowerName.indexOf("butter") !== -1 || lowerName.indexOf("egg") !== -1 || lowerName.indexOf("cheese") !== -1) {
                   category = "Dairy and Fresh";
@@ -463,7 +601,7 @@
               {
                 id: "ai-" + Date.now(),
                 sender: "ai",
-                text: "Great! I have added and updated " + confirmedList.length + " items in your kitchen grocery list and digital pantry:",
+                text: "Great! I have recorded and added " + confirmedList.length + " items to your kitchen grocery list and digital pantry:",
                 stockedItems: confirmedList,
                 totalStockedCount: confirmedList.length,
                 suggestions: [
@@ -572,7 +710,7 @@
               {
                 id: "ai-" + Date.now(),
                 sender: "ai",
-                text: "I am ready to help manage your kitchen! You can tell me what groceries are present in your kitchen (e.g. 'I have 2 kg Atta 2 bread packets and 1 kg tomato'), ask for recipe suggestions with YouTube tutorials, or tell me what meal you cooked today.",
+                text: "I am ready to help manage your kitchen! You can tell me what groceries are present in your kitchen (e.g. 'I have 2 kg Atta 2 bread packets and 1 kg tomato'), ask for recipe suggestions with YouTube tutorials, or forward your delivery bills.",
                 suggestions: [
                   "I have 2 kg Atta 2 bread packets and 1 kg tomato",
                   "What can I cook with my current pantry?",
@@ -582,17 +720,6 @@
             ]);
           }
         }, 500);
-      };
-
-      const handleQuickSync = (platform) => {
-        setPantry(prev => prev.map(item => {
-          if (item.shortName.indexOf("Milk") !== -1) return { ...item, current: +(item.current + 2).toFixed(1) };
-          if (item.shortName.indexOf("Toor Dal") !== -1) return { ...item, current: +(item.current + 1).toFixed(1) };
-          if (item.shortName.indexOf("Tomato") !== -1) return { ...item, current: +(item.current + 1.5).toFixed(1) };
-          if (item.shortName.indexOf("Atta") !== -1) return { ...item, current: +(item.current + 5).toFixed(1) };
-          return item;
-        }));
-        showToast("Order Ingested from " + platform + "! Added Milk, Toor Dal, Tomatoes and Atta.");
       };
 
       const filteredItems = useMemo(() => {
@@ -620,29 +747,29 @@
                     DearHome
                   </h1>
                   <span class="text-[10px] font-black uppercase tracking-wider bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-md">
-                    Cloud Synced
+                    Phase 1 & 2 Live
                   </span>
                 </div>
-                <p class="text-xs text-slate-500 font-medium">Smart Autonomous Indian Kitchen and Grocery Inventory</p>
+                <p class="text-xs text-slate-500 font-medium">Autonomous Indian Kitchen Inventory & Delivery Bill Ingestion</p>
               </div>
             </div>
 
             {/* ACTION BUTTONS */}
-            <div class="flex flex-wrap items-center gap-3">
+            <div class="flex flex-wrap items-center gap-2.5">
               <button
-                onClick={() => setActiveTab("assistant")}
-                class="px-4 py-2.5 rounded-2xl bg-gradient-to-r from-orange-500 to-amber-500 text-white font-extrabold text-xs shadow-md shadow-orange-500/20 transition-all flex items-center gap-2"
+                onClick={() => setActiveTab("inbound")}
+                class="px-3.5 py-2.5 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold text-xs shadow-md shadow-indigo-500/20 transition-all flex items-center gap-1.5"
               >
-                <Icons.Sparkles />
-                <span>AI Kitchen Assistant</span>
+                <Icons.Mail />
+                <span>Inbound Email Hub (Phase 2)</span>
               </button>
 
               <button
-                onClick={() => setActiveTab("family")}
-                class="px-4 py-2.5 rounded-2xl bg-white border border-slate-200 hover:bg-slate-50 text-slate-800 font-extrabold text-xs shadow-sm transition-all flex items-center gap-2"
+                onClick={() => setActiveTab("scan")}
+                class="px-3.5 py-2.5 rounded-2xl bg-gradient-to-r from-orange-500 to-amber-500 text-white font-bold text-xs shadow-md shadow-orange-500/20 transition-all flex items-center gap-1.5"
               >
-                <Icons.Users />
-                <span>Family ({household.adults}A, {household.children}K - {household.appetiteLevel.split(" ")[0]})</span>
+                <Icons.Camera />
+                <span>Invoice OCR (Phase 1)</span>
               </button>
 
               <button
@@ -658,14 +785,14 @@
           {/* MAIN NAVIGATION BAR */}
           <nav class="flex gap-2 p-1.5 bg-slate-100/90 rounded-2xl mb-8 overflow-x-auto border border-slate-200/80">
             {[
+              { id: "scan", label: "Invoice OCR Scanner (Phase 1)", icon: <Icons.Camera /> },
+              { id: "inbound", label: "Email Auto-Forwarding (Phase 2)", icon: <Icons.Mail />, badge: "Autonomous" },
               { id: "assistant", label: "AI Kitchen Assistant", icon: <Icons.Chat /> },
               { id: "pantry", label: "Digital Pantry", count: pantry.length, icon: <Icons.Box /> },
-              { id: "family", label: "Family, Appetite and Guests", icon: <Icons.Users /> },
+              { id: "family", label: "Family Profile", icon: <Icons.Users /> },
               { id: "masala", label: "Masala Dabba", count: 5, icon: <Icons.Flame /> },
               { id: "cook", label: "What Did You Cook?", icon: <Icons.Flame /> },
               { id: "radar", label: "Restock Radar", count: lowStockItems.length, alert: lowStockItems.length > 0, icon: <Icons.Alert /> },
-              { id: "sync", label: "Online Order Sync", icon: <Icons.Zap /> },
-              { id: "scan", label: "OCR Bill Scanner", icon: <Icons.Camera /> },
               { id: "analytics", label: "Household Insights", icon: <Icons.Chart /> }
             ].map(tab => (
               <button
@@ -679,6 +806,11 @@
               >
                 {tab.icon}
                 <span>{tab.label}</span>
+                {tab.badge && (
+                  <span class="text-[9px] px-1.5 py-0.5 rounded-md bg-indigo-100 text-indigo-800 font-extrabold">
+                    {tab.badge}
+                  </span>
+                )}
                 {tab.count !== undefined && tab.count > 0 && (
                   <span class={"text-[10px] px-1.5 py-0.2 rounded-full font-black " + (
                     tab.alert ? "bg-red-500 text-white animate-pulse" : "bg-slate-200 text-slate-700"
@@ -690,7 +822,269 @@
             ))}
           </nav>
 
-          {/* TAB 1: CONVERSATIONAL AI KITCHEN ASSISTANT */}
+          {/* TAB: PHASE 1 MULTIMODAL INVOICE & RECEIPT SCANNER */}
+          {activeTab === "scan" && (
+            <div class="max-w-4xl mx-auto space-y-6">
+              <div class="bg-gradient-to-r from-orange-600 via-amber-600 to-orange-700 rounded-3xl p-6 text-white shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                <div>
+                  <span class="text-[10px] font-black uppercase tracking-wider bg-white/20 px-3 py-1 rounded-full">
+                    Phase 1: Universal Multimodal Ingestion Engine
+                  </span>
+                  <h2 class="text-2xl font-black mt-2">Delivery Bill & Receipt Parser</h2>
+                  <p class="text-xs text-orange-100 mt-1 max-w-xl">
+                    Extracts line items, gram weights, and rates from Zepto, Blinkit, Swiggy Instamart, Amazon Fresh, and D-Mart physical receipts.
+                  </p>
+                </div>
+                <div class="w-14 h-14 rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center text-white text-2xl border border-white/20 shrink-0">
+                  <Icons.Camera />
+                </div>
+              </div>
+
+              {/* SAMPLE INVOICE SELECTOR */}
+              <div class="bg-white rounded-3xl p-5 border border-orange-100 shadow-sm space-y-3">
+                <div class="flex justify-between items-center">
+                  <span class="text-xs font-black text-slate-700 uppercase tracking-wider">
+                    Select a Delivery App Invoice to Test Gemini Multimodal Parsing:
+                  </span>
+                  <span class="text-[10px] font-bold text-orange-600 bg-orange-50 px-2 py-1 rounded-md">
+                    Interactive Simulator
+                  </span>
+                </div>
+
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  {SAMPLE_INVOICES.map(inv => (
+                    <button
+                      key={inv.id}
+                      onClick={() => {
+                        setSelectedInvoice(inv);
+                        setIsScanning(true);
+                        setTimeout(() => {
+                          setIsScanning(false);
+                          setScanResult(inv);
+                        }, 500);
+                      }}
+                      class={"p-3 rounded-2xl border text-left transition-all " + (
+                        selectedInvoice.id === inv.id
+                          ? "border-orange-500 bg-orange-50/70 shadow-sm"
+                          : "border-slate-200 bg-slate-50 hover:bg-white"
+                      )}
+                    >
+                      <span class={"text-[10px] font-black px-2 py-0.5 rounded-md border block w-max mb-1.5 " + inv.badgeColor}>
+                        {inv.platform.split(" ")[0]}
+                      </span>
+                      <span class="font-bold text-xs text-slate-900 block leading-tight">{inv.platform}</span>
+                      <span class="text-[10px] text-slate-500 block mt-1">{inv.items.length} Items ({inv.totalAmount})</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* ACTIVE INVOICE DETAILS & INGESTION CARD */}
+              <div class="bg-white rounded-3xl p-6 sm:p-8 border border-orange-200 shadow-md space-y-6">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pb-4 border-b border-slate-100">
+                  <div>
+                    <div class="flex items-center gap-2">
+                      <h3 class="text-lg font-black text-slate-900">{scanResult.platform}</h3>
+                      <span class={"text-xs font-black px-2.5 py-0.5 rounded-lg border " + scanResult.badgeColor}>
+                        {scanResult.orderId}
+                      </span>
+                    </div>
+                    <span class="text-xs text-slate-500 mt-0.5 block">{scanResult.time}</span>
+                  </div>
+
+                  <div class="text-right">
+                    <span class="text-[11px] font-bold text-slate-400 block uppercase">Bill Total</span>
+                    <span class="text-xl font-black text-slate-900">{scanResult.totalAmount}</span>
+                  </div>
+                </div>
+
+                {/* EXTRACTED ITEMS TABLE */}
+                <div class="overflow-x-auto">
+                  <table class="w-full text-left text-xs">
+                    <thead>
+                      <tr class="border-b border-slate-200 text-slate-400 font-bold uppercase tracking-wider text-[10px]">
+                        <th class="pb-3">Item Description</th>
+                        <th class="pb-3">Category</th>
+                        <th class="pb-3">Quantity</th>
+                        <th class="pb-3">Rate</th>
+                        <th class="pb-3 text-right">Pantry Impact</th>
+                      </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100 font-medium text-slate-700">
+                      {scanResult.items.map((item, idx) => (
+                        <tr key={idx} class="hover:bg-slate-50">
+                          <td class="py-3.5 font-bold text-slate-900">{item.name}</td>
+                          <td class="py-3.5">
+                            <span class="px-2 py-0.5 bg-slate-100 text-slate-600 rounded-md text-[10px] font-bold">
+                              {item.category}
+                            </span>
+                          </td>
+                          <td class="py-3.5 font-black text-orange-900">{item.qty} {item.unit}</td>
+                          <td class="py-3.5 text-slate-500">{item.rate}</td>
+                          <td class="py-3.5 text-right font-black text-emerald-700">
+                            +{item.qty} {item.unit} to stock
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* 1-CLICK INGESTION BUTTON */}
+                <div class="pt-2 flex flex-col sm:flex-row gap-3">
+                  <button
+                    onClick={() => handleIngestInvoiceItems(scanResult.items, scanResult.platform)}
+                    class="flex-1 py-3.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-black text-xs rounded-2xl shadow-lg shadow-emerald-600/20 transition-all flex items-center justify-center gap-2"
+                  >
+                    <Icons.Check />
+                    <span>Confirm & Ingest {scanResult.items.length} Line Items into Digital Pantry</span>
+                  </button>
+
+                  <button
+                    onClick={() => setActiveTab("pantry")}
+                    class="px-5 py-3.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-2xl transition-all"
+                  >
+                    View Current Stock
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* TAB: PHASE 2 DEDICATED INBOUND EMAIL FORWARDING HUB */}
+          {activeTab === "inbound" && (
+            <div class="max-w-4xl mx-auto space-y-6">
+              <div class="bg-gradient-to-r from-blue-700 via-indigo-700 to-purple-800 rounded-3xl p-6 text-white shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                <div>
+                  <div class="flex items-center gap-2">
+                    <span class="text-[10px] font-black uppercase tracking-wider bg-white/20 px-3 py-1 rounded-full">
+                      Phase 2: Autonomous Ingestion Hub
+                    </span>
+                    <span class="flex items-center gap-1 bg-emerald-400/20 text-emerald-200 px-2 py-0.5 rounded-full text-[10px] font-bold border border-emerald-400/30">
+                      <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
+                      Webhook Active
+                    </span>
+                  </div>
+                  <h2 class="text-2xl font-black mt-2">Email Auto-Forwarding Ingestion</h2>
+                  <p class="text-xs text-indigo-100 mt-1 max-w-xl">
+                    Auto-forwards Zepto, Blinkit, and Amazon Fresh PDF invoices to your private DearHome inbox for 100% autonomous pantry top-ups.
+                  </p>
+                </div>
+                <div class="w-14 h-14 rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center text-white text-2xl border border-white/20 shrink-0">
+                  <Icons.Mail />
+                </div>
+              </div>
+
+              {/* USER'S PERSONALIZED INBOX CARD */}
+              <div class="bg-white rounded-3xl p-6 border border-indigo-100 shadow-sm space-y-4">
+                <span class="text-xs font-black text-slate-500 uppercase tracking-wider block">
+                  Your Dedicated DearHome Inbound Address
+                </span>
+                
+                <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                  <div class="flex-1 p-3.5 bg-indigo-50/60 rounded-2xl border border-indigo-200 font-mono text-xs font-bold text-indigo-950 flex items-center justify-between">
+                    <span>sinduja1219@inbox.dearhome.ai</span>
+                    <span class="text-[10px] text-indigo-600 font-sans font-extrabold uppercase">Verified Inbound Route</span>
+                  </div>
+
+                  <button
+                    onClick={() => {
+                      navigator.clipboard?.writeText("sinduja1219@inbox.dearhome.ai");
+                      showToast("Copied sinduja1219@inbox.dearhome.ai to clipboard!");
+                    }}
+                    class="px-5 py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-2xl shadow-md shadow-indigo-500/20 flex items-center justify-center gap-2 transition-all"
+                  >
+                    <Icons.Copy />
+                    <span>Copy Address</span>
+                  </button>
+                </div>
+
+                {/* 3-STEP GMAIL SETUP GUIDE */}
+                <div class="pt-4 border-t border-slate-100">
+                  <h4 class="text-xs font-black text-slate-800 uppercase tracking-wider mb-3">
+                    3-Minute Setup in Gmail (1-Time Configuration):
+                  </h4>
+                  <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+                    <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-1.5">
+                      <span class="w-6 h-6 rounded-lg bg-indigo-100 text-indigo-800 font-black text-xs flex items-center justify-center">1</span>
+                      <h5 class="font-bold text-slate-900">Create Gmail Filter</h5>
+                      <p class="text-[11px] text-slate-500">
+                        Search: <code class="bg-white px-1 py-0.5 rounded text-[10px]">from:(zepto.co.in OR blinkit.com OR swiggy.in)</code>
+                      </p>
+                    </div>
+
+                    <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-1.5">
+                      <span class="w-6 h-6 rounded-lg bg-indigo-100 text-indigo-800 font-black text-xs flex items-center justify-center">2</span>
+                      <h5 class="font-bold text-slate-900">Add Forwarding Rule</h5>
+                      <p class="text-[11px] text-slate-500">
+                        Check <i>"Forward it to"</i> and enter <code class="bg-white px-1 py-0.5 rounded text-[10px]">sinduja1219@inbox.dearhome.ai</code>
+                      </p>
+                    </div>
+
+                    <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-1.5">
+                      <span class="w-6 h-6 rounded-lg bg-indigo-100 text-indigo-800 font-black text-xs flex items-center justify-center">3</span>
+                      <h5 class="font-bold text-slate-900">Zero-Touch Sync</h5>
+                      <p class="text-[11px] text-slate-500">
+                        Every delivery bill is parsed automatically by Gemini 2.0 Flash in &lt;1 second.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* LIVE INCOMING WEBHOOK STREAM SIMULATOR */}
+              <div class="bg-white rounded-3xl p-6 sm:p-8 border border-indigo-100 shadow-md space-y-5">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                  <div>
+                    <h3 class="text-base font-black text-slate-900">Live Inbound Webhook Stream</h3>
+                    <p class="text-xs text-slate-500">Real-time incoming delivery invoices processed by SendGrid Inbound Parse + Gemini.</p>
+                  </div>
+
+                  <div class="flex gap-2">
+                    <button
+                      onClick={() => handleSimulateInboundEmail("Zepto", SAMPLE_INVOICES[0])}
+                      disabled={isSimulatingEmail}
+                      class="px-3 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs font-bold transition-all shadow-sm"
+                    >
+                      {isSimulatingEmail ? "Simulating Webhook..." : "Simulate Zepto Email Ingest"}
+                    </button>
+                    <button
+                      onClick={() => handleSimulateInboundEmail("Blinkit", SAMPLE_INVOICES[1])}
+                      disabled={isSimulatingEmail}
+                      class="px-3 py-2 bg-yellow-500 hover:bg-yellow-600 text-slate-950 rounded-xl text-xs font-bold transition-all shadow-sm"
+                    >
+                      Simulate Blinkit Email Ingest
+                    </button>
+                  </div>
+                </div>
+
+                <div class="space-y-2.5">
+                  {emailInboundFeed.map(feed => (
+                    <div key={feed.id} class="p-4 bg-slate-50 rounded-2xl border border-slate-200 text-xs flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                      <div class="space-y-0.5">
+                        <div class="flex items-center gap-2">
+                          <span class="font-mono text-indigo-700 font-bold">{feed.sender}</span>
+                          <span class="text-slate-300">•</span>
+                          <span class="font-extrabold text-slate-900">{feed.subject}</span>
+                        </div>
+                        <p class="text-[11px] text-slate-500 font-medium">Extracted: {feed.itemsSummary}</p>
+                      </div>
+
+                      <div class="flex items-center gap-2 shrink-0">
+                        <span class="text-[10px] text-slate-400">{feed.time}</span>
+                        <span class="px-2.5 py-1 bg-emerald-100 text-emerald-800 rounded-lg font-black text-[10px] flex items-center gap-1">
+                          <Icons.Check />
+                          <span>{feed.status}</span>
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* TAB: CONVERSATIONAL AI KITCHEN ASSISTANT */}
           {activeTab === "assistant" && (
             <div class="max-w-3xl mx-auto space-y-4">
               <div class="bg-gradient-to-r from-amber-600 via-orange-600 to-amber-700 rounded-3xl p-6 text-white shadow-xl flex items-center justify-between">
@@ -700,7 +1094,7 @@
                   </span>
                   <h2 class="text-2xl font-black mt-2">DearHome Conversational Agent</h2>
                   <p class="text-xs text-orange-100 mt-1">
-                    Instant kitchen grocery ingestion, meal suggestions with YouTube tutorials, and live auto-depletion.
+                    First step kitchen onboarding, meal suggestions with YouTube cooking tutorials, and live auto-depletion.
                   </p>
                 </div>
                 <div class="w-14 h-14 rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center text-white text-2xl border border-white/20">
@@ -723,7 +1117,6 @@
                     >
                       <p class="font-medium">{msg.text}</p>
 
-                      {/* STOCKED KITCHEN ITEMS BADGES */}
                       {msg.stockedItems && (
                         <div class="mt-3 p-3.5 bg-white rounded-2xl border border-emerald-300 shadow-sm space-y-2.5">
                           <div class="flex items-center justify-between">
@@ -749,7 +1142,6 @@
                         </div>
                       )}
 
-                      {/* DISH RECOMMENDATION CARDS WITH YOUTUBE AND WEBSITE LINKS */}
                       {msg.dishRecommendations && (
                         <div class="mt-3 space-y-2.5 pt-2 border-t border-orange-200">
                           {msg.dishRecommendations.map((rec, idx) => {
@@ -803,7 +1195,6 @@
                         </div>
                       )}
 
-                      {/* ACTIONABLE MEAL DEDUCTION CARD */}
                       {msg.actionableMeal && (
                         <div class="mt-3 p-3.5 bg-white rounded-2xl border border-emerald-300 shadow-sm space-y-2.5">
                           <div class="flex justify-between items-center text-xs font-bold text-emerald-950">
@@ -896,7 +1287,7 @@
             </div>
           )}
 
-          {/* TAB 2: DIGITAL PANTRY */}
+          {/* TAB: DIGITAL PANTRY */}
           {activeTab === "pantry" && (
             <div class="space-y-6">
               <div class="bg-white rounded-3xl p-5 border border-orange-100 shadow-sm space-y-4">
@@ -991,16 +1382,16 @@
             </div>
           )}
 
-          {/* TAB 3: FAMILY CUSTOMIZER */}
+          {/* TAB: FAMILY CUSTOMIZER */}
           {activeTab === "family" && (
             <div class="max-w-2xl mx-auto bg-white rounded-3xl p-6 sm:p-8 border border-orange-200 shadow-lg space-y-6">
               <div>
                 <span class="text-xs font-black uppercase text-orange-600 bg-orange-100 px-3 py-1 rounded-full">
-                  Family Profile and Appetite Calibration
+                  Family Profile & Appetite Calibration
                 </span>
-                <h2 class="text-2xl font-black text-slate-900 mt-2">Customize Household and Eating Pattern</h2>
+                <h2 class="text-2xl font-black text-slate-900 mt-2">Customize Household & Eating Pattern</h2>
                 <p class="text-xs text-slate-500 mt-0.5">
-                  Tailor member counts, dietary style, and appetite coefficients so DearHome deducts exact portion weights.
+                  Tailor member counts and appetite coefficients so DearHome deducts exact portion weights.
                 </p>
               </div>
 
@@ -1112,43 +1503,11 @@
                     ))}
                   </div>
                 </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                      Staple Preference
-                    </label>
-                    <select
-                      value={household.staplePreference || "Balanced (50/50)"}
-                      onChange={(e) => setHousehold({ ...household, staplePreference: e.target.value })}
-                      class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800"
-                    >
-                      <option value="Balanced (50/50)">Balanced (Rice lunch, Roti dinner)</option>
-                      <option value="Roti Dominant">Roti Dominant (North Indian style)</option>
-                      <option value="Rice Dominant">Rice Dominant (South/East style)</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                      Tadka and Oil Preference
-                    </label>
-                    <select
-                      value={household.oilIntensity || "Standard Tadka (1.0x)"}
-                      onChange={(e) => setHousehold({ ...household, oilIntensity: e.target.value })}
-                      class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800"
-                    >
-                      <option value="Light Tadka (0.7x)">Light Tadka (Low Oil)</option>
-                      <option value="Standard Tadka (1.0x)">Standard Tadka (Authentic Home)</option>
-                      <option value="Rich Tadka (1.3x)">Rich Tadka (Dhaba / Restaurant Style)</option>
-                    </select>
-                  </div>
-                </div>
               </div>
             </div>
           )}
 
-          {/* TAB 4: MASALA DABBA */}
+          {/* TAB: MASALA DABBA */}
           {activeTab === "masala" && (
             <div class="max-w-3xl mx-auto space-y-6">
               <div class="bg-gradient-to-br from-amber-700 to-yellow-600 rounded-3xl p-6 text-white shadow-xl flex items-center justify-between">
@@ -1194,7 +1553,7 @@
             </div>
           )}
 
-          {/* TAB 5: WHAT DID YOU COOK (MANUAL MEAL LOGGER) */}
+          {/* TAB: WHAT DID YOU COOK */}
           {activeTab === "cook" && (
             <div class="max-w-2xl mx-auto bg-white rounded-3xl p-6 sm:p-8 border border-orange-200 shadow-lg space-y-6">
               <div>
@@ -1255,7 +1614,6 @@
                 </button>
               </div>
 
-              {/* MEAL LOGS HISTORY */}
               {mealLogs.length > 0 && (
                 <div class="pt-6 border-t border-slate-100 space-y-3">
                   <h4 class="text-xs font-black uppercase text-slate-500 tracking-wider">Recent Cooked Meals</h4>
@@ -1277,7 +1635,7 @@
             </div>
           )}
 
-          {/* TAB 6: RESTOCK RADAR */}
+          {/* TAB: RESTOCK RADAR */}
           {activeTab === "radar" && (
             <div class="max-w-3xl mx-auto space-y-6">
               <div class="bg-gradient-to-r from-red-600 to-rose-600 rounded-3xl p-6 text-white shadow-xl flex items-center justify-between">
@@ -1322,119 +1680,12 @@
                       </div>
                     ))}
                   </div>
-
-                  <div class="p-6 bg-white rounded-3xl border border-orange-200 shadow-sm space-y-3">
-                    <h3 class="font-bold text-sm text-slate-900">1-Click Quick-Commerce Restock Basket</h3>
-                    <p class="text-xs text-slate-500">Auto-packs all {lowStockItems.length} low-stock items into an optimized delivery cart.</p>
-                    <div class="flex gap-3">
-                      <button
-                        onClick={() => handleQuickSync("Zepto Instant")}
-                        class="flex-1 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-2xl font-bold text-xs shadow-sm transition-all"
-                      >
-                        Order via Zepto (10 mins)
-                      </button>
-                      <button
-                        onClick={() => handleQuickSync("Blinkit")}
-                        class="flex-1 py-3 bg-yellow-500 hover:bg-yellow-600 text-slate-950 rounded-2xl font-bold text-xs shadow-sm transition-all"
-                      >
-                        Order via Blinkit
-                      </button>
-                    </div>
-                  </div>
                 </div>
               )}
             </div>
           )}
 
-          {/* TAB 7: ONLINE SYNC */}
-          {activeTab === "sync" && (
-            <div class="max-w-2xl mx-auto bg-white rounded-3xl p-6 sm:p-8 border border-orange-200 shadow-lg space-y-6">
-              <div>
-                <span class="text-xs font-black uppercase text-orange-600 bg-orange-100 px-3 py-1 rounded-full">
-                  Omnichannel Quick-Commerce Sync
-                </span>
-                <h2 class="text-2xl font-black text-slate-900 mt-2">Delivery App Integrations</h2>
-                <p class="text-xs text-slate-500 mt-0.5">
-                  Simulate live order invoice ingestion from quick-commerce platforms.
-                </p>
-              </div>
-
-              <div class="grid grid-cols-2 gap-4">
-                {[
-                  { name: "Zepto Quick", color: "bg-purple-600 hover:bg-purple-700", desc: "10-min groceries" },
-                  { name: "Blinkit", color: "bg-yellow-500 hover:bg-yellow-600 text-slate-950", desc: "Instant essentials" },
-                  { name: "Swiggy Instamart", color: "bg-orange-600 hover:bg-orange-700", desc: "Superfast delivery" },
-                  { name: "Amazon Fresh", color: "bg-slate-900 hover:bg-slate-800", desc: "Bulk kitchen staples" }
-                ].map(platform => (
-                  <button
-                    key={platform.name}
-                    onClick={() => handleQuickSync(platform.name)}
-                    class={"p-5 rounded-3xl text-white text-left transition-all shadow-md " + platform.color}
-                  >
-                    <span class="font-black text-sm block">{platform.name}</span>
-                    <span class="text-[10px] opacity-80 block mt-1">{platform.desc}</span>
-                    <span class="text-[11px] font-bold mt-3 inline-block bg-white/20 px-2 py-0.5 rounded-lg">Sync Order</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* TAB 8: OCR BILL SCANNER */}
-          {activeTab === "scan" && (
-            <div class="max-w-2xl mx-auto bg-white rounded-3xl p-6 sm:p-8 border border-orange-200 shadow-lg space-y-6">
-              <div>
-                <span class="text-xs font-black uppercase text-orange-600 bg-orange-100 px-3 py-1 rounded-full">
-                  Gemini Vision OCR Scanner
-                </span>
-                <h2 class="text-2xl font-black text-slate-900 mt-2">Physical Supermarket Receipt Scanner</h2>
-                <p class="text-xs text-slate-500 mt-0.5">
-                  Scan printed paper receipts from D-Mart, Reliance Smart Bazaar, or your local Kirana store.
-                </p>
-              </div>
-
-              <div class="p-8 border-2 border-dashed border-orange-300 rounded-3xl text-center space-y-4 bg-orange-50/50">
-                <div class="w-14 h-14 bg-orange-100 text-orange-700 rounded-2xl flex items-center justify-center mx-auto text-2xl">
-                  <Icons.Camera />
-                </div>
-                <div>
-                  <h4 class="font-bold text-slate-900">Upload Receipt Photo or PDF</h4>
-                  <p class="text-xs text-slate-500 mt-1">Multi-modal AI Vision automatically parses line items and gram weights.</p>
-                </div>
-                <div class="flex justify-center gap-3">
-                  <button
-                    onClick={() => {
-                      setPantry(prev => prev.map(item => {
-                        if (item.shortName.indexOf("Atta") !== -1) return { ...item, current: +(item.current + 10).toFixed(1) };
-                        if (item.shortName.indexOf("Rice") !== -1) return { ...item, current: +(item.current + 5).toFixed(1) };
-                        if (item.shortName.indexOf("Mustard Oil") !== -1) return { ...item, current: +(item.current + 2).toFixed(1) };
-                        return item;
-                      }));
-                      showToast("Parsed D-Mart Receipt! Ingested 10kg Atta, 5kg Rice, 2L Mustard Oil.");
-                    }}
-                    class="px-5 py-2.5 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-xl shadow-sm transition-all"
-                  >
-                    Simulate D-Mart Bill Scan
-                  </button>
-                  <button
-                    onClick={() => {
-                      setPantry(prev => prev.map(item => {
-                        if (item.shortName.indexOf("Toor Dal") !== -1) return { ...item, current: +(item.current + 2).toFixed(1) };
-                        if (item.shortName.indexOf("Sugar") !== -1) return { ...item, current: +(item.current + 3).toFixed(1) };
-                        return item;
-                      }));
-                      showToast("Parsed Kirana Store Bill! Ingested 2kg Toor Dal and 3kg Sugar.");
-                    }}
-                    class="px-5 py-2.5 bg-white border border-slate-300 hover:bg-slate-50 text-slate-800 font-bold text-xs rounded-xl shadow-sm transition-all"
-                  >
-                    Simulate Kirana Bill Scan
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* TAB 9: HOUSEHOLD ANALYTICS */}
+          {/* TAB: HOUSEHOLD ANALYTICS */}
           {activeTab === "analytics" && (
             <div class="max-w-3xl mx-auto space-y-6">
               <div class="bg-gradient-to-r from-slate-900 to-slate-800 rounded-3xl p-6 text-white shadow-xl flex items-center justify-between">
