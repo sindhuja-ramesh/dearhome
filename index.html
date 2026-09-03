@@ -25,7 +25,7 @@
   <script type="text/babel">
     const { useState, useEffect, useMemo, useRef } = React;
 
-    // VECTOR SVG ICONS (NO UNICODE/EMOJI/BULLET GLITCHES)
+    // VECTOR SVG ICONS (CLEAN NO GLITCHES)
     const Icons = {
       Home: () => <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>,
       Users: () => <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>,
@@ -39,9 +39,11 @@
       Sparkles: () => <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/></svg>,
       Plus: () => <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4"/></svg>,
       Check: () => <svg className="w-4 h-4 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"/></svg>,
+      Close: () => <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"/></svg>,
       Send: () => <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>,
       Video: () => <svg className="w-3.5 h-3.5 text-red-600" fill="currentColor" viewBox="0 0 24 24"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/></svg>,
-      BookOpen: () => <svg className="w-3.5 h-3.5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+      BookOpen: () => <svg className="w-3.5 h-3.5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>,
+      Package: () => <svg className="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/></svg>
     };
 
     const CATEGORIES = ["All Items", "Atta and Grains", "Dals and Pulses", "Oils and Ghee", "Masala Dabba", "Dairy and Fresh", "Vegetables", "Beverages and Snacks"];
@@ -204,16 +206,16 @@
       const [guestCountForMeal, setGuestCountForMeal] = useState(0);
       const [toast, setToast] = useState(null);
 
-      // CONVERSATIONAL AGENT STATE
+      // CONVERSATIONAL AGENT STATE: First step asks what is present in kitchen
       const [chatMessages, setChatMessages] = useState([
         {
           id: "m-1",
           sender: "ai",
-          text: "Namaste Sinduja! I am your DearHome AI Kitchen Assistant. What did you cook today, or would you like me to suggest recipes with direct YouTube videos and step-by-step guides based on your available groceries?",
+          text: "Namaste Sinduja! I am your DearHome AI Kitchen Assistant. First, what ingredients and groceries are currently present in your kitchen? You can type what you have (e.g. '5kg Atta, 2kg Basmati Rice, 1kg Toor Dal, 1L Ghee, Milk, and Potatoes'), load a standard Indian kitchen starter pack, or scan your grocery bill.",
           suggestions: [
-            "What can I cook with what I have?",
-            "I cooked Dal Tadka and Rice for 4 people today",
-            "I cooked Aloo Paratha for breakfast",
+            "I have 5kg Atta, 2kg Basmati Rice, 1kg Toor Dal, 1L Ghee, and Potatoes",
+            "Load standard Indian Kitchen starter pack",
+            "What can I cook with what I already have?",
             "Which groceries are running low?"
           ]
         }
@@ -322,22 +324,143 @@
           setIsAiThinking(false);
           const lower = query.toLowerCase();
 
+          // 1. STARTER PACK REQUEST
+          if (lower.indexOf("starter pack") !== -1 || lower.indexOf("standard indian") !== -1 || lower.indexOf("starter pack") !== -1 || lower.indexOf("starter kit") !== -1) {
+            setPantry(INITIAL_PANTRY);
+            setChatMessages(prev => [
+              ...prev,
+              {
+                id: "ai-" + Date.now(),
+                sender: "ai",
+                text: "Loaded the Standard Indian Kitchen Starter Pack! Your pantry is now stocked with 24 kitchen essentials:",
+                stockedItems: INITIAL_PANTRY.slice(0, 8).map(i => ({ name: i.shortName, qty: i.current + " " + i.unit })),
+                totalStockedCount: INITIAL_PANTRY.length,
+                suggestions: [
+                  "What can I cook with what I have?",
+                  "I cooked Dal Tadka and Rice for 4 people today",
+                  "Which groceries are running low?"
+                ]
+              }
+            ]);
+            showToast("Standard Indian Kitchen Starter Pack Loaded (24 Staples)!");
+            return;
+          }
+
+          // 2. KITCHEN INVENTORY DECLARATION (e.g. "I have...", "In my kitchen...", listing items with kg/L/g)
+          const isListingKitchen = (
+            lower.indexOf("i have") !== -1 ||
+            lower.indexOf("in my kitchen") !== -1 ||
+            lower.indexOf("present in") !== -1 ||
+            lower.indexOf("stocked") !== -1 ||
+            lower.indexOf("we have") !== -1 ||
+            lower.indexOf("my groceries") !== -1 ||
+            (lower.indexOf("kg") !== -1 && (lower.indexOf("atta") !== -1 || lower.indexOf("rice") !== -1 || lower.indexOf("dal") !== -1 || lower.indexOf("potato") !== -1))
+          );
+
+          if (isListingKitchen && lower.indexOf("what can i cook") === -1 && lower.indexOf("cooked") === -1 && lower.indexOf("made") === -1) {
+            let updatedPantry = [...pantry];
+            let recognized = [];
+
+            const ingredientKeywords = [
+              { key: "atta", id: "item-1", defaultQty: 5, unit: "kg" },
+              { key: "flour", id: "item-1", defaultQty: 5, unit: "kg" },
+              { key: "rice", id: "item-2", defaultQty: 3, unit: "kg" },
+              { key: "basmati", id: "item-2", defaultQty: 3, unit: "kg" },
+              { key: "poha", id: "item-3", defaultQty: 1, unit: "kg" },
+              { key: "toor dal", id: "item-4", defaultQty: 1, unit: "kg" },
+              { key: "arhar", id: "item-4", defaultQty: 1, unit: "kg" },
+              { key: "rajma", id: "item-5", defaultQty: 1, unit: "kg" },
+              { key: "moong", id: "item-6", defaultQty: 1, unit: "kg" },
+              { key: "mustard oil", id: "item-7", defaultQty: 2, unit: "L" },
+              { key: "sunflower oil", id: "item-8", defaultQty: 2, unit: "L" },
+              { key: "ghee", id: "item-9", defaultQty: 1, unit: "L" },
+              { key: "haldi", id: "item-10", defaultQty: 200, unit: "g" },
+              { key: "turmeric", id: "item-10", defaultQty: 200, unit: "g" },
+              { key: "jeera", id: "item-11", defaultQty: 150, unit: "g" },
+              { key: "cumin", id: "item-11", defaultQty: 150, unit: "g" },
+              { key: "mirch", id: "item-12", defaultQty: 150, unit: "g" },
+              { key: "rai", id: "item-13", defaultQty: 100, unit: "g" },
+              { key: "mustard seed", id: "item-13", defaultQty: 100, unit: "g" },
+              { key: "hing", id: "item-14", defaultQty: 40, unit: "g" },
+              { key: "milk", id: "item-15", defaultQty: 2, unit: "L" },
+              { key: "dahi", id: "item-16", defaultQty: 400, unit: "g" },
+              { key: "curd", id: "item-16", defaultQty: 400, unit: "g" },
+              { key: "paneer", id: "item-17", defaultQty: 250, unit: "g" },
+              { key: "onion", id: "item-18", defaultQty: 2, unit: "kg" },
+              { key: "pyaz", id: "item-18", defaultQty: 2, unit: "kg" },
+              { key: "tomato", id: "item-19", defaultQty: 1.5, unit: "kg" },
+              { key: "tamatar", id: "item-19", defaultQty: 1.5, unit: "kg" },
+              { key: "potato", id: "item-20", defaultQty: 2.5, unit: "kg" },
+              { key: "aloo", id: "item-20", defaultQty: 2.5, unit: "kg" },
+              { key: "ginger", id: "item-21", defaultQty: 150, unit: "g" },
+              { key: "garlic", id: "item-21", defaultQty: 150, unit: "g" },
+              { key: "chai", id: "item-22", defaultQty: 300, unit: "g" },
+              { key: "tea", id: "item-22", defaultQty: 300, unit: "g" },
+              { key: "sugar", id: "item-23", defaultQty: 2, unit: "kg" },
+              { key: "salt", id: "item-24", defaultQty: 1, unit: "kg" }
+            ];
+
+            let handledIds = new Set();
+
+            ingredientKeywords.forEach(ik => {
+              if (lower.indexOf(ik.key) !== -1 && !handledIds.has(ik.id)) {
+                handledIds.add(ik.id);
+                
+                // Extract quantity if present near keyword
+                let qty = ik.defaultQty;
+                const reg = new RegExp("([0-9]+(?:\\.[0-9]+)?)\\s*(kg|g|l|ml|litres|litre|packets|pcs)?\\s*(?:of\\s*)?" + ik.key, "i");
+                const match = query.match(reg);
+                if (match && match[1]) {
+                  qty = parseFloat(match[1]);
+                }
+
+                const pIndex = updatedPantry.findIndex(p => p.id === ik.id);
+                if (pIndex !== -1) {
+                  updatedPantry[pIndex] = { ...updatedPantry[pIndex], current: qty };
+                  recognized.push({ name: updatedPantry[pIndex].shortName, qty: qty + " " + updatedPantry[pIndex].unit });
+                }
+              }
+            });
+
+            if (recognized.length > 0) {
+              setPantry(updatedPantry);
+              setChatMessages(prev => [
+                ...prev,
+                {
+                  id: "ai-" + Date.now(),
+                  sender: "ai",
+                  text: "Great! I have updated your live kitchen inventory with the " + recognized.length + " items you reported present in your kitchen:",
+                  stockedItems: recognized,
+                  totalStockedCount: recognized.length,
+                  suggestions: [
+                    "What can I cook with what I have?",
+                    "I cooked Dal Tadka and Rice for 4 people today",
+                    "Which groceries are running low?"
+                  ]
+                }
+              ]);
+              showToast("Recorded " + recognized.length + " kitchen ingredients into pantry!");
+              return;
+            }
+          }
+
+          // 3. RECIPE SUGGESTIONS
           if (lower.indexOf("what can i cook") !== -1 || lower.indexOf("suggest") !== -1 || lower.indexOf("recipe") !== -1 || lower.indexOf("available") !== -1 || lower.indexOf("dinner") !== -1 || lower.indexOf("lunch") !== -1 || lower.indexOf("video") !== -1 || lower.indexOf("youtube") !== -1) {
-            const hasAtta = (pantry.find(i => i.shortName.indexOf("Atta") !== -1)?.current || 0) >= 1;
-            const hasRice = (pantry.find(i => i.shortName.indexOf("Rice") !== -1)?.current || 0) >= 1;
+            const hasAtta = (pantry.find(i => i.shortName.indexOf("Atta") !== -1)?.current || 0) >= 0.5;
+            const hasRice = (pantry.find(i => i.shortName.indexOf("Rice") !== -1)?.current || 0) >= 0.5;
             const hasPaneer = (pantry.find(i => i.shortName.indexOf("Paneer") !== -1)?.current || 0) >= 100;
-            const hasDal = (pantry.find(i => i.shortName.indexOf("Toor Dal") !== -1)?.current || 0) >= 0.3;
-            const hasRajma = (pantry.find(i => i.shortName.indexOf("Rajma") !== -1)?.current || 0) >= 0.5;
-            const hasAloo = (pantry.find(i => i.shortName.indexOf("Potato") !== -1)?.current || 0) >= 1;
+            const hasDal = (pantry.find(i => i.shortName.indexOf("Toor Dal") !== -1)?.current || 0) >= 0.2;
+            const hasRajma = (pantry.find(i => i.shortName.indexOf("Rajma") !== -1)?.current || 0) >= 0.3;
+            const hasAloo = (pantry.find(i => i.shortName.indexOf("Potato") !== -1)?.current || 0) >= 0.5;
 
             let suggestionsList = [];
             if (hasAtta && hasAloo) {
               const r = INDIAN_RECIPES[2];
-              suggestionsList.push({ ...r, reason: "8.5kg Atta and 2.5kg Potatoes available" });
+              suggestionsList.push({ ...r, reason: "Atta and Potatoes present in kitchen" });
             }
             if (hasDal && hasRice) {
               const r = INDIAN_RECIPES[0];
-              suggestionsList.push({ ...r, reason: "Toor dal and Basmati rice ready in stock" });
+              suggestionsList.push({ ...r, reason: "Toor Dal and Basmati Rice ready in stock" });
             }
             if (hasPaneer && hasAtta) {
               const r = INDIAN_RECIPES[3];
@@ -345,7 +468,11 @@
             }
             if (hasRajma && hasRice) {
               const r = INDIAN_RECIPES[1];
-              suggestionsList.push({ ...r, reason: "1.2kg Rajma and Basmati in stock" });
+              suggestionsList.push({ ...r, reason: "Rajma and Basmati ready in stock" });
+            }
+            if (suggestionsList.length === 0) {
+              suggestionsList.push(INDIAN_RECIPES[0]);
+              suggestionsList.push(INDIAN_RECIPES[4]);
             }
 
             setChatMessages(prev => [
@@ -353,12 +480,13 @@
               {
                 id: "ai-" + Date.now(),
                 sender: "ai",
-                text: "Based on your live pantry groceries, here are dishes you can cook right now with curated YouTube tutorials and recipe steps:",
+                text: "Based on the groceries present in your kitchen, here are delicious recipes you can prepare right now, complete with YouTube video tutorials and step-by-step guides:",
                 dishRecommendations: suggestionsList,
-                suggestions: ["What groceries are running low?", "I cooked one of these dishes"]
+                suggestions: ["What groceries are running low?", "I cooked one of these dishes", "Update what is in my kitchen"]
               }
             ]);
           }
+          // 4. MEAL LOGGING & DEDUCTION
           else if (lower.indexOf("cook") !== -1 || lower.indexOf("made") !== -1 || lower.indexOf("prepared") !== -1 || lower.indexOf("ate") !== -1 || lower.indexOf("dal") !== -1 || lower.indexOf("paratha") !== -1 || lower.indexOf("rajma") !== -1 || lower.indexOf("poha") !== -1 || lower.indexOf("chai") !== -1) {
             let matchedRecipe = INDIAN_RECIPES.find(r => lower.indexOf(r.name.toLowerCase()) !== -1 || lower.indexOf(r.id.toLowerCase()) !== -1 || lower.indexOf(r.cuisine.toLowerCase()) !== -1);
             if (!matchedRecipe) {
@@ -380,15 +508,16 @@
               {
                 id: "ai-" + Date.now(),
                 sender: "ai",
-                text: "Understood! Prepared " + matchedRecipe.name + " (" + effectiveDiners + " portion units). Click below to deduct ingredients or view recipe details:",
+                text: "Understood! Prepared " + matchedRecipe.name + " (" + effectiveDiners + " portion units). Click below to auto-deduct ingredients from your kitchen stock or watch the recipe tutorial:",
                 actionableMeal: {
                   recipe: matchedRecipe,
                   servings: effectiveDiners
                 },
-                suggestions: ["What can I cook for next meal?", "Check pantry levels"]
+                suggestions: ["What can I cook for next meal?", "Check pantry levels", "Update what is in my kitchen"]
               }
             ]);
           }
+          // 5. LOW STOCK RADAR
           else if (lower.indexOf("low") !== -1 || lower.indexOf("stock") !== -1 || lower.indexOf("radar") !== -1 || lower.indexOf("empty") !== -1 || lower.indexOf("running out") !== -1) {
             const lowItemsNames = lowStockItems.map(i => i.shortName + " (" + i.current + " " + i.unit + " left)").join(", ");
             setChatMessages(prev => [
@@ -397,28 +526,29 @@
                 id: "ai-" + Date.now(),
                 sender: "ai",
                 text: lowStockItems.length > 0
-                  ? "Warning: You have " + lowStockItems.length + " items running low: " + lowItemsNames + ". I recommend restocking them today!"
-                  : "All grocery staples in your pantry are above safety threshold! You are fully stocked.",
-                suggestions: ["What can I cook with what I have?", "Simulate Zepto Order Sync"]
+                  ? "Warning: You have " + lowStockItems.length + " items running low in your kitchen: " + lowItemsNames + ". I recommend restocking them today!"
+                  : "All grocery staples in your kitchen pantry are above safety threshold! You are fully stocked.",
+                suggestions: ["What can I cook with what I have?", "Simulate Zepto Order Sync", "Update what is in my kitchen"]
               }
             ]);
           }
+          // 6. DEFAULT FALLBACK
           else {
             setChatMessages(prev => [
               ...prev,
               {
                 id: "ai-" + Date.now(),
                 sender: "ai",
-                text: "I am ready to help manage your kitchen! Ask for recipe recommendations with YouTube video links, tell me what you cooked today, or check items running low.",
+                text: "I am ready to help manage your kitchen! You can tell me what groceries are present in your kitchen, ask for recipe suggestions with YouTube tutorials, or tell me what meal you cooked today to auto-deduct ingredients.",
                 suggestions: [
+                  "I have 5kg Atta, 2kg Basmati Rice, 1kg Toor Dal, 1L Ghee, and Potatoes",
                   "What can I cook with my current pantry?",
-                  "I cooked Dal Tadka for 4 people today",
-                  "Which groceries will run out first?"
+                  "I cooked Dal Tadka for 4 people today"
                 ]
               }
             ]);
           }
-        }, 600);
+        }, 500);
       };
 
       const handleQuickSync = (platform) => {
@@ -537,7 +667,7 @@
                   </span>
                   <h2 class="text-2xl font-black mt-2">DearHome Conversational Agent</h2>
                   <p class="text-xs text-orange-100 mt-1">
-                    Smart meal suggestions with direct YouTube cooking tutorials and automatic pantry deduction.
+                    First step kitchen onboarding, meal suggestions with YouTube cooking tutorials, and live auto-depletion.
                   </p>
                 </div>
                 <div class="w-14 h-14 rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center text-white text-2xl border border-white/20">
@@ -559,6 +689,32 @@
                       )}
                     >
                       <p class="font-medium">{msg.text}</p>
+
+                      {/* STOCKED KITCHEN ITEMS BADGES */}
+                      {msg.stockedItems && (
+                        <div class="mt-3 p-3.5 bg-white rounded-2xl border border-emerald-300 shadow-sm space-y-2.5">
+                          <div class="flex items-center justify-between">
+                            <span class="text-xs font-black text-emerald-900 flex items-center gap-1.5">
+                              <Icons.Check />
+                              <span>Kitchen Inventory Updated ({msg.totalStockedCount} Staples)</span>
+                            </span>
+                            <button
+                              onClick={() => setActiveTab("pantry")}
+                              class="text-[10px] font-bold text-orange-700 bg-orange-100 hover:bg-orange-200 px-2 py-0.5 rounded-md transition-all"
+                            >
+                              View Pantry
+                            </button>
+                          </div>
+                          <div class="flex flex-wrap gap-1.5 pt-1 border-t border-slate-100">
+                            {msg.stockedItems.map((stk, sidx) => (
+                              <span key={sidx} class="inline-flex items-center gap-1 px-2 py-1 bg-emerald-50 border border-emerald-200 text-emerald-900 rounded-lg text-[10px] font-bold">
+                                <span>{stk.name}:</span>
+                                <span class="text-emerald-700">{stk.qty}</span>
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
 
                       {/* DISH RECOMMENDATION CARDS WITH YOUTUBE AND WEBSITE LINKS */}
                       {msg.dishRecommendations && (
@@ -676,7 +832,7 @@
                 {isAiThinking && (
                   <div class="flex items-center gap-2 p-3 bg-orange-50 rounded-2xl max-w-xs text-xs text-orange-800 font-semibold border border-orange-200 animate-pulse">
                     <Icons.Sparkles />
-                    <span>Analyzing pantry stock, recipes and YouTube tutorials...</span>
+                    <span>Analyzing kitchen groceries, recipe intelligence and pantry levels...</span>
                   </div>
                 )}
                 <div ref={chatEndRef} />
@@ -691,7 +847,7 @@
               >
                 <input
                   type="text"
-                  placeholder="e.g. 'What can I make for dinner with YouTube video?' or 'Cooked Rajma Chawal for 4'"
+                  placeholder="e.g. 'I have 5kg Atta, 2kg Basmati Rice, 1kg Toor Dal, Ghee, Milk, Potatoes' or 'What can I cook?'"
                   value={userChatInput}
                   onChange={(e) => setUserChatInput(e.target.value)}
                   class="flex-1 px-4 py-3.5 bg-white border border-slate-200 rounded-2xl text-xs font-semibold focus:outline-none focus:border-orange-500 shadow-sm"
@@ -949,131 +1105,55 @@
                       onChange={(e) => setHousehold({ ...household, oilIntensity: e.target.value })}
                       class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800"
                     >
-                      <option value="Standard Tadka (1.0x)">Standard Desi Tadka (1.0x)</option>
-                      <option value="Low Oil (0.7x)">Low Oil and Ghee (Health-focused)</option>
-                      <option value="Rich Tadka (1.3x)">Rich and Flavorful (1.3x)</option>
+                      <option value="Light Tadka (0.7x)">Light Tadka (Low Oil)</option>
+                      <option value="Standard Tadka (1.0x)">Standard Tadka (Authentic Home)</option>
+                      <option value="Rich Tadka (1.3x)">Rich Tadka (Dhaba / Restaurant Style)</option>
                     </select>
                   </div>
                 </div>
-
-                <div class="p-5 bg-amber-50 rounded-2xl border border-amber-200 space-y-2">
-                  <div class="flex justify-between items-center">
-                    <div>
-                      <span class="text-xs font-black text-amber-950 block">
-                        House Guests Staying Over
-                      </span>
-                      <span class="text-[11px] text-amber-800 block mt-0.5">
-                        Temporarily scales total daily kitchen grocery deductions.
-                      </span>
-                    </div>
-                    <div class="flex items-center gap-3">
-                      <button
-                        onClick={() => setHousehold(p => ({ ...p, currentGuests: Math.max(0, (p.currentGuests || 0) - 1) }))}
-                        class="w-9 h-9 rounded-xl bg-white border border-amber-300 font-black text-sm hover:bg-amber-100 shadow-sm"
-                      >
-                        -
-                      </button>
-                      <span class="w-6 text-center font-black text-lg text-amber-950">{household.currentGuests || 0}</span>
-                      <button
-                        onClick={() => setHousehold(p => ({ ...p, currentGuests: (p.currentGuests || 0) + 1 }))}
-                        class="w-9 h-9 rounded-xl bg-white border border-amber-300 font-black text-sm hover:bg-amber-100 shadow-sm"
-                      >
-                        +
-                      </button>
-                    </div>
-                  </div>
-                </div>
-
-                <div>
-                  <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                    Regional Cooking Focus
-                  </label>
-                  <select
-                    value={household.cuisine}
-                    onChange={(e) => setHousehold({ ...household, cuisine: e.target.value })}
-                    class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800"
-                  >
-                    <option value="North Indian">North Indian (Roti, Dals, Sabzis)</option>
-                    <option value="South Indian">South Indian (Rice, Sambar, Idli)</option>
-                    <option value="Maharashtrian">Maharashtrian (Poha, Poli, Dal)</option>
-                    <option value="Bengali">Bengali (Rice and Curries)</option>
-                    <option value="Gujarati">Gujarati (Rotli, Shaak, Dal, Khichdi)</option>
-                    <option value="Punjabi">Punjabi (Parathas, Rajma, Paneer)</option>
-                  </select>
-                </div>
-
-                <button
-                  onClick={() => {
-                    setActiveTab("pantry");
-                    showToast("Household and Appetite profile saved!");
-                  }}
-                  class="w-full py-4 bg-slate-900 hover:bg-slate-800 text-white font-black text-xs rounded-xl shadow-md transition-all mt-2"
-                >
-                  Save Profile and Go to Digital Pantry
-                </button>
               </div>
             </div>
           )}
 
-          {/* TAB 4: THE MASALA DABBA */}
+          {/* TAB 4: MASALA DABBA */}
           {activeTab === "masala" && (
-            <div class="space-y-6">
-              <div class="bg-gradient-to-r from-amber-950 to-orange-950 rounded-3xl p-8 text-white shadow-xl">
-                <span class="text-xs font-black uppercase text-amber-400 bg-amber-900/60 px-3 py-1 rounded-full border border-amber-700">
-                  Daily Tadka Essentials
-                </span>
-                <h2 class="text-3xl font-black mt-3">The Masala Dabba Organizer</h2>
-                <p class="text-sm text-amber-200/80 mt-1 max-w-2xl">
-                  Track grams remaining in your classic spice canisters. Daily pinches from cooked meals automatically reduce stock levels here.
-                </p>
+            <div class="max-w-3xl mx-auto space-y-6">
+              <div class="bg-gradient-to-br from-amber-700 to-yellow-600 rounded-3xl p-6 text-white shadow-xl flex items-center justify-between">
+                <div>
+                  <span class="text-[10px] font-black uppercase tracking-wider bg-white/20 px-3 py-1 rounded-full">
+                    Traditional Indian Spice Organizer
+                  </span>
+                  <h2 class="text-2xl font-black mt-2">The Masala Dabba</h2>
+                  <p class="text-xs text-amber-100 mt-1">
+                    Tracks daily tadka pinches (Haldi, Jeera, Rai, Hing, Lal Mirch) and alerts before your spice katoris run empty.
+                  </p>
+                </div>
+                <div class="w-14 h-14 rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center text-white text-2xl border border-white/20">
+                  <Icons.Flame />
+                </div>
               </div>
 
-              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
                 {pantry.filter(i => i.category === "Masala Dabba").map(spice => {
                   const pct = Math.min(100, Math.round((spice.current / spice.max) * 100));
-                  const isLow = spice.current <= spice.threshold;
-
                   return (
-                    <div key={spice.id} class="bg-white rounded-3xl p-6 border border-orange-100 shadow-sm flex flex-col justify-between">
+                    <div key={spice.id} class="bg-white rounded-3xl p-5 border border-amber-200 shadow-sm text-center space-y-3">
+                      <div class="w-12 h-12 mx-auto rounded-2xl bg-amber-100 text-amber-900 flex items-center justify-center font-black text-sm">
+                        <Icons.Flame />
+                      </div>
                       <div>
-                        <div class="flex justify-between items-center mb-3">
-                          <span class="font-extrabold text-sm text-slate-900">{spice.shortName}</span>
-                          <span class={"text-[10px] font-black uppercase px-2 py-0.5 rounded-full " + (
-                            isLow ? "bg-red-100 text-red-700" : "bg-emerald-100 text-emerald-800"
-                          )}>
-                            {isLow ? "Refill Soon" : "Fresh"}
-                          </span>
-                        </div>
-                        <p class="text-xs text-slate-400">{spice.name}</p>
-
-                        <div class="mt-4 bg-slate-50 p-3 rounded-2xl border border-slate-100">
-                          <div class="flex justify-between text-xs font-bold mb-1">
-                            <span class="text-slate-500">Level</span>
-                            <span class="text-slate-900">{spice.current} {spice.unit}</span>
-                          </div>
-                          <div class="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
-                            <div
-                              class={"h-full rounded-full " + (isLow ? "bg-red-500" : "bg-orange-500")}
-                              style={{ width: pct + "%" }}
-                            ></div>
-                          </div>
-                        </div>
+                        <h4 class="font-bold text-sm text-slate-900">{spice.shortName}</h4>
+                        <span class="text-xs font-black text-amber-700">{spice.current} {spice.unit}</span>
                       </div>
-
-                      <div class="mt-4 pt-3 border-t border-slate-100 grid grid-cols-2 gap-2">
-                        <button
-                          onClick={() => updateStock(spice.id, -10)}
-                          class="py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold"
-                        >
-                          - 10g Tadka
-                        </button>
-                        <button
-                          onClick={() => updateStock(spice.id, 50)}
-                          class="py-1.5 bg-orange-100 hover:bg-orange-200 text-orange-800 rounded-xl text-xs font-bold"
-                        >
-                          + 50g Refill
-                        </button>
+                      <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+                        <div class="h-full bg-amber-500 rounded-full" style={{ width: pct + "%" }}></div>
                       </div>
+                      <button
+                        onClick={() => updateStock(spice.id, -5)}
+                        class="w-full py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-900 rounded-xl text-xs font-bold transition-all"
+                      >
+                        1 Tadka Pinch (-5g)
+                      </button>
                     </div>
                   );
                 })}
@@ -1081,75 +1161,51 @@
             </div>
           )}
 
-          {/* TAB 5: "WHAT DID YOU COOK?" */}
+          {/* TAB 5: WHAT DID YOU COOK (MANUAL MEAL LOGGER) */}
           {activeTab === "cook" && (
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
-              <div class="lg:col-span-7 bg-white rounded-3xl p-6 sm:p-8 border border-orange-100 shadow-sm space-y-6">
-                <div>
-                  <span class="text-[10px] font-black uppercase tracking-wider text-orange-600">
-                    Indian Recipe Intelligence
-                  </span>
-                  <h2 class="text-2xl font-black text-slate-900 mt-0.5">
-                    What Did You Cook Today?
-                  </h2>
-                  <p class="text-xs text-slate-500 mt-1">
-                    Select the dish and diner count. DearHome computes exact recipe proportions adjusted for your {household.appetiteLevel} appetite.
-                  </p>
-                </div>
+            <div class="max-w-2xl mx-auto bg-white rounded-3xl p-6 sm:p-8 border border-orange-200 shadow-lg space-y-6">
+              <div>
+                <span class="text-xs font-black uppercase text-orange-600 bg-orange-100 px-3 py-1 rounded-full">
+                  Recipe Auto-Depletion
+                </span>
+                <h2 class="text-2xl font-black text-slate-900 mt-2">What Did You Cook?</h2>
+                <p class="text-xs text-slate-500 mt-0.5">
+                  Select the dish and portion count. DearHome calculates and deducts exact ingredient weights.
+                </p>
+              </div>
 
+              <div class="space-y-4">
                 <div>
-                  <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
-                    1. Select Dish Cooked
-                  </label>
-                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 max-h-56 overflow-y-auto pr-1">
-                    {INDIAN_RECIPES.map(recipe => (
-                      <div
-                        key={recipe.id}
-                        onClick={() => setSelectedRecipe(recipe.id)}
-                        class={"p-3 rounded-2xl border-2 cursor-pointer transition-all flex items-center gap-3 " + (
-                          selectedRecipe === recipe.id
-                            ? "border-orange-500 bg-orange-50/70 shadow-sm"
-                            : "border-slate-100 hover:border-slate-300 bg-slate-50/60"
-                        )}
-                      >
-                        <div>
-                          <h4 class="font-extrabold text-xs text-slate-900">{recipe.name}</h4>
-                          <p class="text-[10px] text-slate-400">{recipe.cuisine} - {recipe.prepTime}</p>
-                        </div>
-                      </div>
+                  <label class="block text-xs font-bold text-slate-700 uppercase mb-1.5">Select Recipe</label>
+                  <select
+                    value={selectedRecipe}
+                    onChange={(e) => setSelectedRecipe(e.target.value)}
+                    class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800"
+                  >
+                    {INDIAN_RECIPES.map(r => (
+                      <option key={r.id} value={r.id}>{r.name} ({r.cuisine} - {r.prepTime})</option>
                     ))}
-                  </div>
+                  </select>
                 </div>
 
-                <div class="p-4 bg-orange-50/60 rounded-2xl border border-orange-200/80 space-y-3">
-                  <div class="flex justify-between items-center">
-                    <div>
-                      <span class="text-xs font-black text-slate-900 block">2. Diners and Appetite Setup</span>
-                      <span class="text-[11px] text-slate-500">
-                        {household.adults} Adults, {household.children} Kids - <strong>{household.appetiteLevel}</strong>
-                      </span>
-                    </div>
-                    <div class="text-right">
-                      <span class="text-xs font-bold text-slate-400 block">Portion Units</span>
-                      <span class="text-xl font-black text-orange-600">{totalMealEaters} Units</span>
-                    </div>
+                <div class="p-4 bg-orange-50 rounded-2xl border border-orange-200">
+                  <div class="flex justify-between items-center text-xs">
+                    <span class="font-bold text-slate-700">Base Family Servings:</span>
+                    <span class="font-black text-orange-900">{baseFamilyServings} portions</span>
                   </div>
-
-                  <div class="flex items-center justify-between pt-2 border-t border-orange-200/60">
-                    <span class="text-xs font-bold text-slate-700 flex items-center gap-1.5">
-                      <span>Extra Guests for this meal:</span>
-                    </span>
+                  <div class="flex justify-between items-center text-xs mt-2 pt-2 border-t border-orange-200">
+                    <span class="font-bold text-slate-700">Add Visiting Guests:</span>
                     <div class="flex items-center gap-2">
                       <button
-                        onClick={() => setGuestCountForMeal(Math.max(0, guestCountForMeal - 1))}
-                        class="w-8 h-8 rounded-xl bg-white border border-slate-300 font-black text-xs hover:bg-slate-100 shadow-sm"
+                        onClick={() => setGuestCountForMeal(p => Math.max(0, p - 1))}
+                        class="w-7 h-7 rounded-lg bg-white border border-slate-300 font-bold text-xs"
                       >
                         -
                       </button>
-                      <span class="w-6 text-center font-black text-sm text-slate-900">{guestCountForMeal}</span>
+                      <span class="font-bold text-slate-900 w-4 text-center">{guestCountForMeal}</span>
                       <button
-                        onClick={() => setGuestCountForMeal(guestCountForMeal + 1)}
-                        class="w-8 h-8 rounded-xl bg-white border border-slate-300 font-black text-xs hover:bg-slate-100 shadow-sm"
+                        onClick={() => setGuestCountForMeal(p => p + 1)}
+                        class="w-7 h-7 rounded-lg bg-white border border-slate-300 font-bold text-xs"
                       >
                         +
                       </button>
@@ -1159,143 +1215,132 @@
 
                 <button
                   onClick={() => handleCookMealDirect(selectedRecipe, totalMealEaters)}
-                  class="w-full py-4 rounded-2xl bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white font-black text-xs shadow-lg shadow-orange-600/25 transition-all"
+                  class="w-full py-3.5 bg-orange-600 hover:bg-orange-700 text-white font-black text-xs rounded-xl shadow-md transition-all flex items-center justify-center gap-2"
                 >
-                  Confirm and Auto-Deduct Ingredients for {totalMealEaters} Portion Units
+                  <Icons.Flame />
+                  <span>Log Meal & Deduct {totalMealEaters} Portion Ingredients</span>
                 </button>
               </div>
 
-              <div class="lg:col-span-5 space-y-6">
-                <div class="bg-gradient-to-br from-amber-50 to-orange-50 rounded-3xl p-6 border border-orange-200/80 shadow-sm">
-                  <div class="flex justify-between items-center pb-3 border-b border-orange-200/60 mb-3">
-                    <h3 class="font-extrabold text-sm text-slate-900">
-                      Calculated Ingredient Deductions
-                    </h3>
-                    <span class="text-[11px] font-black bg-orange-200 text-orange-900 px-2.5 py-0.5 rounded-full">
-                      {totalMealEaters} Portion Units
-                    </span>
-                  </div>
-
-                  <div class="space-y-2 max-h-52 overflow-y-auto">
-                    {INDIAN_RECIPES.find(r => r.id === selectedRecipe)?.ingredients.map(ing => (
-                      <div key={ing.name} class="flex justify-between text-xs p-2 bg-white/90 rounded-xl border border-orange-100">
-                        <span class="font-medium text-slate-700">- {ing.name}</span>
-                        <span class="font-black text-orange-700">- {(ing.qty * totalMealEaters).toFixed(1)} {ing.unit}</span>
+              {/* MEAL LOGS HISTORY */}
+              {mealLogs.length > 0 && (
+                <div class="pt-6 border-t border-slate-100 space-y-3">
+                  <h4 class="text-xs font-black uppercase text-slate-500 tracking-wider">Recent Cooked Meals</h4>
+                  <div class="space-y-2 max-h-48 overflow-y-auto">
+                    {mealLogs.map(log => (
+                      <div key={log.id} class="p-3 bg-slate-50 rounded-xl border border-slate-200 text-xs flex justify-between items-center">
+                        <div>
+                          <span class="font-bold text-slate-900 block">{log.recipeName}</span>
+                          <span class="text-[10px] text-slate-500">{log.time} - {log.servings} portions</span>
+                        </div>
+                        <span class="text-[10px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-md">
+                          Deducted
+                        </span>
                       </div>
                     ))}
                   </div>
                 </div>
-
-                <div class="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm">
-                  <h3 class="font-extrabold text-xs uppercase tracking-wider text-slate-400 mb-3">
-                    Recent Cook Logs
-                  </h3>
-                  {mealLogs.length === 0 ? (
-                    <p class="text-xs text-slate-400 text-center py-4">No meals logged yet today.</p>
-                  ) : (
-                    <div class="space-y-2.5 max-h-48 overflow-y-auto">
-                      {mealLogs.slice(0, 5).map(log => (
-                        <div key={log.id} class="p-3 bg-slate-50 rounded-xl text-xs border border-slate-100">
-                          <div class="flex justify-between font-bold text-slate-800">
-                            <span>{log.recipeName}</span>
-                            <span class="text-[10px] text-slate-400">{log.time}</span>
-                          </div>
-                          <div class="text-[11px] text-slate-500 mt-0.5">
-                            {log.servings} Portions ({log.appetite})
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
+              )}
             </div>
           )}
 
           {/* TAB 6: RESTOCK RADAR */}
           {activeTab === "radar" && (
-            <div class="space-y-6">
-              <div class="bg-white p-7 rounded-3xl border border-orange-200 shadow-sm space-y-4">
-                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                  <div>
-                    <h2 class="text-xl font-bold text-slate-900">Low Stock Restock Radar</h2>
-                    <p class="text-xs text-slate-500">Autonomous burn-rate prediction warns you before essentials run out.</p>
-                  </div>
-                  {lowStockItems.length > 0 && (
-                    <button
-                      onClick={() => {
-                        lowStockItems.forEach(i => updateStock(i.id, +(i.max - i.current).toFixed(1)));
-                        showToast("All low stock items marked as restocked!");
-                      }}
-                      class="bg-emerald-600 text-white font-bold text-xs px-4 py-2.5 rounded-xl hover:bg-emerald-700 shadow-sm"
-                    >
-                      1-Click Restock All ({lowStockItems.length} items)
-                    </button>
-                  )}
+            <div class="max-w-3xl mx-auto space-y-6">
+              <div class="bg-gradient-to-r from-red-600 to-rose-600 rounded-3xl p-6 text-white shadow-xl flex items-center justify-between">
+                <div>
+                  <span class="text-[10px] font-black uppercase tracking-wider bg-white/20 px-3 py-1 rounded-full">
+                    Predictive Stockout Radar
+                  </span>
+                  <h2 class="text-2xl font-black mt-2">Zero-Stockout Alerts</h2>
+                  <p class="text-xs text-rose-100 mt-1">
+                    Items approaching or below safety threshold. Generates optimized 1-click restock cart.
+                  </p>
                 </div>
+                <div class="w-14 h-14 rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center text-white text-2xl border border-white/20">
+                  <Icons.Alert />
+                </div>
+              </div>
 
-                {lowStockItems.length === 0 ? (
-                  <div class="text-center py-12 text-slate-400">
-                    <p class="font-bold text-slate-700">Kitchen is fully stocked!</p>
-                    <p class="text-xs mt-1">Zero items are below safety threshold.</p>
+              {lowStockItems.length === 0 ? (
+                <div class="bg-white rounded-3xl p-8 border border-emerald-200 text-center space-y-2">
+                  <div class="w-12 h-12 bg-emerald-100 text-emerald-800 rounded-2xl flex items-center justify-center mx-auto text-xl">
+                    <Icons.Check />
                   </div>
-                ) : (
-                  <div class="grid grid-cols-1 md:grid-cols-2 gap-3 pt-2">
+                  <h3 class="font-bold text-slate-900">Your Kitchen is Fully Stocked</h3>
+                  <p class="text-xs text-slate-500">No staples are currently below critical safety thresholds.</p>
+                </div>
+              ) : (
+                <div class="space-y-4">
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {lowStockItems.map(item => (
-                      <div key={item.id} class="p-4 bg-red-50/80 border border-red-200 rounded-2xl flex justify-between items-center">
+                      <div key={item.id} class="bg-white rounded-3xl p-5 border border-red-200 shadow-sm flex justify-between items-center">
                         <div>
-                          <h4 class="font-bold text-red-950 text-sm">{item.shortName}</h4>
-                          <p class="text-xs text-red-700">
-                            Current: <strong>{item.current} {item.unit}</strong> (Min Threshold: {item.threshold} {item.unit})
-                          </p>
+                          <span class="text-[10px] font-bold text-red-600 uppercase block">Low Stock</span>
+                          <h4 class="font-bold text-sm text-slate-900">{item.shortName}</h4>
+                          <span class="text-xs text-slate-500">Left: {item.current} {item.unit} (Threshold: {item.threshold} {item.unit})</span>
                         </div>
                         <button
-                          onClick={() => {
-                            updateStock(item.id, +(item.max - item.current).toFixed(1));
-                            showToast("Refilled " + item.shortName + "!");
-                          }}
-                          class="bg-red-600 text-white font-bold text-xs px-3.5 py-1.5 rounded-xl hover:bg-red-700"
+                          onClick={() => updateStock(item.id, item.max - item.current)}
+                          class="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-xl text-xs font-bold transition-all"
                         >
-                          + Refill
+                          Restock
                         </button>
                       </div>
                     ))}
                   </div>
-                )}
-              </div>
+
+                  <div class="p-6 bg-white rounded-3xl border border-orange-200 shadow-sm space-y-3">
+                    <h3 class="font-bold text-sm text-slate-900">1-Click Quick-Commerce Restock Basket</h3>
+                    <p class="text-xs text-slate-500">Auto-packs all {lowStockItems.length} low-stock items into an optimized delivery cart.</p>
+                    <div class="flex gap-3">
+                      <button
+                        onClick={() => handleQuickSync("Zepto Instant")}
+                        class="flex-1 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-2xl font-bold text-xs shadow-sm transition-all"
+                      >
+                        Order via Zepto (10 mins)
+                      </button>
+                      <button
+                        onClick={() => handleQuickSync("Blinkit")}
+                        class="flex-1 py-3 bg-yellow-500 hover:bg-yellow-600 text-slate-950 rounded-2xl font-bold text-xs shadow-sm transition-all"
+                      >
+                        Order via Blinkit
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
-          {/* TAB 7: ONLINE ORDER SYNC */}
+          {/* TAB 7: ONLINE SYNC */}
           {activeTab === "sync" && (
-            <div class="max-w-2xl mx-auto bg-white p-8 rounded-3xl border border-orange-200 shadow-sm text-center space-y-6">
+            <div class="max-w-2xl mx-auto bg-white rounded-3xl p-6 sm:p-8 border border-orange-200 shadow-lg space-y-6">
               <div>
                 <span class="text-xs font-black uppercase text-orange-600 bg-orange-100 px-3 py-1 rounded-full">
-                  Quick-Commerce Ingestion
+                  Omnichannel Quick-Commerce Sync
                 </span>
-                <h2 class="text-2xl font-black text-slate-900 mt-2">Connect Delivery Apps</h2>
-                <p class="text-xs text-slate-500 mt-1">
-                  Orders from Zepto, Blinkit, Instamart, or Amazon Fresh automatically increment your live stock.
+                <h2 class="text-2xl font-black text-slate-900 mt-2">Delivery App Integrations</h2>
+                <p class="text-xs text-slate-500 mt-0.5">
+                  Simulate live order invoice ingestion from quick-commerce platforms.
                 </p>
               </div>
 
-              <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <div class="grid grid-cols-2 gap-4">
                 {[
-                  { name: "Zepto", color: "bg-purple-600" },
-                  { name: "Blinkit", color: "bg-yellow-500" },
-                  { name: "Instamart", color: "bg-orange-500" },
-                  { name: "Amazon Fresh", color: "bg-teal-700" }
-                ].map(app => (
+                  { name: "Zepto Quick", color: "bg-purple-600 hover:bg-purple-700", desc: "10-min groceries" },
+                  { name: "Blinkit", color: "bg-yellow-500 hover:bg-yellow-600 text-slate-950", desc: "Instant essentials" },
+                  { name: "Swiggy Instamart", color: "bg-orange-600 hover:bg-orange-700", desc: "Superfast delivery" },
+                  { name: "Amazon Fresh", color: "bg-slate-900 hover:bg-slate-800", desc: "Bulk kitchen staples" }
+                ].map(platform => (
                   <button
-                    key={app.name}
-                    onClick={() => handleQuickSync(app.name)}
-                    class="p-4 bg-slate-50 hover:bg-orange-50 border border-slate-200 rounded-2xl transition-all flex flex-col items-center gap-2 group hover:border-orange-300"
+                    key={platform.name}
+                    onClick={() => handleQuickSync(platform.name)}
+                    class={"p-5 rounded-3xl text-white text-left transition-all shadow-md " + platform.color}
                   >
-                    <div class={"w-11 h-11 rounded-xl " + app.color + " text-white font-black flex items-center justify-center text-sm shadow-sm"}>
-                      <Icons.Zap />
-                    </div>
-                    <span class="text-xs font-extrabold text-slate-800">{app.name}</span>
-                    <span class="text-[10px] text-emerald-600 font-bold">Simulate Sync</span>
+                    <span class="font-black text-sm block">{platform.name}</span>
+                    <span class="text-[10px] opacity-80 block mt-1">{platform.desc}</span>
+                    <span class="text-[11px] font-bold mt-3 inline-block bg-white/20 px-2 py-0.5 rounded-lg">Sync Order</span>
                   </button>
                 ))}
               </div>
@@ -1304,49 +1349,74 @@
 
           {/* TAB 8: OCR BILL SCANNER */}
           {activeTab === "scan" && (
-            <div class="max-w-2xl mx-auto bg-white p-8 rounded-3xl border border-orange-200 shadow-sm text-center space-y-6">
+            <div class="max-w-2xl mx-auto bg-white rounded-3xl p-6 sm:p-8 border border-orange-200 shadow-lg space-y-6">
               <div>
-                <span class="text-xs font-black uppercase text-indigo-600 bg-indigo-100 px-3 py-1 rounded-full">
-                  Gemini Vision OCR
+                <span class="text-xs font-black uppercase text-orange-600 bg-orange-100 px-3 py-1 rounded-full">
+                  Gemini Vision OCR Scanner
                 </span>
-                <h2 class="text-2xl font-black text-slate-900 mt-2">Supermarket Bill Scanner</h2>
-                <p class="text-xs text-slate-500 mt-1">
-                  Snap physical receipts from D-Mart, Reliance Smart, or Kirana stores to auto-itemize groceries.
+                <h2 class="text-2xl font-black text-slate-900 mt-2">Physical Supermarket Receipt Scanner</h2>
+                <p class="text-xs text-slate-500 mt-0.5">
+                  Scan printed paper receipts from D-Mart, Reliance Smart Bazaar, or your local Kirana store.
                 </p>
               </div>
 
-              <div class="border-2 border-dashed border-orange-300 p-8 rounded-3xl bg-orange-50/40 space-y-4">
-                <div className="w-12 h-12 rounded-2xl bg-orange-100 text-orange-600 flex items-center justify-center mx-auto">
+              <div class="p-8 border-2 border-dashed border-orange-300 rounded-3xl text-center space-y-4 bg-orange-50/50">
+                <div class="w-14 h-14 bg-orange-100 text-orange-700 rounded-2xl flex items-center justify-center mx-auto text-2xl">
                   <Icons.Camera />
                 </div>
                 <div>
-                  <p class="text-xs font-bold text-slate-800">Drop receipt image or simulate scanning</p>
-                  <p class="text-[10px] text-slate-400 mt-0.5">Supports thermal cash receipts and GST supermarket invoices</p>
+                  <h4 class="font-bold text-slate-900">Upload Receipt Photo or PDF</h4>
+                  <p class="text-xs text-slate-500 mt-1">Multi-modal AI Vision automatically parses line items and gram weights.</p>
                 </div>
-                <button
-                  onClick={() => {
-                    handleQuickSync("D-Mart Store #402");
-                    showToast("D-Mart Invoice Parsed! Added 5kg Atta, 1L Mustard Oil and 1kg Dal.");
-                  }}
-                  class="px-6 py-3 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-xl shadow-md"
-                >
-                  Simulate D-Mart Receipt Scan
-                </button>
+                <div class="flex justify-center gap-3">
+                  <button
+                    onClick={() => {
+                      setPantry(prev => prev.map(item => {
+                        if (item.shortName.indexOf("Atta") !== -1) return { ...item, current: +(item.current + 10).toFixed(1) };
+                        if (item.shortName.indexOf("Rice") !== -1) return { ...item, current: +(item.current + 5).toFixed(1) };
+                        if (item.shortName.indexOf("Mustard Oil") !== -1) return { ...item, current: +(item.current + 2).toFixed(1) };
+                        return item;
+                      }));
+                      showToast("Parsed D-Mart Receipt! Ingested 10kg Atta, 5kg Rice, 2L Mustard Oil.");
+                    }}
+                    class="px-5 py-2.5 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-xl shadow-sm transition-all"
+                  >
+                    Simulate D-Mart Bill Scan
+                  </button>
+                  <button
+                    onClick={() => {
+                      setPantry(prev => prev.map(item => {
+                        if (item.shortName.indexOf("Toor Dal") !== -1) return { ...item, current: +(item.current + 2).toFixed(1) };
+                        if (item.shortName.indexOf("Sugar") !== -1) return { ...item, current: +(item.current + 3).toFixed(1) };
+                        return item;
+                      }));
+                      showToast("Parsed Kirana Store Bill! Ingested 2kg Toor Dal and 3kg Sugar.");
+                    }}
+                    class="px-5 py-2.5 bg-white border border-slate-300 hover:bg-slate-50 text-slate-800 font-bold text-xs rounded-xl shadow-sm transition-all"
+                  >
+                    Simulate Kirana Bill Scan
+                  </button>
+                </div>
               </div>
             </div>
           )}
 
-          {/* TAB 9: HOUSEHOLD INSIGHTS */}
+          {/* TAB 9: HOUSEHOLD ANALYTICS */}
           {activeTab === "analytics" && (
-            <div class="space-y-6">
-              <div class="bg-gradient-to-r from-slate-900 via-emerald-950 to-slate-900 rounded-3xl p-8 text-white shadow-xl">
-                <span class="text-xs font-black uppercase text-emerald-400 bg-emerald-950 px-3 py-1 rounded-full border border-emerald-700">
-                  Consumption Intelligence
-                </span>
-                <h2 class="text-3xl font-black mt-3">Monthly Household Usage Patterns</h2>
-                <p class="text-sm text-slate-300 mt-1">
-                  Derived dynamically from your household size ({household.adults} Adults, {household.children} Kids) and your <strong>{household.appetiteLevel}</strong> appetite calibration.
-                </p>
+            <div class="max-w-3xl mx-auto space-y-6">
+              <div class="bg-gradient-to-r from-slate-900 to-slate-800 rounded-3xl p-6 text-white shadow-xl flex items-center justify-between">
+                <div>
+                  <span class="text-[10px] font-black uppercase tracking-wider bg-orange-500 px-3 py-1 rounded-full">
+                    Consumption Intelligence
+                  </span>
+                  <h2 class="text-2xl font-black mt-2">Household Burn Rate Analytics</h2>
+                  <p class="text-xs text-slate-300 mt-1">
+                    Based on {household.adults} Adults, {household.children} Children, and {household.appetiteLevel} appetite calibration.
+                  </p>
+                </div>
+                <div class="w-14 h-14 rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center text-white text-2xl border border-white/20">
+                  <Icons.Chart />
+                </div>
               </div>
 
               <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
@@ -1374,7 +1444,7 @@
                   onClick={() => setIsAddItemModalOpen(false)}
                   class="absolute right-5 top-5 p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100"
                 >
-                  âœ•
+                  <Icons.Close />
                 </button>
 
                 <h2 class="text-xl font-black text-slate-900">Add New Grocery Staple</h2>
