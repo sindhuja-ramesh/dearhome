@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -647,9 +647,116 @@
 
         setTimeout(() => {
           setIsAiThinking(false);
-          const lower = query.toLowerCase();
+          const lower = query.toLowerCase().trim();
 
-          // 1. NOTIFICATION / ALERT SETUP INTENT
+          // 1. PANTRY INVENTORY OVERVIEW: "What is present in my pantry list?", "show pantry", etc.
+          if (
+            lower.indexOf("what is in my pantry") !== -1 ||
+            lower.indexOf("what is present in my pantry") !== -1 ||
+            lower.indexOf("what is in my kitchen") !== -1 ||
+            lower.indexOf("show pantry") !== -1 ||
+            lower.indexOf("pantry list") !== -1 ||
+            lower.indexOf("kitchen inventory") !== -1 ||
+            lower.indexOf("list my items") !== -1 ||
+            lower.indexOf("what do i have") !== -1 ||
+            lower.indexOf("what groceries do i have") !== -1 ||
+            (lower.indexOf("pantry") !== -1 && lower.indexOf("list") !== -1)
+          ) {
+            const totalItems = pantry.length;
+            const inStock = pantry.filter(i => i.current > 0);
+            const lowStock = pantry.filter(i => i.current <= i.threshold);
+
+            const categorized = {};
+            inStock.forEach(item => {
+              if (!categorized[item.category]) categorized[item.category] = [];
+              categorized[item.category].push(`${item.shortName || item.name} (${item.current} ${item.unit})`);
+            });
+
+            let breakdown = Object.entries(categorized)
+              .map(([cat, items]) => `📁 **${cat}**:\n• ` + items.join(", "))
+              .join("\n\n");
+
+            const responseText = `📦 **DearHome Kitchen Inventory (${totalItems} items tracked)**:\n\n${breakdown}\n\n${
+              lowStock.length > 0 
+                ? `⚠️ *Note: You have ${lowStock.length} item(s) currently low on stock.*` 
+                : `✨ *All essentials are well-stocked above safety thresholds.*`
+            }`;
+
+            setChatMessages(prev => [
+              ...prev,
+              {
+                id: "ai-" + Date.now(),
+                sender: "ai",
+                text: responseText,
+                suggestions: [
+                  "What can I cook with what I have?",
+                  "Which groceries are running low?",
+                  "Do I have Basmati Rice?"
+                ]
+              }
+            ]);
+            return;
+          }
+
+          // 2. SPECIFIC ITEM CHECK: "Do I have Atta?", "How much Milk is left?", "Check for Garlic"
+          if (
+            lower.startsWith("do i have") ||
+            lower.startsWith("is there any") ||
+            lower.startsWith("is there") ||
+            lower.startsWith("how much") ||
+            lower.startsWith("how many") ||
+            lower.startsWith("check for") ||
+            (lower.indexOf("do we have") !== -1)
+          ) {
+            const matchedItem = pantry.find(item => {
+              const name = item.name.toLowerCase();
+              const short = (item.shortName || "").toLowerCase();
+              return lower.indexOf(name) !== -1 || lower.indexOf(short) !== -1 ||
+                     name.split(" ").some(word => word.length > 3 && lower.indexOf(word) !== -1);
+            });
+
+            if (matchedItem) {
+              const isLow = matchedItem.current <= matchedItem.threshold;
+              const daysLeft = matchedItem.dailyBurn > 0 ? (matchedItem.current / matchedItem.dailyBurn).toFixed(1) : "N/A";
+
+              const reply = `✅ **${matchedItem.name}** is present in your kitchen pantry:\n\n` +
+                `• **Current Stock**: ${matchedItem.current} ${matchedItem.unit} (Max Capacity: ${matchedItem.max} ${matchedItem.unit})\n` +
+                `• **Estimated Runout**: ~${daysLeft} days remaining at current family burn rate\n` +
+                `• **Stock Health**: ${isLow ? `🚨 Below threshold of ${matchedItem.threshold} ${matchedItem.unit} (Restock needed!)` : "🟢 Well-stocked"}`;
+
+              setChatMessages(prev => [
+                ...prev,
+                {
+                  id: "ai-" + Date.now(),
+                  sender: "ai",
+                  text: reply,
+                  suggestions: [
+                    `What can I cook with ${matchedItem.shortName || matchedItem.name}?`,
+                    "What is present in my pantry list?",
+                    "Which groceries are running low?"
+                  ]
+                }
+              ]);
+            } else {
+              const cleanedQuery = query.replace(/^(do i have|do we have|how much|how many|is there any|is there|check for)\s+/i, "").replace(/\?$/, "").trim();
+              setChatMessages(prev => [
+                ...prev,
+                {
+                  id: "ai-" + Date.now(),
+                  sender: "ai",
+                  text: `❌ I checked your pantry list and could not find **"${cleanedQuery}"**.\n\nWould you like me to add it to your kitchen inventory or grocery shopping list?`,
+                  suggestions: [
+                    `Add 1 kg ${cleanedQuery}`,
+                    "What is present in my pantry list?",
+                    "What can I cook with what I already have?"
+                  ]
+                }
+              ]);
+            }
+            return;
+          }
+
+          // 3. NOTIFICATION / ALERT SETUP INTENT
           if (lower.indexOf("notification") !== -1 || lower.indexOf("notify") !== -1 || lower.indexOf("alert") !== -1 || lower.indexOf("stockout") !== -1) {
             triggerStockoutNotification("🔔 Stockout Alert Activated", "DearHome will notify you immediately when items drop below safety thresholds.", "warning");
             setChatMessages(prev => [
@@ -669,7 +776,7 @@
             return;
           }
 
-          // 2. SIMULATE ZEPTO / BLINKIT EMAIL WEBHOOK TRIGGER
+          // 4. SIMULATE ZEPTO / BLINKIT EMAIL WEBHOOK TRIGGER
           if (lower.indexOf("simulate zepto") !== -1 || lower.indexOf("zepto email") !== -1 || lower.indexOf("zepto ingest") !== -1) {
             const sample = SAMPLE_INVOICES[0];
             handleIngestInvoiceItems(sample.items, "Zepto");
@@ -691,9 +798,9 @@
                 stockedItems: sample.items.map(i => ({ name: i.shortName, qty: "+" + i.qty + " " + i.unit })),
                 totalStockedCount: sample.items.length,
                 suggestions: [
+                  "What is present in my pantry list?",
                   "What can I cook with what I have?",
-                  "Check Restock Radar",
-                  "Simulate Blinkit Email Ingest"
+                  "Check Restock Radar"
                 ]
               }
             ]);
@@ -721,16 +828,16 @@
                 stockedItems: sample.items.map(i => ({ name: i.shortName, qty: "+" + i.qty + " " + i.unit })),
                 totalStockedCount: sample.items.length,
                 suggestions: [
+                  "What is present in my pantry list?",
                   "What can I cook with what I have?",
-                  "Check Restock Radar",
-                  "Simulate Zepto Email Ingest"
+                  "Check Restock Radar"
                 ]
               }
             ]);
             return;
           }
 
-          // 3. STARTER PACK
+          // 5. STARTER PACK
           if (lower.indexOf("starter pack") !== -1 || lower.indexOf("standard indian") !== -1 || lower.indexOf("starter kit") !== -1) {
             setPantry(INITIAL_PANTRY);
             setChatMessages(prev => [
@@ -742,8 +849,8 @@
                 stockedItems: INITIAL_PANTRY.slice(0, 8).map(i => ({ name: i.shortName, qty: i.current + " " + i.unit })),
                 totalStockedCount: INITIAL_PANTRY.length,
                 suggestions: [
+                  "What is present in my pantry list?",
                   "What can I cook with what I have?",
-                  "I cooked Dal Tadka and Rice for 4 people today",
                   "Which groceries are running low?"
                 ]
               }
@@ -752,7 +859,7 @@
             return;
           }
 
-          // 4. GROCERY INGESTION
+          // 6. GROCERY INGESTION (e.g. "I have 2kg Atta 2 bread packets")
           const isNotQueryingRecipe = lower.indexOf("what can i cook") === -1 && lower.indexOf("cooked") === -1 && lower.indexOf("prepared") === -1 && lower.indexOf("made") === -1;
           const parsedGroceries = parseGroceriesFromText(query);
 
@@ -820,8 +927,8 @@
                 stockedItems: confirmedList,
                 totalStockedCount: confirmedList.length,
                 suggestions: [
+                  "What is present in my pantry list?",
                   "What can I cook with what I have?",
-                  "I cooked Dal Tadka and Rice for 4 people today",
                   "Which groceries are running low?"
                 ]
               }
@@ -830,50 +937,54 @@
             return;
           }
 
-          // 5. RECIPE SUGGESTIONS
-          if (lower.indexOf("what can i cook") !== -1 || lower.indexOf("suggest") !== -1 || lower.indexOf("recipe") !== -1 || lower.indexOf("available") !== -1 || lower.indexOf("dinner") !== -1 || lower.indexOf("lunch") !== -1 || lower.indexOf("video") !== -1 || lower.indexOf("youtube") !== -1) {
-            const hasAtta = (pantry.find(i => i.shortName.indexOf("Atta") !== -1)?.current || 0) >= 0.5;
-            const hasRice = (pantry.find(i => i.shortName.indexOf("Rice") !== -1)?.current || 0) >= 0.5;
-            const hasPaneer = (pantry.find(i => i.shortName.indexOf("Paneer") !== -1)?.current || 0) >= 100;
-            const hasDal = (pantry.find(i => i.shortName.indexOf("Toor Dal") !== -1)?.current || 0) >= 0.2;
-            const hasRajma = (pantry.find(i => i.shortName.indexOf("Rajma") !== -1)?.current || 0) >= 0.3;
-            const hasAloo = (pantry.find(i => i.shortName.indexOf("Potato") !== -1)?.current || 0) >= 0.5;
-
-            let suggestionsList = [];
-            if (hasAtta && hasAloo) {
-              const r = INDIAN_RECIPES[2];
-              suggestionsList.push({ ...r, reason: "Atta and Potatoes present in kitchen" });
-            }
-            if (hasDal && hasRice) {
-              const r = INDIAN_RECIPES[0];
-              suggestionsList.push({ ...r, reason: "Toor Dal and Basmati Rice ready in stock" });
-            }
-            if (hasPaneer && hasAtta) {
-              const r = INDIAN_RECIPES[3];
-              suggestionsList.push({ ...r, reason: "Fresh Malai Paneer and Atta ready" });
-            }
-            if (hasRajma && hasRice) {
-              const r = INDIAN_RECIPES[1];
-              suggestionsList.push({ ...r, reason: "Rajma and Basmati ready in stock" });
-            }
-            if (suggestionsList.length === 0) {
-              suggestionsList.push(INDIAN_RECIPES[0]);
-              suggestionsList.push(INDIAN_RECIPES[4]);
-            }
+          // 7. DYNAMIC PANTRY-AWARE RECIPE RECOMMENDATIONS
+          if (
+            lower.indexOf("what can i cook") !== -1 ||
+            lower.indexOf("suggest") !== -1 ||
+            lower.indexOf("recipe") !== -1 ||
+            lower.indexOf("available") !== -1 ||
+            lower.indexOf("dinner") !== -1 ||
+            lower.indexOf("lunch") !== -1 ||
+            lower.indexOf("video") !== -1 ||
+            lower.indexOf("youtube") !== -1
+          ) {
+            // Rank recipes dynamically by matching pantry items
+            const rankedRecipes = INDIAN_RECIPES.map(recipe => {
+              let matchedCount = 0;
+              recipe.ingredients.forEach(ing => {
+                const found = pantry.find(p => {
+                  const pName = p.name.toLowerCase();
+                  const pShort = (p.shortName || "").toLowerCase();
+                  const ingName = ing.name.toLowerCase();
+                  return pName.indexOf(ingName) !== -1 || ingName.indexOf(pName) !== -1 || pShort.indexOf(ingName) !== -1 || ingName.indexOf(pShort) !== -1;
+                });
+                if (found && found.current > 0) {
+                  matchedCount++;
+                }
+              });
+              const matchPct = Math.round((matchedCount / recipe.ingredients.length) * 100);
+              return { ...recipe, matchPct, matchedCount, totalCount: recipe.ingredients.length, reason: `${matchedCount}/${recipe.ingredients.length} ingredients ready in your kitchen (${matchPct}% match)` };
+            }).sort((a, b) => b.matchPct - a.matchPct);
 
             setChatMessages(prev => [
               ...prev,
               {
                 id: "ai-" + Date.now(),
                 sender: "ai",
-                text: "Based on the groceries present in your kitchen, here are delicious recipes you can prepare right now, complete with YouTube video tutorials and step-by-step guides:",
-                dishRecommendations: suggestionsList,
-                suggestions: ["What groceries are running low?", "I cooked one of these dishes", "Update what is in my kitchen"]
+                text: `Based on your live pantry inventory (${pantry.length} items), here are the top recipe matches you can prepare right now with full YouTube tutorials and step-by-step guides:`,
+                dishRecommendations: rankedRecipes.slice(0, 4),
+                suggestions: [
+                  "What is present in my pantry list?",
+                  "Which groceries are running low?",
+                  "I cooked Dal Tadka and Rice today"
+                ]
               }
             ]);
+            return;
           }
-          // 6. MEAL LOGGING & DEDUCTION
-          else if (lower.indexOf("cook") !== -1 || lower.indexOf("made") !== -1 || lower.indexOf("prepared") !== -1 || lower.indexOf("ate") !== -1 || lower.indexOf("dal") !== -1 || lower.indexOf("paratha") !== -1 || lower.indexOf("rajma") !== -1 || lower.indexOf("poha") !== -1 || lower.indexOf("chai") !== -1) {
+
+          // 8. MEAL LOGGING & DEDUCTION (e.g., "I cooked Dal Tadka", "used 1kg Atta")
+          if (lower.indexOf("cook") !== -1 || lower.indexOf("made") !== -1 || lower.indexOf("prepared") !== -1 || lower.indexOf("ate") !== -1 || lower.indexOf("dal") !== -1 || lower.indexOf("paratha") !== -1 || lower.indexOf("rajma") !== -1 || lower.indexOf("poha") !== -1 || lower.indexOf("chai") !== -1) {
             let matchedRecipe = INDIAN_RECIPES.find(r => lower.indexOf(r.name.toLowerCase()) !== -1 || lower.indexOf(r.id.toLowerCase()) !== -1 || lower.indexOf(r.cuisine.toLowerCase()) !== -1);
             if (!matchedRecipe) {
               if (lower.indexOf("dal") !== -1 || lower.indexOf("rice") !== -1) matchedRecipe = INDIAN_RECIPES[0];
@@ -899,12 +1010,18 @@
                   recipe: matchedRecipe,
                   servings: effectiveDiners
                 },
-                suggestions: ["What can I cook for next meal?", "Check pantry levels", "Update what is in my kitchen"]
+                suggestions: [
+                  "What is present in my pantry list?",
+                  "What can I cook for next meal?",
+                  "Check Restock Radar"
+                ]
               }
             ]);
+            return;
           }
-          // 7. LOW STOCK RADAR
-          else if (lower.indexOf("low") !== -1 || lower.indexOf("stock") !== -1 || lower.indexOf("radar") !== -1 || lower.indexOf("empty") !== -1 || lower.indexOf("running out") !== -1) {
+
+          // 9. LOW STOCK RADAR
+          if (lower.indexOf("low") !== -1 || lower.indexOf("stock") !== -1 || lower.indexOf("radar") !== -1 || lower.indexOf("empty") !== -1 || lower.indexOf("running out") !== -1) {
             const lowItemsNames = lowStockItems.map(i => i.shortName + " (" + i.current + " " + i.unit + " left)").join(", ");
             setChatMessages(prev => [
               ...prev,
@@ -914,26 +1031,35 @@
                 text: lowStockItems.length > 0
                   ? "Warning: You have " + lowStockItems.length + " items running low in your kitchen: " + lowItemsNames + ". I recommend restocking them today!"
                   : "All grocery staples in your kitchen pantry are above safety threshold! You are fully stocked.",
-                suggestions: ["What can I cook with what I have?", "Simulate Zepto Order Sync", "Configure Alert Thresholds"]
-              }
-            ]);
-          }
-          // 8. DEFAULT FALLBACK
-          else {
-            setChatMessages(prev => [
-              ...prev,
-              {
-                id: "ai-" + Date.now(),
-                sender: "ai",
-                text: "I am ready to help manage your kitchen! You can tell me what groceries are present in your kitchen (e.g. 'I have 2 kg Atta 2 bread packets and 1 kg tomato'), ask for recipe suggestions with YouTube tutorials, or set low-stock alert notifications.",
                 suggestions: [
-                  "I have 2 kg Atta 2 bread packets and 1 kg tomato",
-                  "Notify me when Milk or Atta is low",
-                  "What can I cook with my current pantry?"
+                  "What is present in my pantry list?",
+                  "What can I cook with what I have?",
+                  "Simulate Zepto Order Sync"
                 ]
               }
             ]);
+            return;
           }
+
+          // 10. DEFAULT FALLBACK
+          setChatMessages(prev => [
+            ...prev,
+            {
+              id: "ai-" + Date.now(),
+              sender: "ai",
+              text: `Namaste! I am tracking all **${pantry.length} items** in your kitchen inventory.\n\n` +
+                `You can ask me:\n` +
+                `• *"What is present in my pantry list?"* for an instant breakdown.\n` +
+                `• *"Do I have Atta or Paneer?"* to check specific ingredient availability.\n` +
+                `• *"What can I cook?"* for recipe matching with YouTube tutorials.\n` +
+                `• Say *"I have 2 kg Atta 2 bread packets"* to add groceries.`,
+              suggestions: [
+                "What is present in my pantry list?",
+                "What can I cook with what I have?",
+                "Which groceries are running low?"
+              ]
+            }
+          ]);
         }, 500);
       };
 
