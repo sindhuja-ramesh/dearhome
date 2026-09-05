@@ -1,21 +1,36 @@
 steps:
-  # Step 1: Verify and display repository files
+  # Step 1: Verify repository files
   - name: 'gcr.io/cloud-builders/git'
     entrypoint: 'bash'
     args:
       - '-c'
       - |
-        echo "=========================================="
-        echo "DearHome: AI Smart Kitchen & Pantry Assistant"
+        echo "=================================================="
+        echo "DearHome: AI Smart Kitchen & Food Waste Engine"
         echo "Triggered by Commit: $COMMIT_SHA on Branch: $BRANCH_NAME"
-        echo "=========================================="
+        echo "=================================================="
         ls -la
         test -f index.html && echo "Verified: index.html is ready for cloud deployment!"
 
-  # Step 2: Cloud validation step
+  # Step 2: Validate Secret Manager integration securely
   - name: 'bash'
+    secretEnv: ['GEMINI_API_KEY']
     script: |
+      echo "=================================================="
+      echo "Verifying Secret Manager Integration..."
+      if [ -n "$$GEMINI_API_KEY" ]; then
+        echo "SUCCESS: GEMINI_API_KEY retrieved securely from Google Cloud Secret Manager!"
+        echo "Key verification: Length is $${#GEMINI_API_KEY} characters."
+      else
+        echo "NOTICE: GEMINI_API_KEY not found or IAM Secret Accessor role pending."
+      fi
       echo "DearHome Cloud Build pipeline completed successfully."
+      echo "=================================================="
+
+availableSecrets:
+  secretManager:
+    - versionName: projects/$PROJECT_ID/secrets/GEMINI_API_KEY/versions/latest
+      env: 'GEMINI_API_KEY'
 
 options:
   logging: CLOUD_LOGGING_ONLY
