@@ -1,78 +1,113 @@
-# DearHome - AI Smart Indian Kitchen and Pantry Assistant
+# 🍳 DearHome - Autonomous AI Kitchen Operating System & Zero-Waste Engine
 
-Autonomous Multi-Agent Kitchen Inventory, Delivery Bill Ingestion & Food-Waste Prevention Engine Powered by Google Gemini 2.0 and Cloud Infrastructure.
+> **"DearHome auto-syncs grocery bills from Gmail and receipt scans into a live digital pantry, alerts you before essentials run out of stock, and tells you what to cook with on-hand ingredients—powered by Google Gemini 2.0 AI."**
 
-- **Lead Submitter**: Sinduja
+- **Lead Submitter**: Sindhuja Ramesh
 - **Contact Email**: Sinduja1219@gmail.com
 - **Live Web Application**: [https://sindhuja-ramesh.github.io/dearhome/](https://sindhuja-ramesh.github.io/dearhome/)
-- **Target Initiative**: Google Patchamomma / AI for Sustainability (UN SDG 12: Responsible Consumption and SDG 11: Sustainable Communities)
+- **Target Initiative**: Google Event / AI for Sustainability (UN SDG 12: Responsible Consumption)
 - **Architecture Documentation**: [ARCHITECTURE.md](ARCHITECTURE.md)
+- **Full Proposal & Plan**: [PROPOSAL.md](PROPOSAL.md)
 
 ---
 
-## 🏛️ End-to-End System Architecture
+## 🌟 What is DearHome?
 
-For complete layer-by-layer technical specifications, data schemas, and API contracts, see [ARCHITECTURE.md](ARCHITECTURE.md).
+Every day, millions of households face the same daily friction:
+1. **Silent Stockouts**: Discovering you are out of milk or cooking oil mid-recipe.
+2. **Food Waste**: Forgotten perishables rotting in the back of the refrigerator.
+3. **Paper Invoice Clutter**: Stacks of thermal receipts and manual grocery tracking friction.
+4. **Cooking Indecision**: The eternal question: *"What should I cook tonight with what I already have?"*
+
+**DearHome** transforms the modern kitchen into an autonomous, paperless, zero-waste smart hub. By connecting directly to **Gmail** for 10-minute grocery delivery invoices (Zepto, Blinkit, Swiggy Instamart) and utilizing **Google Gemini 2.0 Multimodal Vision** with in-browser canvas OCR, DearHome maintains a real-time digital pantry, pushes proactive restock alerts before items run dry, and features a voice-enabled AI assistant that suggests authentic recipes based strictly on expiring ingredients.
+
+---
+
+## 🏛️ System Architecture
 
 ```mermaid
 flowchart TD
     subgraph Sources ["1. Ingestion Sources"]
-        A1["📱 Conversational Onboarding"]
-        A2["📸 Invoice Multimodal OCR (Phase 1)"]
-        A3["📬 Inbound Email Webhook (Phase 2)"]
+        A1["📸 Camera & Bill Upload
+(Google Gemini 2.0 Vision + Canvas OCR)"]
+        A2["📬 Automated Gmail Sync
+(Zepto / Blinkit / Swiggy / DMart)"]
+        A3["🎙️ Voice Commands
+(Web Speech API Conversational AI)"]
     end
 
     subgraph AI_Core ["2. Google Gemini 2.0 AI Engine"]
-        B1["Gemini 2.0 Flash Multimodal Parser"]
+        B1["Gemini 2.0 Flash Multimodal Vision"]
         B2["Taxonomy & Recipe Depletion Graph"]
+        B3["Zero-Waste 'What to Cook' Assistant"]
     end
 
-    subgraph Cloud_Storage ["3. Google Cloud Persistence"]
-        C1[("Cloud Firestore (Real-Time Pantry)")]
-        C2["Stockout Push Notification Center"]
+    subgraph Cloud_Persistence ["3. Google Cloud & Security"]
+        C1[("Google Cloud Firestore (Real-Time Sync)")]
+        C2["Google Cloud Secret Manager (API Security)"]
+        C3["Google Cloud Build (Automated CI/CD)"]
     end
 
-    Sources --> AI_Core --> Cloud_Storage
+    subgraph User_Action ["4. Household Outcomes"]
+        D1["🚨 Proactive Out-of-Stock Alerts"]
+        D2["🍲 Dynamic Meal Scaler (Auto-Deduct Grams)"]
+        D3["📊 Immutable Kitchen Ledger"]
+    end
+
+    Sources --> AI_Core --> Cloud_Persistence --> User_Action
 ```
 
 ---
 
-## Core Capabilities
+## 🚀 Core Capabilities
 
-### 📸 Phase 1: Universal Multimodal Invoice & Receipt Scanner
-- Multi-platform receipt parser for **Zepto, Blinkit, Swiggy Instamart, Amazon Fresh, and D-Mart physical supermarket bills**.
-- Powered by **Gemini 2.0 Flash (Multimodal)**: Extracts item names, packaging units (kg, g, L, packets), line-item rates, and total amounts in <500ms.
+### 1. 📸 Dual-Engine Multimodal Receipt OCR
+- **Google Gemini 2.0 Flash Multimodal Vision**: Ingests paper receipts from Zepto, Blinkit, Swiggy Instamart, BigBasket, DMart, Amazon Fresh, and local Kirana store thermal bills.
+- **In-Browser Canvas Preprocessor & Tesseract.js**: Applies grayscale contrast stretching to sharpen faint thermal dot-matrix text.
+- **Live Camera Viewfinder**: Snap bills directly inside the app with instant alignment guidelines.
+- **Interactive Raw Text Editor**: View and edit detected OCR lines with instant `⚡ Re-Parse Text` capabilities.
 
-### 📬 Phase 2: Autonomous Inbound Email Forwarding Hub
-- Dedicated private inbound routing address: `sinduja1219@inbox.dearhome.ai`.
-- **Zero-Touch Automation**: Users configure a 1-time auto-forward filter in Gmail/Outlook for `from:(zepto.co.in OR blinkit.com OR swiggy.in OR amazon.in)`.
-- Incoming order invoices trigger SendGrid + Gemini to automatically update the household digital pantry in real time.
+### 2. 📬 Automated Gmail & Delivery App Sync
+- Auto-ingests digital invoices from quick-commerce apps directly from order confirmation emails.
+- Zero manual typing: instantly converts receipts into structured items, exact quantities (`kg`, `g`, `L`, `ml`, `packets`, `pcs`), and prices.
 
-### 🔔 Smart Stockout Notification Center & Web Push
-- Header notification bell with live animated unread low-stock count badges.
-- Device push notifications via native Web Notifications API.
-- Customizable per-item alert threshold rules (e.g. notify when Milk drops below 1.5L or Atta below 3kg).
+### 3. 🚨 Proactive Out-of-Stock & Expiry Notification Engine
+- Monitors customizable minimum inventory thresholds (e.g. notify when Milk drops below 1.5L or Atta below 3kg).
+- Real-time shelf-life radar highlights perishables within their critical 3-day window.
 
-### 🍲 Meal-Based Recipe Auto-Depletion (What Did You Cook?)
-- Log cooked meals (e.g. Dal Tadka and Jeera Rice for 4 people + 2 guests).
-- Automatically calculates exact gram and milliliter ingredient deductions for Atta, Dals, Spices (Haldi, Jeera, Rai), Cooking Oils, Ghee, and Vegetables.
-- Includes authentic YouTube cooking video tutorials by Chef Ranveer Brar.
+### 4. 🎙️ Voice-Enabled Zero-Waste AI Sous Chef
+- Hands-free kitchen conversational intelligence aware of live pantry stock.
+- Ask: *"What can I cook with expiring items?"* or *"Do I have enough Basmati Rice for 4 people?"*.
+- Suggests authentic recipes matching **only** what is physically in stock to eliminate food waste.
 
----
-
-## Google Initiative Alignment & Tech Stack
-
-| Feature | Google Product | Purpose |
-| :--- | :--- | :--- |
-| **Multimodal Receipt OCR (Phase 1)** | Gemini 2.0 Flash | Itemizes thermal receipts and delivery PDFs in <1s |
-| **Autonomous Email Ingestion (Phase 2)** | Cloud Run / Functions + SendGrid | Real-time webhook processing of digital invoices |
-| **Meal Depletion Intelligence** | Vertex AI (Gemini 2.0) | Multi-portion recipe ingredient reasoning |
-| **Real-time Inventory Sync** | Google Cloud Firestore | Instant multi-device sync |
-| **Cloud Hosting & Delivery** | GitHub Pages / Firebase Hosting | Low-latency responsive web application |
+### 5. 🍲 Dynamic Family & Guest Portion Scaler
+- Select diners (Adults, Children, Guests) and appetite levels (Light, Standard, Heavy).
+- Automatically calculates and deducts the exact grams/liters of ingredients used from live stock upon cooking, recording every transaction in an immutable Kitchen Ledger.
 
 ---
 
-## Submitter Contact
-- **Lead Submitter**: Sinduja
+## 🛠️ Google Technology Stack
+
+| Google Technology | Role in DearHome |
+| :--- | :--- |
+| **Google Gemini 2.0 / 1.5 Flash** | Multimodal OCR parsing of receipt images and zero-waste recipe reasoning |
+| **Google Cloud Firestore** | Real-time multi-device cloud pantry synchronization |
+| **Google Cloud Secret Manager** | Secure, enterprise-grade storage of API keys |
+| **Google Cloud Build** | Automated continuous deployment pipeline |
+| **Gmail API / Workspace** | Direct ingestion of digital delivery receipts |
+| **Web Speech API** | Hands-free voice recognition for conversational kitchen assistant |
+
+---
+
+## 📚 Complete Documentation Links
+
+- 📖 **System Architecture Deep-Dive**: [ARCHITECTURE.md](ARCHITECTURE.md)
+- 💡 **Competition Proposal & UN SDG Alignment**: [PROPOSAL.md](PROPOSAL.md)
+- ⚙️ **Cloud Build Pipeline**: [cloudbuild.yaml](cloudbuild.yaml)
+- 🚀 **Live Web Application**: [https://sindhuja-ramesh.github.io/dearhome/](https://sindhuja-ramesh.github.io/dearhome/)
+
+---
+
+## 👥 Submitter Contact
+- **Lead Submitter**: Sindhuja Ramesh
 - **Email**: Sinduja1219@gmail.com
-- **Live Application**: [https://sindhuja-ramesh.github.io/dearhome/](https://sindhuja-ramesh.github.io/dearhome/)
