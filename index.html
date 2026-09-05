@@ -606,112 +606,203 @@
     
 
       // ============================================================================
-      // DUAL-ENGINE MULTIMODAL RECEIPT OCR (GEMINI 2.0 VISION + CLIENT TESSERACT.JS)
+      // ULTRA-ACCURATE RECEIPT OCR ENGINE (IMAGE PREPROCESSOR + GEMINI 2.0 + SMART STITCHER)
       // ============================================================================
 
-      // Smart Parser for Indian Grocery Line Items from Raw OCR Text
+      // In-Browser Canvas Image Preprocessor for Crisp Thermal OCR
+      const preprocessImageForOcr = (dataUrl) => {
+        return new Promise((resolve) => {
+          const img = new Image();
+          img.crossOrigin = "anonymous";
+          img.onload = () => {
+            const canvas = document.createElement("canvas");
+            const maxDim = 2200;
+            let w = img.width;
+            let h = img.height;
+            if (w > maxDim || h > maxDim) {
+              const ratio = Math.min(maxDim / w, maxDim / h);
+              w = Math.round(w * ratio);
+              h = Math.round(h * ratio);
+            } else if (w < 900) {
+              const ratio = 1200 / w;
+              w = Math.round(w * ratio);
+              h = Math.round(h * ratio);
+            }
+            canvas.width = w;
+            canvas.height = h;
+            const ctx = canvas.getContext("2d");
+            ctx.drawImage(img, 0, 0, w, h);
+
+            // Grayscale + Adaptive Contrast Stretch
+            try {
+              const imgData = ctx.getImageData(0, 0, w, h);
+              const d = imgData.data;
+              let minLum = 255;
+              let maxLum = 0;
+              for (let i = 0; i < d.length; i += 4) {
+                const lum = 0.299 * d[i] + 0.587 * d[i+1] + 0.114 * d[i+2];
+                if (lum < minLum) minLum = lum;
+                if (lum > maxLum) maxLum = lum;
+              }
+
+              const range = Math.max(1, maxLum - minLum);
+              for (let i = 0; i < d.length; i += 4) {
+                let lum = 0.299 * d[i] + 0.587 * d[i+1] + 0.114 * d[i+2];
+                lum = ((lum - minLum) / range) * 255;
+                if (lum < 115) lum = lum * 0.75; // Darken faint text
+                else if (lum > 135) lum = Math.min(255, lum * 1.15 + 15); // Whiten paper
+                d[i] = lum;
+                d[i+1] = lum;
+                d[i+2] = lum;
+              }
+              ctx.putImageData(imgData, 0, 0);
+              resolve(canvas.toDataURL("image/jpeg", 0.95));
+            } catch (e) {
+              resolve(dataUrl);
+            }
+          };
+          img.onerror = () => resolve(dataUrl);
+          img.src = dataUrl;
+        });
+      };
+
+      // Advanced Indian Grocery Line-Item & Layout Parser
       const parseRawTextToGroceryItems = (fullText) => {
         if (!fullText || !fullText.trim()) return [];
-        const lines = fullText.split(/\r?\n/).map(l => l.trim()).filter(l => l.length > 2);
-        const extracted = [];
+        const rawLines = fullText.split(/\r?\n/).map(l => l.trim()).filter(l => l.length > 0);
 
-        // Common receipt headers and noise to ignore
-        const noiseKeywords = [
-          'tax invoice', 'retail invoice', 'cash receipt', 'order id', 'order no', 'subtotal',
-          'sub total', 'grand total', 'net total', 'total amt', 'amount payable', 'round off',
-          'gstin', 'gst', 'cgst', 'sgst', 'fssai', 'lic no', 'thank you', 'visit again',
-          'upi', 'cash', 'card', 'change', 'customer', 'phone', 'ph no', 'email', 'date',
-          'time', 'delivery partner', 'picker', 'store manager', 'payment mode', 'items total',
-          'discount', 'coupon', 'savings', 'bag fee', 'handling fee', 'delivery fee', 'surge fee'
-        ];
+        const noiseHeaderRegex = /^(store|retail|mart|provision|superfast|order|delivered|date|time|gst|fssai|lic|tax|cash|phone|ph:|tel:|welcome|invoice|receipt|item description|sl no|sno|description)/i;
+        const noiseFooterRegex = /^(subtotal|sub total|grand total|net total|item total|total amount|total items|total|net amount|amount payable|round off|balance|paid|cash received|change|savings|discount|delivery fee|handling|bag fee|cgst|sgst|igst|vat|taxable|thank you|visit again|powered by)/i;
 
-        lines.forEach(line => {
+        const items = [];
+        let bufferName = "";
+
+        for (let i = 0; i < rawLines.length; i++) {
+          const line = rawLines[i];
           const lower = line.toLowerCase();
-          if (noiseKeywords.some(k => lower.includes(k))) return;
 
-          // Quantity regex: matches '5kg', '500 g', '1.5 L', '200ml', '2 packets', '3 pcs', '2x', etc.
-          const qtyRegex = /(?:(\d+(?:\.\d+)?)\s*(kg|kgs|g|gm|gms|gram|grams|l|ltr|ltrs|liter|liters|litre|litres|ml|pkt|pkts|packets?|packs?|pcs|pieces?|units?|bottles?|jars?|cans?|dzn|dozen))|(?:(\d+)\s*(?:x|nos|no|qty))/i;
-          const qtyMatch = line.match(qtyRegex);
+          // Skip divider lines
+          if (/^[-=*_#.|/\\~\s]{3,}$/.test(line)) continue;
+          if (noiseFooterRegex.test(lower)) continue;
 
-          // Price regex: matches '₹240', 'Rs. 45.00', 'INR 150', or price at end of line
-          const priceRegex = /(?:₹|rs\.?|inr)\s*(\d+(?:\.\d{2})?)|(\d+\.\d{2})(?:\s*$)/i;
-          const priceMatch = line.match(priceRegex);
+          // Check if whole line is store header / metadata
+          if (noiseHeaderRegex.test(lower) && !/\d+\s*(?:kg|g|l|ml|pkt|pack|rs|₹)/i.test(line) && !/\d+\.\d{2}/.test(line)) {
+            bufferName = "";
+            continue;
+          }
 
-          let qty = 1;
+          // Strip leading item numbers like "1.", "1)", "1 ", "| 1 "
+          let cleanLine = line
+            .replace(/^\|\s*|\s*\|$/g, '')
+            .replace(/^\s*\d+[\.\)\-\s]\s*/, '')
+            .trim();
+
+          // Skip column headers
+          if (/^(item|description|qty|price|rate|amount|sl no|sno)$/i.test(cleanLine.toLowerCase()) ||
+              /^(item description|qty price|rate amount|items count)$/i.test(cleanLine.toLowerCase())) {
+            bufferName = "";
+            continue;
+          }
+
+          // Extract price: matches "₹240", "Rs. 112", "45.00", "Rs 971" at line end
+          const priceMatch = cleanLine.match(/(?:₹|rs\.?|inr)?\s*(\d+(?:\.\d{2})?)(?:\s*$)/i);
+          let rate = "₹50";
+          if (priceMatch) {
+            const pNum = parseFloat(priceMatch[1]);
+            if (pNum > 5) rate = "₹" + Math.round(pNum);
+          }
+
+          // Extract weight/volume pack size (e.g., "5kg", "500g", "1 L", "250ml", "100g")
+          const weightMatch = cleanLine.match(/(\d+(?:\.\d+)?)\s*(kg|kgs|g|gm|gms|gram|grams|l|ltr|ltrs|liter|liters|litre|litres|ml|pkt|pkts|packets?|packs?|pcs|pieces?)\b/i);
+
+          // Extract count quantity (e.g., "x 2", "2 nos", or number before price column "1   245.00")
+          const countMatch = cleanLine.match(/(?:\bx\s*(\d+)\b)|(?:\b(\d+)\s*(?:nos|no|qty|units?)\b)|(?:\s+(\d+)\s+(?:(?:₹|rs\.?|inr)?\s*\d+(?:\.\d{2})?)\s*$)/i);
+
+          let count = 1;
+          if (countMatch) {
+            count = parseInt(countMatch[1] || countMatch[2] || countMatch[3], 10) || 1;
+          }
+
+          let qty = count;
           let unit = "pcs";
 
-          if (qtyMatch) {
-            if (qtyMatch[1]) {
-              qty = parseFloat(qtyMatch[1]) || 1;
-              const u = (qtyMatch[2] || "").toLowerCase();
-              if (u.startsWith("kg")) unit = "kg";
-              else if (u.startsWith("g") || u.startsWith("gm")) unit = "g";
-              else if (u.startsWith("l") || u.startsWith("ltr")) unit = "L";
-              else if (u.startsWith("ml")) unit = "ml";
-              else if (u.startsWith("pkt") || u.startsWith("pack")) unit = "packets";
-              else if (u.startsWith("dzn") || u.startsWith("dozen")) { qty = qty * 12; unit = "pcs"; }
-              else unit = "pcs";
-            } else if (qtyMatch[3]) {
-              qty = parseInt(qtyMatch[3], 10) || 1;
-              unit = "pcs";
-            }
+          if (weightMatch) {
+            const baseNum = parseFloat(weightMatch[1]) || 1;
+            const u = (weightMatch[2] || "").toLowerCase();
+            
+            let stdUnit = "pcs";
+            if (u.startsWith("kg")) stdUnit = "kg";
+            else if (u.startsWith("g") || u.startsWith("gm")) stdUnit = "g";
+            else if (u.startsWith("l") || u.startsWith("ltr")) stdUnit = "L";
+            else if (u.startsWith("ml")) stdUnit = "ml";
+            else if (u.startsWith("pkt") || u.startsWith("pack")) stdUnit = "packets";
+            else stdUnit = "pcs";
+
+            qty = count > 1 ? (baseNum * count) : baseNum;
+            unit = stdUnit;
           }
 
-          let rate = "₹60";
-          if (priceMatch) {
-            const num = priceMatch[1] || priceMatch[2];
-            if (num) rate = "₹" + Math.round(parseFloat(num));
-          }
-
-          // Clean Item Name
-          let itemName = line
-            .replace(/(?:₹|rs\.?|inr)\s*\d+(?:\.\d+)?/gi, '')
-            .replace(/\d+\.\d{2}\s*$/gi, '')
-            .replace(/(?:\d+(?:\.\d+)?)\s*(kg|kgs|g|gm|gms|l|ltr|ml|pkt|packets?|packs?|pcs|pieces?)/gi, '')
-            .replace(/[^a-zA-Z0-9\s&'-]/g, ' ')
+          // Clean product name
+          let cleanName = cleanLine
+            .replace(/(?:₹|rs\.?|inr)?\s*\d+(?:\.\d{2})?\s*$/i, '')
+            .replace(/\bx\s*\d+\b/gi, '')
+            .replace(/\s+\d+\s*$/i, '')
+            .replace(/(\d+(?:\.\d+)?)\s*(kg|kgs|g|gm|gms|gram|grams|l|ltr|ltrs|liter|liters|litre|litres|ml|pkt|pkts|packets?|packs?|pcs|pieces?)\b/gi, '')
+            .replace(/[()\-–—]/g, ' ')
+            .replace(/[^a-zA-Z0-9\s&']/g, ' ')
             .replace(/\s+/g, ' ')
             .trim();
 
-          // Exclude header words
-          const skipWords = ['item', 'items', 'description', 'rate', 'price', 'qty', 'amount', 'hsn', 'code', 'sno', 'sl no', 'mrp'];
-          if (itemName.length >= 3 && !skipWords.includes(itemName.toLowerCase())) {
-            let category = "Vegetables";
-            const lName = itemName.toLowerCase();
+          const skipKeywords = ['item', 'items', 'description', 'qty', 'rate', 'price', 'amount', 'mrp', 'hsn', 'code', 'sno', 'sl no'];
+          if (skipKeywords.includes(cleanName.toLowerCase())) continue;
 
-            if (/milk|curd|dahi|paneer|butter|cheese|cream|ghee|egg|yogurt|lassi|chaas/i.test(lName)) {
-              category = "Dairy and Fresh";
-            } else if (/atta|flour|rice|poha|wheat|grain|maida|suji|sooji|rava|besan|oats|quinoa|millets|ragi/i.test(lName)) {
-              category = "Atta and Grains";
-            } else if (/dal|dhal|pulse|rajma|chana|moong|toor|urad|arhar|masoor|kabuli|lobia/i.test(lName)) {
-              category = "Dals and Pulses";
-            } else if (/oil|sunflower|mustard oil|groundnut oil|gingelly|olive oil|coconut oil/i.test(lName)) {
-              category = "Oils and Ghee";
-            } else if (/haldi|turmeric|jeera|cumin|mirch|chilli|masala|rai|mustard seed|hing|asafoetida|spice|salt|namak|sugar|cheeni|tea|chai|coffee|elaichi|cardamom|clove|laung|cinnamon|dalchini|coriander powder|dhania/i.test(lName)) {
-              category = "Spices and Condiments";
-            } else if (/bread|biscuit|snack|cookie|rusk|toast|chips|namkeen|sauce|ketchup|jam|noodle|pasta|maggi|soup/i.test(lName)) {
-              category = "Beverages and Snacks";
-            }
+          if (cleanName.length > 0) {
+            if (!priceMatch && !weightMatch && !countMatch && cleanName.length > 2) {
+              bufferName = bufferName ? (bufferName + " " + cleanName) : cleanName;
+            } else {
+              const fullName = bufferName ? (bufferName + " " + cleanName).trim() : cleanName;
+              bufferName = "";
 
-            const formattedName = itemName
-              .split(' ')
-              .filter(w => w.length > 0)
-              .map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
-              .join(' ');
+              if (fullName.length >= 2) {
+                let category = "Vegetables";
+                const lName = fullName.toLowerCase();
 
-            if (formattedName && formattedName.length > 2) {
-              extracted.push({
-                name: formattedName,
-                shortName: formattedName.split(' ').slice(0, 2).join(' '),
-                qty: qty || 1,
-                unit: unit,
-                rate: rate,
-                category: category
-              });
+                if (/\b(haldi|turmeric|jeera|cumin|mirch|chilli|masala|rai|mustard seed|hing|asafoetida|spice|spices|salt|namak|sugar|cheeni|tea|chai|coffee|elaichi|cardamom|clove|laung|cinnamon|dalchini|coriander powder|dhania|everest|mdh|catch)\b/i.test(lName)) {
+                  category = "Spices and Condiments";
+                } else if (/\b(milk|curd|dahi|paneer|butter|cheese|cream|ghee|egg|eggs|yogurt|lassi|chaas|nandini|amul|mother dairy)\b/i.test(lName)) {
+                  category = "Dairy and Fresh";
+                } else if (/\b(atta|flour|rice|poha|wheat|grain|maida|suji|sooji|rava|besan|oats|quinoa|millets|ragi|sona masoori|basmati|chakki)\b/i.test(lName)) {
+                  category = "Atta and Grains";
+                } else if (/\b(dal|dhal|pulse|pulses|rajma|chana|moong|toor|urad|arhar|masoor|kabuli|lobia|gram)\b/i.test(lName)) {
+                  category = "Dals and Pulses";
+                } else if (/\b(oil|sunflower|mustard oil|groundnut|gingelly|olive oil|coconut oil|saffola|fortune|gemini)\b/i.test(lName)) {
+                  category = "Oils and Ghee";
+                } else if (/\b(bread|biscuit|biscuits|snack|snacks|cookie|rusk|toast|chips|namkeen|sauce|ketchup|jam|noodle|noodles|pasta|maggi|soup|yippee)\b/i.test(lName)) {
+                  category = "Beverages and Snacks";
+                } else if (/\b(tomato|tomatoes|onion|onions|potato|potatoes|ginger|garlic|chilli|coriander|lemon|carrot|cucumber|capsicum|brinjal|bhindi|cabbage|cauliflower|palak|spinach|beans|peas|matar|methi)\b/i.test(lName)) {
+                  category = "Vegetables";
+                }
+
+                const formattedName = fullName
+                  .split(' ')
+                  .filter(w => w.length > 0)
+                  .map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+                  .join(' ');
+
+                items.push({
+                  name: formattedName,
+                  shortName: formattedName.split(' ').slice(0, 2).join(' '),
+                  qty: qty,
+                  unit: unit,
+                  rate: rate,
+                  category: category
+                });
+              }
             }
           }
-        });
+        }
 
-        return extracted;
+        return items;
       };
 
       // Engine 1: Google Gemini Multimodal Vision API (Gemini 1.5 / 2.0 Flash)
@@ -719,19 +810,16 @@
         const apiKey = geminiApiKey.trim() || localStorage.getItem("dearhome_gemini_key") || "";
         if (!apiKey) return null;
 
-        const prompt = "You are an expert OCR receipt parsing AI for Indian households. Analyze this uploaded grocery receipt or delivery invoice image (from Zepto, Blinkit, Swiggy Instamart, BigBasket, DMart, Amazon Fresh, or a local Kirana store). " +
-          "Extract ALL purchased grocery items. Return a STRICT JSON array of objects with NO markdown formatting, with fields: " +
-          "name (string, full product name), " +
-          "shortName (string, concise staple name e.g. 'Atta', 'Milk', 'Tomato', 'Mustard Oil'), " +
-          "qty (number only e.g. 1, 0.5, 2, 500), " +
-          "unit (one of: 'kg', 'g', 'L', 'ml', 'packets', 'pcs'), " +
-          "rate (string with Indian rupee price e.g. '₹65'), " +
+        const prompt = "You are an expert OCR receipt parsing AI for Indian households. Analyze this grocery receipt or delivery invoice image. " +
+          "Extract all real physical grocery items. Ignore taxes, delivery charges, discounts, and payment methods. " +
+          "Return a STRICT JSON array of objects with NO markdown formatting: " +
+          "name (full item name), shortName (1-2 word staple name), qty (number only e.g. 5, 1, 0.5), " +
+          "unit (one of: 'kg', 'g', 'L', 'ml', 'packets', 'pcs'), rate (price e.g. '₹240'), " +
           "category (one of: 'Atta and Grains', 'Dals and Pulses', 'Oils and Ghee', 'Dairy and Fresh', 'Vegetables', 'Beverages and Snacks', 'Spices and Condiments').";
 
         const rawBase64 = base64Data.split(',')[1] || base64Data;
         const cleanMime = mimeType || 'image/jpeg';
 
-        // STRICT CAMELCASE PAYLOAD for Gemini REST API v1beta
         const requestBody = {
           contents: [{
             parts: [
@@ -786,14 +874,16 @@
         return null;
       };
 
-      // Engine 2: Client-Side Tesseract.js In-Browser OCR
+      // Engine 2: Canvas-Preprocessed Tesseract.js In-Browser OCR
       const parseWithTesseractOcr = async (imageSrc) => {
         if (typeof Tesseract === "undefined") {
           throw new Error("Tesseract.js OCR engine is still loading from CDN, please wait 2 seconds.");
         }
+        setOcrProcessingStep("✨ Enhancing receipt contrast and sharpening text...");
+        const enhancedImage = await preprocessImageForOcr(imageSrc);
+
         setOcrProcessingStep("📸 Reading receipt text directly from image pixels...");
-        
-        const result = await Tesseract.recognize(imageSrc, 'eng', {
+        const result = await Tesseract.recognize(enhancedImage, 'eng', {
           logger: m => {
             if (m.status === 'recognizing text') {
               setOcrProcessingStep(`Recognizing bill text: ${Math.round((m.progress || 0) * 100)}%`);
@@ -823,34 +913,34 @@
             setOcrProcessingStep("Sending image to Google Gemini Multimodal Vision...");
             extractedItems = await parseWithGeminiVision(dataUrl, mimeType);
             if (extractedItems && extractedItems.length > 0) {
-              showToast("✨ Gemini AI successfully recognized " + extractedItems.length + " items from your receipt!");
+              showToast("✨ Gemini AI recognized " + extractedItems.length + " items from your receipt!");
             }
           } catch (geminiErr) {
-            console.warn("Gemini API error, automatically falling back to client Tesseract OCR:", geminiErr);
-            showToast("Gemini Vision notice: " + geminiErr.message, "warning");
+            console.warn("Gemini API notice, falling back to enhanced Tesseract OCR:", geminiErr);
+            showToast("Gemini notice: " + geminiErr.message, "warning");
           }
         }
 
-        // Step 2: In-Browser Visual Tesseract OCR fallback (runs directly on image pixels)
+        // Step 2: In-Browser Visual Tesseract OCR with Contrast Enhancement
         if (!extractedItems || extractedItems.length === 0) {
           try {
-            engineUsed = "In-Browser Visual OCR (Tesseract.js)";
+            engineUsed = "In-Browser Visual OCR (Enhanced Tesseract)";
             extractedItems = await parseWithTesseractOcr(dataUrl);
             if (extractedItems && extractedItems.length > 0) {
-              showToast("📸 In-browser OCR extracted " + extractedItems.length + " items directly from your photo!");
+              showToast("📸 In-browser OCR extracted " + extractedItems.length + " items from your photo!");
             }
           } catch (tessErr) {
             console.error("Tesseract OCR error:", tessErr);
           }
         }
 
-        // Step 3: If completely unreadable or zero text detected
+        // Step 3: If completely unreadable
         if (!extractedItems || extractedItems.length === 0) {
           extractedItems = [
             { name: "Scanned Item (Edit details)", shortName: "Grocery Staple", qty: 1, unit: "kg", rate: "₹60", category: "Atta and Grains" },
             { name: "Dairy Item (Edit details)", shortName: "Milk", qty: 1, unit: "L", rate: "₹56", category: "Dairy and Fresh" }
           ];
-          showToast("⚠️ Could not clearly read text on image. You can edit or add items below.", "warning");
+          showToast("⚠️ Image text was faint. You can edit raw text or table items below.", "warning");
         }
 
         const newParsedInvoice = {
@@ -1394,23 +1484,53 @@
                 </div>
               )}
 
-              {/* RAW OCR TEXT INSPECTOR (PROOF OF REAL EXTRACTION) */}
+              {/* RAW OCR TEXT INSPECTOR & INSTANT RE-PARSER */}
               {rawOcrText && (
-                <div class="bg-slate-900 rounded-3xl p-5 border border-slate-800 text-white space-y-2.5">
-                  <div class="flex justify-between items-center">
+                <div class="bg-slate-900 rounded-3xl p-5 border border-slate-800 text-white space-y-3 shadow-xl">
+                  <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
                     <div class="flex items-center gap-2">
                       <span class="text-xs">📄</span>
                       <span class="text-xs font-black text-slate-200 uppercase tracking-wider">
-                        Raw Text Detected on Your Receipt Photo
+                        Detected Receipt Text (Editable)
                       </span>
                     </div>
-                    <span class="text-[10px] bg-slate-800 text-emerald-400 px-2.5 py-1 rounded-lg font-mono font-bold">
-                      {rawOcrText.split('\n').filter(l => l.trim().length > 0).length} lines detected
-                    </span>
+                    <div class="flex items-center gap-2">
+                      <span class="text-[10px] bg-slate-800 text-emerald-400 px-2.5 py-1 rounded-lg font-mono font-bold">
+                        {rawOcrText.split('\n').filter(l => l.trim().length > 0).length} lines detected
+                      </span>
+                      <button
+                        onClick={() => {
+                          const reParsed = parseRawTextToGroceryItems(rawOcrText);
+                          if (reParsed.length > 0) {
+                            setEditableScanItems(reParsed);
+                            setScanResult(prev => ({
+                              ...prev,
+                              items: reParsed,
+                              totalAmount: reParsed.length + " Items Extracted"
+                            }));
+                            showToast("⚡ Re-parsed " + reParsed.length + " items from detected text!");
+                          } else {
+                            showToast("No structured items found. Please check line format.", "warning");
+                          }
+                        }}
+                        class="px-3.5 py-1 bg-orange-500 hover:bg-orange-600 text-white font-black text-xs rounded-xl shadow-md transition-all flex items-center gap-1.5 cursor-pointer"
+                      >
+                        <span>⚡ Re-Parse Text</span>
+                      </button>
+                    </div>
                   </div>
-                  <pre class="text-[11px] font-mono text-slate-300 bg-slate-950 p-3.5 rounded-2xl overflow-x-auto max-h-36 leading-relaxed border border-slate-800/80 whitespace-pre-wrap">
-                    {rawOcrText}
-                  </pre>
+
+                  <p class="text-[11px] text-slate-400">
+                    💡 <em>Tip: You can edit or paste raw text below if any receipt line had faint characters, then click <strong>Re-Parse Text</strong> to update the items table instantly.</em>
+                  </p>
+
+                  <textarea
+                    value={rawOcrText}
+                    onChange={(e) => setRawOcrText(e.target.value)}
+                    rows={6}
+                    class="w-full text-xs font-mono text-emerald-300 bg-slate-950 p-3.5 rounded-2xl border border-slate-800 focus:outline-none focus:border-orange-500 leading-relaxed resize-y"
+                    placeholder="OCR text lines appear here. You can edit text directly and click 'Re-Parse Text'..."
+                  />
                 </div>
               )}
 
