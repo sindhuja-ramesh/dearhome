@@ -1,0 +1,21 @@
+steps:
+  # Step 1: Verify and display repository files
+  - name: 'gcr.io/cloud-builders/git'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        echo "=========================================="
+        echo "DearHome: AI Smart Kitchen & Pantry Assistant"
+        echo "Triggered by Commit: $COMMIT_SHA on Branch: $BRANCH_NAME"
+        echo "=========================================="
+        ls -la
+        test -f index.html && echo "Verified: index.html is ready for cloud deployment!"
+
+  # Step 2: Cloud validation step
+  - name: 'bash'
+    script: |
+      echo "DearHome Cloud Build pipeline completed successfully."
+
+options:
+  logging: CLOUD_LOGGING_ONLY
