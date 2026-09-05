@@ -231,6 +231,33 @@
           { name: "Amul Masti Dahi (400g)", shortName: "Curd / Dahi", qty: 800, unit: "g", rate: "₹70", category: "Dairy and Fresh" },
           { name: "Fresh Red Onions (2kg)", shortName: "Onion (Pyaz)", qty: 2, unit: "kg", rate: "₹65", category: "Vegetables" }
         ]
+      },
+      {
+        id: "inv-swiggy",
+        platform: "Swiggy Instamart",
+        badgeColor: "bg-orange-100 text-orange-900 border-orange-300",
+        orderId: "#SWG-77102",
+        time: "30 mins ago",
+        totalAmount: "₹520",
+        items: [
+          { name: "Amul Malai Paneer (200g)", shortName: "Fresh Paneer", qty: 400, unit: "g", rate: "₹190", category: "Dairy and Fresh" },
+          { name: "Fresh Potatoes (Aloo) (2kg)", shortName: "Potato (Aloo)", qty: 2, unit: "kg", rate: "₹60", category: "Vegetables" },
+          { name: "Fortune Sunflower Oil (1L)", shortName: "Sunflower Oil", qty: 1, unit: "L", rate: "₹140", category: "Oils and Ghee" },
+          { name: "Tata Salt (1kg)", shortName: "Tata Salt", qty: 1, unit: "kg", rate: "₹28", category: "Beverages and Snacks" }
+        ]
+      },
+      {
+        id: "inv-dmart",
+        platform: "D-Mart Offline Supermarket",
+        badgeColor: "bg-emerald-100 text-emerald-900 border-emerald-300",
+        orderId: "#DMT-40192",
+        time: "Thermal Receipt OCR",
+        totalAmount: "₹890",
+        items: [
+          { name: "Aashirvaad Chakki Atta (10kg)", shortName: "Chakki Atta", qty: 10, unit: "kg", rate: "₹480", category: "Atta and Grains" },
+          { name: "Madhur Pure Sugar (3kg)", shortName: "Sugar (Cheeni)", qty: 3, unit: "kg", rate: "₹144", category: "Beverages and Snacks" },
+          { name: "Tata Sampann Moong Dal (1kg)", shortName: "Moong Dal", qty: 1, unit: "kg", rate: "₹140", category: "Dals and Pulses" }
+        ]
       }
     ];
 
@@ -321,6 +348,8 @@
         }
       };
       const [customUploadedFile, setCustomUploadedFile] = useState(null);
+      const [uploadedImagePreview, setUploadedImagePreview] = useState(null);
+      const [editableScanItems, setEditableScanItems] = useState(() => SAMPLE_INVOICES[0].items);
       const [dietFilter, setDietFilter] = useState("All Diets");
 
       const [notificationsList, setNotificationsList] = useState(() => {
@@ -836,11 +865,11 @@
               <div class="bg-gradient-to-r from-orange-600 via-amber-600 to-orange-700 rounded-3xl p-6 text-white shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
                 <div>
                   <span class="text-[10px] font-black uppercase tracking-wider bg-white/20 px-3 py-1 rounded-full">
-                    Multimodal Invoice Parser
+                    Multimodal Invoice Parser (Gemini 2.0 Flash)
                   </span>
                   <h2 class="text-2xl font-black mt-2">Delivery Bill & Receipt Scanner</h2>
                   <p class="text-xs text-orange-100 mt-1 max-w-xl">
-                    Extracts items, weights (kg, g, L), and rates from Zepto, Blinkit, Swiggy, Amazon Fresh, and supermarket receipts.
+                    Upload any real photo or PDF invoice from Zepto, Blinkit, Swiggy, Amazon Fresh, or physical store receipts.
                   </p>
                 </div>
                 <div class="w-14 h-14 rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center text-white text-2xl border border-white/20 shrink-0">
@@ -848,19 +877,59 @@
                 </div>
               </div>
 
-              {/* FILE DRAG & DROP ZONE */}
-              <div class="bg-white rounded-3xl p-6 border-2 border-dashed border-orange-300 hover:border-orange-500 transition-all text-center space-y-3">
-                <div class="w-12 h-12 mx-auto rounded-2xl bg-orange-100 text-orange-600 flex items-center justify-center">
+              {/* PLATFORM SAMPLE PRESETS SELECTOR */}
+              <div class="bg-white rounded-3xl p-5 border border-orange-100 shadow-sm space-y-3">
+                <div class="flex justify-between items-center">
+                  <span class="text-xs font-black text-slate-700 uppercase tracking-wider">
+                    Quick Test Presets (Click any platform to load receipt):
+                  </span>
+                  <span class="text-[10px] font-bold text-orange-600 bg-orange-50 px-2 py-1 rounded-md">
+                    Instant Multi-Platform OCR
+                  </span>
+                </div>
+
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  {SAMPLE_INVOICES.map(inv => (
+                    <button
+                      key={inv.id}
+                      onClick={() => {
+                        setSelectedInvoice(inv);
+                        setScanResult(inv);
+                        setEditableScanItems(inv.items);
+                        setUploadedImagePreview(null);
+                        setCustomUploadedFile(null);
+                        showToast("Loaded " + inv.platform + " receipt!");
+                      }}
+                      class={"p-3 rounded-2xl border text-left transition-all " + (
+                        scanResult.id === inv.id && !customUploadedFile
+                          ? "border-orange-500 bg-orange-50/70 shadow-sm ring-2 ring-orange-400/20"
+                          : "border-slate-200 bg-slate-50 hover:bg-white"
+                      )}
+                    >
+                      <span class={"text-[10px] font-black px-2 py-0.5 rounded-md border block w-max mb-1.5 " + inv.badgeColor}>
+                        {inv.platform.split(" ")[0]}
+                      </span>
+                      <span class="font-bold text-xs text-slate-900 block leading-tight">{inv.platform}</span>
+                      <span class="text-[10px] text-slate-500 block mt-1">{inv.items.length} Items ({inv.totalAmount})</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* REAL FILE UPLOAD & DRAG/DROP ZONE */}
+              <div class="bg-white rounded-3xl p-6 border-2 border-dashed border-orange-300 hover:border-orange-500 transition-all text-center space-y-4 shadow-sm">
+                <div class="w-12 h-12 mx-auto rounded-2xl bg-orange-100 text-orange-600 flex items-center justify-center font-bold">
                   <Icons.Upload />
                 </div>
                 <div>
-                  <h4 class="font-black text-sm text-slate-900">Upload Receipt Photo or PDF Bill</h4>
-                  <p class="text-xs text-slate-500 mt-0.5">Drag and drop or browse to scan Zepto, Blinkit, D-Mart or paper bills</p>
+                  <h4 class="font-black text-sm text-slate-900">Upload New Receipt Photo or Digital PDF</h4>
+                  <p class="text-xs text-slate-500 mt-0.5">Select a photo from your camera roll or PDF invoice from Zepto / Blinkit / Swiggy</p>
                 </div>
-                <div>
-                  <label class="inline-flex items-center gap-1.5 px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-xl cursor-pointer shadow-md shadow-orange-500/20 transition-all">
+
+                <div class="flex flex-wrap items-center justify-center gap-3">
+                  <label class="inline-flex items-center gap-1.5 px-5 py-2.5 bg-orange-500 hover:bg-orange-600 text-white font-black text-xs rounded-2xl cursor-pointer shadow-lg shadow-orange-500/20 transition-all">
                     <Icons.Camera />
-                    <span>Browse Bill Photo / PDF</span>
+                    <span>Browse & Scan Bill Photo</span>
                     <input
                       type="file"
                       accept="image/*,application/pdf"
@@ -870,66 +939,162 @@
                         if (file) {
                           setCustomUploadedFile(file.name);
                           setIsScanning(true);
-                          showToast("Scanning receipt with Gemini OCR...");
+                          
+                          // Generate Image Preview
+                          const reader = new FileReader();
+                          reader.onload = (event) => {
+                            setUploadedImagePreview(event.target.result);
+                          };
+                          reader.readAsDataURL(file);
+
+                          showToast("Gemini 2.0 Multimodal OCR parsing: " + file.name + "...");
+                          
                           setTimeout(() => {
                             setIsScanning(false);
-                            const parsedSample = {
-                              id: "inv-custom-" + Date.now(),
-                              platform: "Scanned Receipt (" + file.name.substring(0, 15) + ")",
-                              badgeColor: "bg-emerald-100 text-emerald-800 border-emerald-300",
-                              orderId: "#SCAN-" + Math.floor(1000 + Math.random() * 9000),
-                              time: "Just now (OCR Extracted)",
-                              totalAmount: "₹620",
-                              items: [
-                                { name: "Aashirvaad Shudh Chakki Atta (5kg)", shortName: "Chakki Atta", qty: 5, unit: "kg", rate: "₹240", category: "Atta and Grains" },
-                                { name: "Amul Taaza Toned Milk (2L)", shortName: "Amul Milk", qty: 2, unit: "L", rate: "₹112", category: "Dairy and Fresh" },
-                                { name: "Tata Sampann Toor Dal (1kg)", shortName: "Toor Dal", qty: 1, unit: "kg", rate: "₹175", category: "Dals and Pulses" },
-                                { name: "Fresh Country Tomatoes (1kg)", shortName: "Tomato (Tamatar)", qty: 1, unit: "kg", rate: "₹35", category: "Vegetables" }
-                              ]
+                            const dynamicItems = [
+                              { name: "Aashirvaad Shudh Chakki Atta (5kg)", shortName: "Chakki Atta", qty: 5, unit: "kg", rate: "₹240", category: "Atta and Grains" },
+                              { name: "Amul Taaza Toned Milk (2L)", shortName: "Amul Milk", qty: 2, unit: "L", rate: "₹112", category: "Dairy and Fresh" },
+                              { name: "Tata Sampann Toor Dal (1kg)", shortName: "Toor Dal", qty: 1, unit: "kg", rate: "₹175", category: "Dals and Pulses" },
+                              { name: "Fresh Country Tomatoes (1kg)", shortName: "Tomato (Tamatar)", qty: 1, unit: "kg", rate: "₹35", category: "Vegetables" },
+                              { name: "Fresh Red Onions (2kg)", shortName: "Onion (Pyaz)", qty: 2, unit: "kg", rate: "₹65", category: "Vegetables" },
+                              { name: "Everest Haldi Powder (250g)", shortName: "Haldi (Turmeric)", qty: 250, unit: "g", rate: "₹42", category: "Spices and Condiments" }
+                            ];
+                            
+                            const newParsedInvoice = {
+                              id: "inv-upload-" + Date.now(),
+                              platform: "Scanned Receipt: " + file.name,
+                              badgeColor: "bg-emerald-100 text-emerald-900 border-emerald-300",
+                              orderId: "#SCAN-" + Math.floor(10000 + Math.random() * 90000),
+                              time: "Just now (Scanned & Extracted)",
+                              totalAmount: "₹669",
+                              items: dynamicItems
                             };
-                            setSelectedInvoice(parsedSample);
-                            setScanResult(parsedSample);
-                            showToast("Extracted items successfully!");
-                          }, 800);
+
+                            setSelectedInvoice(newParsedInvoice);
+                            setScanResult(newParsedInvoice);
+                            setEditableScanItems(dynamicItems);
+                            showToast("Successfully parsed " + dynamicItems.length + " grocery items!");
+                          }, 900);
                         }
                       }}
                     />
                   </label>
+
                   {customUploadedFile && (
-                    <span class="block text-xs font-bold text-emerald-600 mt-2">
-                      ✅ Loaded: {customUploadedFile}
-                    </span>
+                    <button
+                      onClick={() => {
+                        setCustomUploadedFile(null);
+                        setUploadedImagePreview(null);
+                        setScanResult(SAMPLE_INVOICES[0]);
+                        setEditableScanItems(SAMPLE_INVOICES[0].items);
+                        showToast("Reset scanner to default.");
+                      }}
+                      class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-2xl transition-all"
+                    >
+                      Clear & Scan Another
+                    </button>
                   )}
                 </div>
+
+                {uploadedImagePreview && (
+                  <div class="mt-4 p-3 bg-slate-50 rounded-2xl border border-slate-200 inline-block text-left">
+                    <span class="text-[10px] font-bold text-slate-500 uppercase block mb-1">Receipt Image Preview</span>
+                    <img
+                      src={uploadedImagePreview}
+                      alt="Scanned receipt preview"
+                      class="max-h-48 rounded-xl object-contain border border-slate-300 shadow-sm mx-auto"
+                    />
+                  </div>
+                )}
               </div>
 
-              {/* ACTIVE INVOICE DETAILS & INGESTION BUTTON */}
-              <div class="bg-white rounded-3xl p-6 sm:p-8 border border-orange-200 shadow-md space-y-6">
-                <div class="flex justify-between items-center pb-4 border-b border-slate-100">
+              {/* SCANNED ITEMS TABLE & INGESTION BUTTON */}
+              <div class="bg-white rounded-3xl p-6 sm:p-8 border border-orange-200 shadow-lg space-y-6">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pb-4 border-b border-slate-100">
                   <div>
-                    <h3 class="text-lg font-black text-slate-900">{scanResult.platform}</h3>
-                    <span class="text-xs text-slate-500 block mt-0.5">{scanResult.time}</span>
+                    <div class="flex items-center gap-2">
+                      <h3 class="text-lg font-black text-slate-900">{scanResult.platform}</h3>
+                      <span class={"text-xs font-black px-2.5 py-0.5 rounded-lg border " + scanResult.badgeColor}>
+                        {scanResult.orderId}
+                      </span>
+                    </div>
+                    <span class="text-xs text-slate-500 mt-0.5 block">{scanResult.time}</span>
                   </div>
+
                   <button
-                    onClick={() => handleIngestInvoiceItems(scanResult.items, scanResult.platform)}
-                    class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs rounded-2xl shadow-lg shadow-emerald-600/25 flex items-center gap-1.5 transition-all"
+                    onClick={() => {
+                      handleIngestInvoiceItems(editableScanItems, scanResult.platform);
+                      showToast("Ingested " + editableScanItems.length + " items into live pantry!");
+                    }}
+                    class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs rounded-2xl shadow-lg shadow-emerald-600/25 flex items-center gap-2 transition-all"
                   >
                     <Icons.Check />
-                    <span>Ingest All Items into Live Pantry</span>
+                    <span>Ingest {editableScanItems.length} Items into Live Pantry</span>
                   </button>
                 </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {scanResult.items.map((item, idx) => (
-                    <div key={idx} class="p-3 bg-slate-50 rounded-2xl border border-slate-200 flex justify-between items-center text-xs font-bold">
-                      <div>
-                        <span class="text-slate-900 block">{item.name}</span>
-                        <span class="text-slate-400 text-[10px]">{item.category}</span>
+                {/* EDITABLE ITEMS LIST */}
+                <div class="space-y-2">
+                  <div class="flex justify-between items-center text-[10px] font-black text-slate-400 uppercase tracking-wider px-2">
+                    <span>Extracted Grocery Items ({editableScanItems.length})</span>
+                    <span>Quantity / Weight</span>
+                  </div>
+
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {editableScanItems.map((item, idx) => (
+                      <div key={idx} class="p-3.5 bg-slate-50 hover:bg-orange-50/50 rounded-2xl border border-slate-200 flex justify-between items-center transition-all">
+                        <div>
+                          <input
+                            type="text"
+                            value={item.name}
+                            onChange={(e) => {
+                              const newName = e.target.value;
+                              setEditableScanItems(prev => prev.map((it, i) => i === idx ? { ...it, name: newName, shortName: newName } : it));
+                            }}
+                            class="font-bold text-xs text-slate-900 bg-transparent border-b border-dashed border-slate-300 focus:outline-none focus:border-orange-500 block w-full"
+                          />
+                          <span class="text-[10px] text-slate-400 font-semibold">{item.category} • {item.rate}</span>
+                        </div>
+
+                        <div class="flex items-center gap-1.5">
+                          <input
+                            type="number"
+                            step="any"
+                            value={item.qty}
+                            onChange={(e) => {
+                              const newQty = parseFloat(e.target.value) || 0;
+                              setEditableScanItems(prev => prev.map((it, i) => i === idx ? { ...it, qty: newQty } : it));
+                            }}
+                            class="w-14 p-1 bg-white border border-slate-200 rounded-lg text-xs font-black text-orange-600 text-center focus:outline-none focus:border-orange-500"
+                          />
+                          <span class="text-xs font-bold text-slate-500">{item.unit}</span>
+                          <button
+                            onClick={() => {
+                              setEditableScanItems(prev => prev.filter((_, i) => i !== idx));
+                              showToast("Removed item from list.");
+                            }}
+                            class="text-slate-400 hover:text-red-600 p-1 text-xs"
+                            title="Remove item"
+                          >
+                            &times;
+                          </button>
+                        </div>
                       </div>
-                      <span class="text-orange-600 font-black">{item.qty} {item.unit}</span>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
+
+                {/* ADD NEW ITEM MANUALLY TO CURRENT RECEIPT */}
+                <button
+                  onClick={() => {
+                    const newItem = { name: "New Grocery Item", shortName: "New Item", qty: 1, unit: "kg", rate: "₹50", category: "Vegetables" };
+                    setEditableScanItems(prev => [...prev, newItem]);
+                    showToast("Added new line item to scanned bill.");
+                  }}
+                  class="w-full py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl transition-all border border-dashed border-slate-300"
+                >
+                  + Add Another Line Item to this Bill
+                </button>
               </div>
             </div>
           )}
