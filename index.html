@@ -11,6 +11,8 @@
   <!-- GOOGLE CLOUD FIRESTORE SDK -->
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+  <!-- CLIENT-SIDE TESSERACT.JS OCR ENGINE FOR ZERO-KEY VISUAL RECEIPT PARSING -->
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
   <style>
     body { font-family: 'Plus Jakarta Sans', sans-serif; }
@@ -352,6 +354,11 @@
       });
       const [customUploadedFile, setCustomUploadedFile] = useState(null);
       const [uploadedImagePreview, setUploadedImagePreview] = useState(null);
+      const [rawOcrText, setRawOcrText] = useState("");
+      const [ocrProcessingStep, setOcrProcessingStep] = useState("");
+      const [isCameraOpen, setIsCameraOpen] = useState(false);
+      const [cameraStream, setCameraStream] = useState(null);
+      const videoRef = React.useRef(null);
       const [editableScanItems, setEditableScanItems] = useState(() => SAMPLE_INVOICES[0].items);
       const [dietFilter, setDietFilter] = useState("All Diets");
 
@@ -557,51 +564,312 @@
         showToast(`↩️ Undid ${log.recipeName}! Restored pantry stock.`);
       };
 
-      // REAL GOOGLE GEMINI 2.0 MULTIMODAL VISION OCR
-      const parseReceiptWithGeminiVision = async (base64Data, mimeType, fileName) => {
-        const apiKey = geminiApiKey.trim();
-        if (!apiKey) {
-          showToast("⚠️ Please enter your Gemini API Key above to run live OCR on your bill!", "warning");
-          return null;
+      
+      // Live Camera Stream Handlers for Real Receipt Capture
+      const startCamera = async () => {
+        try {
+          setIsCameraOpen(true);
+          const stream = await navigator.mediaDevices.getUserMedia({
+            video: { facingMode: { ideal: "environment" }, width: { ideal: 1920 }, height: { ideal: 1080 } }
+          });
+          setCameraStream(stream);
+          if (videoRef.current) {
+            videoRef.current.srcObject = stream;
+          }
+        } catch (err) {
+          console.error("Camera access error:", err);
+          showToast("Unable to access camera: " + err.message + ". Please use file upload.", "warning");
+          setIsCameraOpen(false);
         }
+      };
 
-        const prompt = "You are a professional receipt and invoice OCR parser for Indian kitchens. Analyze this uploaded grocery bill or receipt image. Extract all purchased grocery items. Return a STRICT JSON array of objects with NO markdown formatting, with fields: " +
-          "name (full item name), shortName (concise staple name e.g. 'Atta', 'Milk', 'Tomato'), qty (number only e.g. 2, 0.5, 500), unit (one of: 'kg', 'g', 'L', 'ml', 'packets', 'pcs'), rate (string with price e.g. '₹60'), category (one of: 'Atta and Grains', 'Dals and Pulses', 'Oils and Ghee', 'Dairy and Fresh', 'Vegetables', 'Beverages and Snacks', 'Spices and Condiments'). If store name is visible, identify it.";
+      const stopCamera = () => {
+        if (cameraStream) {
+          cameraStream.getTracks().forEach(track => track.stop());
+          setCameraStream(null);
+        }
+        setIsCameraOpen(false);
+      };
 
-        const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+      const captureCameraSnapshot = () => {
+        if (!videoRef.current) return;
+        const video = videoRef.current;
+        const canvas = document.createElement("canvas");
+        canvas.width = video.videoWidth || 1280;
+        canvas.height = video.videoHeight || 720;
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        const dataUrl = canvas.toDataURL("image/jpeg", 0.95);
+        stopCamera();
+        processReceiptDataUrl(dataUrl, "Camera_Snapshot_" + new Date().toISOString().slice(0, 10) + ".jpg", "image/jpeg");
+      };
+    
+
+      // ============================================================================
+      // DUAL-ENGINE MULTIMODAL RECEIPT OCR (GEMINI 2.0 VISION + CLIENT TESSERACT.JS)
+      // ============================================================================
+
+      // Smart Parser for Indian Grocery Line Items from Raw OCR Text
+      const parseRawTextToGroceryItems = (fullText) => {
+        if (!fullText || !fullText.trim()) return [];
+        const lines = fullText.split(/\r?\n/).map(l => l.trim()).filter(l => l.length > 2);
+        const extracted = [];
+
+        // Common receipt headers and noise to ignore
+        const noiseKeywords = [
+          'tax invoice', 'retail invoice', 'cash receipt', 'order id', 'order no', 'subtotal',
+          'sub total', 'grand total', 'net total', 'total amt', 'amount payable', 'round off',
+          'gstin', 'gst', 'cgst', 'sgst', 'fssai', 'lic no', 'thank you', 'visit again',
+          'upi', 'cash', 'card', 'change', 'customer', 'phone', 'ph no', 'email', 'date',
+          'time', 'delivery partner', 'picker', 'store manager', 'payment mode', 'items total',
+          'discount', 'coupon', 'savings', 'bag fee', 'handling fee', 'delivery fee', 'surge fee'
+        ];
+
+        lines.forEach(line => {
+          const lower = line.toLowerCase();
+          if (noiseKeywords.some(k => lower.includes(k))) return;
+
+          // Quantity regex: matches '5kg', '500 g', '1.5 L', '200ml', '2 packets', '3 pcs', '2x', etc.
+          const qtyRegex = /(?:(\d+(?:\.\d+)?)\s*(kg|kgs|g|gm|gms|gram|grams|l|ltr|ltrs|liter|liters|litre|litres|ml|pkt|pkts|packets?|packs?|pcs|pieces?|units?|bottles?|jars?|cans?|dzn|dozen))|(?:(\d+)\s*(?:x|nos|no|qty))/i;
+          const qtyMatch = line.match(qtyRegex);
+
+          // Price regex: matches '₹240', 'Rs. 45.00', 'INR 150', or price at end of line
+          const priceRegex = /(?:₹|rs\.?|inr)\s*(\d+(?:\.\d{2})?)|(\d+\.\d{2})(?:\s*$)/i;
+          const priceMatch = line.match(priceRegex);
+
+          let qty = 1;
+          let unit = "pcs";
+
+          if (qtyMatch) {
+            if (qtyMatch[1]) {
+              qty = parseFloat(qtyMatch[1]) || 1;
+              const u = (qtyMatch[2] || "").toLowerCase();
+              if (u.startsWith("kg")) unit = "kg";
+              else if (u.startsWith("g") || u.startsWith("gm")) unit = "g";
+              else if (u.startsWith("l") || u.startsWith("ltr")) unit = "L";
+              else if (u.startsWith("ml")) unit = "ml";
+              else if (u.startsWith("pkt") || u.startsWith("pack")) unit = "packets";
+              else if (u.startsWith("dzn") || u.startsWith("dozen")) { qty = qty * 12; unit = "pcs"; }
+              else unit = "pcs";
+            } else if (qtyMatch[3]) {
+              qty = parseInt(qtyMatch[3], 10) || 1;
+              unit = "pcs";
+            }
+          }
+
+          let rate = "₹60";
+          if (priceMatch) {
+            const num = priceMatch[1] || priceMatch[2];
+            if (num) rate = "₹" + Math.round(parseFloat(num));
+          }
+
+          // Clean Item Name
+          let itemName = line
+            .replace(/(?:₹|rs\.?|inr)\s*\d+(?:\.\d+)?/gi, '')
+            .replace(/\d+\.\d{2}\s*$/gi, '')
+            .replace(/(?:\d+(?:\.\d+)?)\s*(kg|kgs|g|gm|gms|l|ltr|ml|pkt|packets?|packs?|pcs|pieces?)/gi, '')
+            .replace(/[^a-zA-Z0-9\s&'-]/g, ' ')
+            .replace(/\s+/g, ' ')
+            .trim();
+
+          // Exclude header words
+          const skipWords = ['item', 'items', 'description', 'rate', 'price', 'qty', 'amount', 'hsn', 'code', 'sno', 'sl no', 'mrp'];
+          if (itemName.length >= 3 && !skipWords.includes(itemName.toLowerCase())) {
+            let category = "Vegetables";
+            const lName = itemName.toLowerCase();
+
+            if (/milk|curd|dahi|paneer|butter|cheese|cream|ghee|egg|yogurt|lassi|chaas/i.test(lName)) {
+              category = "Dairy and Fresh";
+            } else if (/atta|flour|rice|poha|wheat|grain|maida|suji|sooji|rava|besan|oats|quinoa|millets|ragi/i.test(lName)) {
+              category = "Atta and Grains";
+            } else if (/dal|dhal|pulse|rajma|chana|moong|toor|urad|arhar|masoor|kabuli|lobia/i.test(lName)) {
+              category = "Dals and Pulses";
+            } else if (/oil|sunflower|mustard oil|groundnut oil|gingelly|olive oil|coconut oil/i.test(lName)) {
+              category = "Oils and Ghee";
+            } else if (/haldi|turmeric|jeera|cumin|mirch|chilli|masala|rai|mustard seed|hing|asafoetida|spice|salt|namak|sugar|cheeni|tea|chai|coffee|elaichi|cardamom|clove|laung|cinnamon|dalchini|coriander powder|dhania/i.test(lName)) {
+              category = "Spices and Condiments";
+            } else if (/bread|biscuit|snack|cookie|rusk|toast|chips|namkeen|sauce|ketchup|jam|noodle|pasta|maggi|soup/i.test(lName)) {
+              category = "Beverages and Snacks";
+            }
+
+            const formattedName = itemName
+              .split(' ')
+              .filter(w => w.length > 0)
+              .map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+              .join(' ');
+
+            if (formattedName && formattedName.length > 2) {
+              extracted.push({
+                name: formattedName,
+                shortName: formattedName.split(' ').slice(0, 2).join(' '),
+                qty: qty || 1,
+                unit: unit,
+                rate: rate,
+                category: category
+              });
+            }
+          }
+        });
+
+        return extracted;
+      };
+
+      // Engine 1: Google Gemini Multimodal Vision API (Gemini 1.5 / 2.0 Flash)
+      const parseWithGeminiVision = async (base64Data, mimeType) => {
+        const apiKey = geminiApiKey.trim() || localStorage.getItem("dearhome_gemini_key") || "";
+        if (!apiKey) return null;
+
+        const prompt = "You are an expert OCR receipt parsing AI for Indian households. Analyze this uploaded grocery receipt or delivery invoice image (from Zepto, Blinkit, Swiggy Instamart, BigBasket, DMart, Amazon Fresh, or a local Kirana store). " +
+          "Extract ALL purchased grocery items. Return a STRICT JSON array of objects with NO markdown formatting, with fields: " +
+          "name (string, full product name), " +
+          "shortName (string, concise staple name e.g. 'Atta', 'Milk', 'Tomato', 'Mustard Oil'), " +
+          "qty (number only e.g. 1, 0.5, 2, 500), " +
+          "unit (one of: 'kg', 'g', 'L', 'ml', 'packets', 'pcs'), " +
+          "rate (string with Indian rupee price e.g. '₹65'), " +
+          "category (one of: 'Atta and Grains', 'Dals and Pulses', 'Oils and Ghee', 'Dairy and Fresh', 'Vegetables', 'Beverages and Snacks', 'Spices and Condiments').";
+
         const rawBase64 = base64Data.split(',')[1] || base64Data;
+        const cleanMime = mimeType || 'image/jpeg';
 
+        // STRICT CAMELCASE PAYLOAD for Gemini REST API v1beta
         const requestBody = {
           contents: [{
             parts: [
               { text: prompt },
-              { inline_data: { mime_type: mimeType || 'image/jpeg', data: rawBase64 } }
+              {
+                inlineData: {
+                  mimeType: cleanMime,
+                  data: rawBase64
+                }
+              }
             ]
           }],
           generationConfig: {
             temperature: 0.1,
-            maxOutputTokens: 1000
+            maxOutputTokens: 2048,
+            responseMimeType: "application/json"
           }
         };
 
-        const response = await fetch(endpoint, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(requestBody)
-        });
+        const endpoints = [
+          `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+          `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`
+        ];
 
-        if (!response.ok) {
-          const errText = await response.text();
-          throw new Error("Gemini API Error: " + response.status + " - " + errText);
+        let lastErr = null;
+        for (const endpoint of endpoints) {
+          try {
+            const response = await fetch(endpoint, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(requestBody)
+            });
+
+            if (response.ok) {
+              const resultData = await response.json();
+              const rawResponseText = resultData.candidates?.[0]?.content?.parts?.[0]?.text || "";
+              const cleanJson = rawResponseText.replace(/```json/gi, '').replace(/```/g, '').trim();
+              const items = JSON.parse(cleanJson);
+              if (Array.isArray(items) && items.length > 0) {
+                return items;
+              }
+            } else {
+              const errTxt = await response.text();
+              lastErr = new Error(`Gemini API HTTP ${response.status}: ${errTxt}`);
+            }
+          } catch (e) {
+            lastErr = e;
+          }
         }
 
-        const resultData = await response.json();
-        const rawResponseText = resultData.candidates?.[0]?.content?.parts?.[0]?.text || "";
-        const cleanJson = rawResponseText.replace(/```json/g, '').replace(/```/g, '').trim();
-        
-        return JSON.parse(cleanJson);
+        if (lastErr) throw lastErr;
+        return null;
       };
 
+      // Engine 2: Client-Side Tesseract.js In-Browser OCR
+      const parseWithTesseractOcr = async (imageSrc) => {
+        if (typeof Tesseract === "undefined") {
+          throw new Error("Tesseract.js OCR engine is still loading from CDN, please wait 2 seconds.");
+        }
+        setOcrProcessingStep("📸 Reading receipt text directly from image pixels...");
+        
+        const result = await Tesseract.recognize(imageSrc, 'eng', {
+          logger: m => {
+            if (m.status === 'recognizing text') {
+              setOcrProcessingStep(`Recognizing bill text: ${Math.round((m.progress || 0) * 100)}%`);
+            }
+          }
+        });
+
+        const extractedText = result.data?.text || "";
+        setRawOcrText(extractedText);
+        return parseRawTextToGroceryItems(extractedText);
+      };
+
+      // Unified Receipt Processing Pipeline
+      const processReceiptDataUrl = async (dataUrl, fileName, mimeType) => {
+        setCustomUploadedFile(fileName);
+        setUploadedImagePreview(dataUrl);
+        setIsScanning(true);
+        setRawOcrText("");
+        setOcrProcessingStep("Analyzing your receipt photo...");
+
+        let extractedItems = null;
+        let engineUsed = "Google Gemini Multimodal Vision";
+
+        // Step 1: Try Gemini Multimodal API if user provided an API key
+        if (geminiApiKey.trim()) {
+          try {
+            setOcrProcessingStep("Sending image to Google Gemini Multimodal Vision...");
+            extractedItems = await parseWithGeminiVision(dataUrl, mimeType);
+            if (extractedItems && extractedItems.length > 0) {
+              showToast("✨ Gemini AI successfully recognized " + extractedItems.length + " items from your receipt!");
+            }
+          } catch (geminiErr) {
+            console.warn("Gemini API error, automatically falling back to client Tesseract OCR:", geminiErr);
+            showToast("Gemini Vision notice: " + geminiErr.message, "warning");
+          }
+        }
+
+        // Step 2: In-Browser Visual Tesseract OCR fallback (runs directly on image pixels)
+        if (!extractedItems || extractedItems.length === 0) {
+          try {
+            engineUsed = "In-Browser Visual OCR (Tesseract.js)";
+            extractedItems = await parseWithTesseractOcr(dataUrl);
+            if (extractedItems && extractedItems.length > 0) {
+              showToast("📸 In-browser OCR extracted " + extractedItems.length + " items directly from your photo!");
+            }
+          } catch (tessErr) {
+            console.error("Tesseract OCR error:", tessErr);
+          }
+        }
+
+        // Step 3: If completely unreadable or zero text detected
+        if (!extractedItems || extractedItems.length === 0) {
+          extractedItems = [
+            { name: "Scanned Item (Edit details)", shortName: "Grocery Staple", qty: 1, unit: "kg", rate: "₹60", category: "Atta and Grains" },
+            { name: "Dairy Item (Edit details)", shortName: "Milk", qty: 1, unit: "L", rate: "₹56", category: "Dairy and Fresh" }
+          ];
+          showToast("⚠️ Could not clearly read text on image. You can edit or add items below.", "warning");
+        }
+
+        const newParsedInvoice = {
+          id: "inv-upload-" + Date.now(),
+          platform: "Scanned Bill: " + fileName + " (" + engineUsed + ")",
+          badgeColor: "bg-emerald-100 text-emerald-900 border-emerald-300",
+          orderId: "#SCAN-" + Math.floor(10000 + Math.random() * 90000),
+          time: "Just now • " + engineUsed,
+          totalAmount: extractedItems.length + " Items Extracted",
+          items: extractedItems
+        };
+
+        setSelectedInvoice(newParsedInvoice);
+        setScanResult(newParsedInvoice);
+        setEditableScanItems(extractedItems);
+        setIsScanning(false);
+        setOcrProcessingStep("");
+      };
+    
       const handleIngestInvoiceItems = (items, platformName) => {
         let updatedPantry = [...pantry];
         let ingestedList = [];
@@ -999,74 +1267,79 @@
                 </div>
               </div>
 
-              {/* REAL FILE UPLOAD & DRAG/DROP ZONE */}
+              {/* LIVE CAMERA VIEW MODAL */}
+              {isCameraOpen && (
+                <div class="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex flex-col items-center justify-center p-4">
+                  <div class="bg-slate-900 rounded-3xl p-5 max-w-lg w-full text-white border border-slate-700 shadow-2xl space-y-4">
+                    <div class="flex justify-between items-center">
+                      <div class="flex items-center gap-2">
+                        <span class="w-3 h-3 rounded-full bg-red-500 animate-ping"></span>
+                        <h3 class="font-black text-sm">Align Receipt Within Camera</h3>
+                      </div>
+                      <button onClick={stopCamera} class="text-slate-400 hover:text-white text-lg font-bold">✕</button>
+                    </div>
+
+                    <div class="relative rounded-2xl overflow-hidden bg-black aspect-[3/4] border-2 border-dashed border-orange-400 flex items-center justify-center">
+                      <video ref={videoRef} autoPlay playsInline muted class="w-full h-full object-cover"></video>
+                      <div class="absolute inset-x-4 inset-y-6 border border-white/50 rounded-xl pointer-events-none flex items-center justify-center">
+                        <span class="text-[10px] bg-black/60 px-3 py-1 rounded-full text-white font-mono">Hold bill straight</span>
+                      </div>
+                    </div>
+
+                    <div class="flex gap-3">
+                      <button
+                        onClick={captureCameraSnapshot}
+                        class="flex-1 py-3.5 bg-orange-500 hover:bg-orange-600 text-white font-black text-xs rounded-2xl shadow-lg flex items-center justify-center gap-2 transition-all cursor-pointer"
+                      >
+                        <Icons.Camera />
+                        <span>📸 Capture & Scan Receipt Now</span>
+                      </button>
+                      <button
+                        onClick={stopCamera}
+                        class="px-5 py-3.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs rounded-2xl"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* DUAL RECEIPT CAPTURE ZONE (CAMERA + FILE UPLOAD) */}
               <div class="bg-white rounded-3xl p-6 border-2 border-dashed border-orange-300 hover:border-orange-500 transition-all text-center space-y-4 shadow-sm">
                 <div class="w-12 h-12 mx-auto rounded-2xl bg-orange-100 text-orange-600 flex items-center justify-center font-bold">
-                  <Icons.Upload />
+                  <Icons.Camera />
                 </div>
                 <div>
-                  <h4 class="font-black text-sm text-slate-900">Upload New Receipt Photo or Digital PDF</h4>
-                  <p class="text-xs text-slate-500 mt-0.5">Select a photo from your camera roll or PDF invoice from Zepto / Blinkit / Swiggy</p>
+                  <h4 class="font-black text-sm text-slate-900">Capture or Upload Your Real Grocery Receipt</h4>
+                  <p class="text-xs text-slate-500 mt-0.5">Snap a photo with your camera or upload a paper bill / Zepto / Blinkit / Swiggy / DMart receipt</p>
                 </div>
 
                 <div class="flex flex-wrap items-center justify-center gap-3">
-                  <label class="inline-flex items-center gap-1.5 px-5 py-2.5 bg-orange-500 hover:bg-orange-600 text-white font-black text-xs rounded-2xl cursor-pointer shadow-lg shadow-orange-500/20 transition-all">
+                  {/* LIVE CAMERA CAPTURE BUTTON */}
+                  <button
+                    onClick={startCamera}
+                    class="inline-flex items-center gap-2 px-5 py-3 bg-slate-900 hover:bg-slate-800 text-white font-black text-xs rounded-2xl shadow-lg shadow-slate-900/20 transition-all cursor-pointer"
+                  >
                     <Icons.Camera />
-                    <span>Browse & Scan Bill Photo</span>
+                    <span>📸 Snap Photo with Camera</span>
+                  </button>
+
+                  {/* FILE BROWSE & UPLOAD BUTTON */}
+                  <label class="inline-flex items-center gap-2 px-5 py-3 bg-orange-500 hover:bg-orange-600 text-white font-black text-xs rounded-2xl cursor-pointer shadow-lg shadow-orange-500/20 transition-all">
+                    <Icons.Upload />
+                    <span>📁 Upload Bill Photo / PDF</span>
                     <input
                       type="file"
                       accept="image/*,application/pdf"
+                      capture="environment"
                       class="hidden"
-                      onChange={async (e) => {
+                      onChange={(e) => {
                         const file = e.target.files[0];
                         if (file) {
-                          setCustomUploadedFile(file.name);
-                          setIsScanning(true);
-                          
-                          // Read Image for Preview and Base64 API payload
                           const reader = new FileReader();
-                          reader.onload = async (event) => {
-                            const dataUrl = event.target.result;
-                            setUploadedImagePreview(dataUrl);
-
-                            showToast("🤖 Sending receipt to Google Gemini 2.0 Multimodal OCR...");
-                            
-                            try {
-                              let extractedItems = [];
-                              if (geminiApiKey.trim()) {
-                                extractedItems = await parseReceiptWithGeminiVision(dataUrl, file.type, file.name);
-                              }
-                              
-                              // Fallback if API key not provided or returned empty
-                              if (!extractedItems || !extractedItems.length) {
-                                extractedItems = [
-                                  { name: file.name.replace(/\.[^/.]+$/, "") + " Item 1", shortName: "Grocery Staple", qty: 1, unit: "kg", rate: "₹100", category: "Atta and Grains" },
-                                  { name: "Fresh Milk / Dairy", shortName: "Milk", qty: 1, unit: "L", rate: "₹56", category: "Dairy and Fresh" },
-                                  { name: "Fresh Vegetables", shortName: "Vegetables", qty: 1, unit: "kg", rate: "₹40", category: "Vegetables" }
-                                ];
-                                showToast("Tip: Add your Gemini API key above for exact line-item AI extraction!");
-                              }
-
-                              const newParsedInvoice = {
-                                id: "inv-upload-" + Date.now(),
-                                platform: "Scanned Receipt (" + file.name + ")",
-                                badgeColor: "bg-emerald-100 text-emerald-900 border-emerald-300",
-                                orderId: "#SCAN-" + Math.floor(10000 + Math.random() * 90000),
-                                time: "Just now (Gemini 2.0 Live OCR)",
-                                totalAmount: "Extracted",
-                                items: extractedItems
-                              };
-
-                              setSelectedInvoice(newParsedInvoice);
-                              setScanResult(newParsedInvoice);
-                              setEditableScanItems(extractedItems);
-                              setIsScanning(false);
-                              showToast("✅ Extracted " + extractedItems.length + " real items from your receipt!");
-                            } catch (err) {
-                              console.error("OCR Parsing failed:", err);
-                              setIsScanning(false);
-                              showToast("OCR Notice: " + err.message);
-                            }
+                          reader.onload = (ev) => {
+                            processReceiptDataUrl(ev.target.result, file.name, file.type);
                           };
                           reader.readAsDataURL(file);
                         }
@@ -1079,28 +1352,67 @@
                       onClick={() => {
                         setCustomUploadedFile(null);
                         setUploadedImagePreview(null);
+                        setRawOcrText("");
                         setScanResult(SAMPLE_INVOICES[0]);
                         setEditableScanItems(SAMPLE_INVOICES[0].items);
-                        showToast("Reset scanner to default.");
+                        showToast("Reset scanner to sample demo bill.");
                       }}
-                      class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-2xl transition-all"
+                      class="px-4 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-2xl transition-all"
                     >
                       Clear & Scan Another
                     </button>
                   )}
                 </div>
 
+                {/* RECEIPT IMAGE PREVIEW */}
                 {uploadedImagePreview && (
-                  <div class="mt-4 p-3 bg-slate-50 rounded-2xl border border-slate-200 inline-block text-left">
-                    <span class="text-[10px] font-bold text-slate-500 uppercase block mb-1">Receipt Image Preview</span>
+                  <div class="mt-4 p-4 bg-slate-50 rounded-2xl border border-slate-200 inline-block text-left max-w-md w-full">
+                    <div class="flex justify-between items-center mb-2">
+                      <span class="text-[10px] font-black text-slate-500 uppercase tracking-wider">Your Scanned Photo</span>
+                      <span class="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded-md">Image Loaded</span>
+                    </div>
                     <img
                       src={uploadedImagePreview}
                       alt="Scanned receipt preview"
-                      class="max-h-48 rounded-xl object-contain border border-slate-300 shadow-sm mx-auto"
+                      class="max-h-56 w-full rounded-xl object-contain border border-slate-300 shadow-sm bg-white"
                     />
                   </div>
                 )}
               </div>
+
+              {/* LIVE OCR PROCESSING ANIMATION */}
+              {isScanning && (
+                <div class="bg-gradient-to-r from-orange-500 to-amber-500 text-white rounded-3xl p-5 shadow-xl flex items-center justify-between animate-pulse">
+                  <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-full border-3 border-white border-t-transparent animate-spin"></div>
+                    <div>
+                      <span class="text-xs font-black block">{ocrProcessingStep || "Analyzing your receipt photo..."}</span>
+                      <span class="text-[10px] text-orange-100 block">Extracting real items, quantities, and prices...</span>
+                    </div>
+                  </div>
+                  <span class="text-[10px] bg-white/20 px-3 py-1.5 rounded-full uppercase tracking-wider font-black">Active OCR</span>
+                </div>
+              )}
+
+              {/* RAW OCR TEXT INSPECTOR (PROOF OF REAL EXTRACTION) */}
+              {rawOcrText && (
+                <div class="bg-slate-900 rounded-3xl p-5 border border-slate-800 text-white space-y-2.5">
+                  <div class="flex justify-between items-center">
+                    <div class="flex items-center gap-2">
+                      <span class="text-xs">📄</span>
+                      <span class="text-xs font-black text-slate-200 uppercase tracking-wider">
+                        Raw Text Detected on Your Receipt Photo
+                      </span>
+                    </div>
+                    <span class="text-[10px] bg-slate-800 text-emerald-400 px-2.5 py-1 rounded-lg font-mono font-bold">
+                      {rawOcrText.split('\n').filter(l => l.trim().length > 0).length} lines detected
+                    </span>
+                  </div>
+                  <pre class="text-[11px] font-mono text-slate-300 bg-slate-950 p-3.5 rounded-2xl overflow-x-auto max-h-36 leading-relaxed border border-slate-800/80 whitespace-pre-wrap">
+                    {rawOcrText}
+                  </pre>
+                </div>
+              )}
 
               {/* SCANNED ITEMS TABLE & INGESTION BUTTON */}
               <div class="bg-white rounded-3xl p-6 sm:p-8 border border-orange-200 shadow-lg space-y-6">
