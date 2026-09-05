@@ -1,9 +1,9 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>DearHome - AI Smart Indian Kitchen and Pantry Assistant</title>
+  <title>DearHome - AI Smart Indian Kitchen, Invoicing & Food Waste Prevention</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
@@ -11,12 +11,12 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
   <style>
     body { font-family: 'Plus Jakarta Sans', sans-serif; }
-    .glass { background: rgba(255, 255, 255, 0.92); backdrop-filter: blur(16px); }
+    .glass { background: rgba(255, 255, 255, 0.94); backdrop-filter: blur(16px); }
     ::-webkit-scrollbar { width: 6px; height: 6px; }
     ::-webkit-scrollbar-track { background: rgba(0,0,0,0.03); }
     ::-webkit-scrollbar-thumb { background: rgba(245, 135, 11, 0.3); border-radius: 9999px; }
-    @keyframes fadeIn { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
-    .animate-modal { animation: fadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+    @keyframes pulseGlow { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.6; transform: scale(0.95); } }
+    .pulse-mic { animation: pulseGlow 1.5s infinite; }
   </style>
 </head>
 <body class="bg-[#faf8f5] text-slate-800 min-h-screen selection:bg-orange-500 selection:text-white pb-16">
@@ -27,15 +27,11 @@
 
     // VECTOR SVG ICONS
     const Icons = {
-      Mic: () => <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"/></svg>,
-      MicActive: () => <svg className="w-4 h-4 text-red-500 animate-pulse" fill="currentColor" viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>,
-      Upload: () => <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>,
       Home: () => <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>,
       Users: () => <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>,
       Box: () => <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>,
       Flame: () => <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z"/></svg>,
       Alert: () => <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>,
-      Zap: () => <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>,
       Camera: () => <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg>,
       Chart: () => <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>,
       Chat: () => <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg>,
@@ -47,40 +43,42 @@
       Video: () => <svg className="w-3.5 h-3.5 text-red-600" fill="currentColor" viewBox="0 0 24 24"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/></svg>,
       BookOpen: () => <svg className="w-3.5 h-3.5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>,
       Mail: () => <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>,
-      Copy: () => <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>,
-      FileText: () => <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>,
-      Download: () => <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>,
       Bell: () => <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>,
-      Sliders: () => <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/></svg>
+      Sliders: () => <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/></svg>,
+      Mic: () => <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"/></svg>,
+      MicActive: () => <svg className="w-4 h-4 text-red-500 animate-pulse" fill="currentColor" viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>,
+      Undo: () => <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 10h10a5 5 0 015 5v2M3 10l6 6m-6-6l6-6"/></svg>,
+      Upload: () => <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>,
+      List: () => <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg>
     };
 
     const CATEGORIES = ["All Items", "Atta and Grains", "Dals and Pulses", "Oils and Ghee", "Dairy and Fresh", "Vegetables", "Beverages and Snacks", "Spices and Condiments"];
 
     const INITIAL_PANTRY = [
-      { id: "item-1", name: "Aashirvaad Shudh Chakki Atta", shortName: "Chakki Atta", category: "Atta and Grains", current: 8.5, max: 10, unit: "kg", threshold: 2.5, dailyBurn: 0.38, price: 48 },
-      { id: "item-2", name: "Fortune Daawat Basmati Rice", shortName: "Basmati Rice", category: "Atta and Grains", current: 3.8, max: 5, unit: "kg", threshold: 1.5, dailyBurn: 0.22, price: 110 },
-      { id: "item-3", name: "Tata Sampann Poha (Thick)", shortName: "Poha", category: "Atta and Grains", current: 0.8, max: 1, unit: "kg", threshold: 0.3, dailyBurn: 0.08, price: 65 },
-      { id: "item-4", name: "Tata Sampann Toor Dal (Arhar)", shortName: "Toor Dal", category: "Dals and Pulses", current: 0.45, max: 2, unit: "kg", threshold: 0.6, dailyBurn: 0.12, price: 175 },
-      { id: "item-5", name: "Chitra Rajma (Kidney Beans)", shortName: "Rajma", category: "Dals and Pulses", current: 1.2, max: 1.5, unit: "kg", threshold: 0.35, dailyBurn: 0.05, price: 160 },
-      { id: "item-6", name: "Moong Dal (Yellow Dhuli)", shortName: "Moong Dal", category: "Dals and Pulses", current: 1.0, max: 1.5, unit: "kg", threshold: 0.4, dailyBurn: 0.08, price: 140 },
-      { id: "item-7", name: "Fortune Kachi Ghani Mustard Oil", shortName: "Mustard Oil", category: "Oils and Ghee", current: 1.8, max: 3, unit: "L", threshold: 0.75, dailyBurn: 0.07, price: 165 },
-      { id: "item-8", name: "Fortune Refined Sunflower Oil", shortName: "Sunflower Oil", category: "Oils and Ghee", current: 2.2, max: 3, unit: "L", threshold: 0.8, dailyBurn: 0.08, price: 140 },
-      { id: "item-9", name: "Amul Pure Cow Ghee", shortName: "Desi Ghee", category: "Oils and Ghee", current: 0.35, max: 1, unit: "L", threshold: 0.3, dailyBurn: 0.03, price: 620 },
-      { id: "item-10", name: "Everest Haldi (Turmeric Powder)", shortName: "Haldi (Turmeric)", category: "Spices and Condiments", current: 160, max: 250, unit: "g", threshold: 50, dailyBurn: 5, price: 38 },
-      { id: "item-11", name: "Catch Jeera (Cumin Seeds)", shortName: "Jeera (Cumin)", category: "Spices and Condiments", current: 130, max: 200, unit: "g", threshold: 40, dailyBurn: 4.5, price: 55 },
-      { id: "item-12", name: "Everest Lal Mirch Powder", shortName: "Lal Mirch Powder", category: "Spices and Condiments", current: 140, max: 200, unit: "g", threshold: 45, dailyBurn: 4, price: 42 },
-      { id: "item-13", name: "Black Mustard Seeds (Rai)", shortName: "Mustard Seeds (Rai)", category: "Spices and Condiments", current: 110, max: 200, unit: "g", threshold: 30, dailyBurn: 2.5, price: 30 },
-      { id: "item-14", name: "Catch Hing (Asafoetida)", shortName: "Hing (Asafoetida)", category: "Spices and Condiments", current: 35, max: 50, unit: "g", threshold: 10, dailyBurn: 0.8, price: 90 },
-      { id: "item-15", name: "Amul Taaza Toned Milk", shortName: "Amul Milk", category: "Dairy and Fresh", current: 0.5, max: 2, unit: "L", threshold: 1.0, dailyBurn: 1.0, price: 56 },
-      { id: "item-16", name: "Amul Masti Dahi / Curd", shortName: "Curd / Dahi", category: "Dairy and Fresh", current: 350, max: 500, unit: "g", threshold: 200, dailyBurn: 150, price: 40 },
-      { id: "item-17", name: "Amul Malai Paneer (Fresh)", shortName: "Fresh Paneer", category: "Dairy and Fresh", current: 200, max: 400, unit: "g", threshold: 200, dailyBurn: 100, price: 95 },
-      { id: "item-18", name: "Fresh Red Onions (Pyaz)", shortName: "Onion (Pyaz)", category: "Vegetables", current: 1.2, max: 4, unit: "kg", threshold: 1.2, dailyBurn: 0.35, price: 35 },
-      { id: "item-19", name: "Fresh Country Tomatoes", shortName: "Tomato (Tamatar)", category: "Vegetables", current: 0.5, max: 2.5, unit: "kg", threshold: 0.8, dailyBurn: 0.28, price: 40 },
-      { id: "item-20", name: "Fresh Potatoes (Aloo)", shortName: "Potato (Aloo)", category: "Vegetables", current: 2.5, max: 5, unit: "kg", threshold: 1.5, dailyBurn: 0.35, price: 30 },
-      { id: "item-21", name: "Fresh Ginger and Garlic", shortName: "Ginger-Garlic", category: "Vegetables", current: 120, max: 250, unit: "g", threshold: 60, dailyBurn: 15, price: 35 },
-      { id: "item-22", name: "Tata Tea Gold (Chai Patti)", shortName: "Chai Patti (Tea)", category: "Beverages and Snacks", current: 350, max: 500, unit: "g", threshold: 100, dailyBurn: 12, price: 165 },
-      { id: "item-23", name: "Madhur Pure Sugar", shortName: "Sugar (Cheeni)", category: "Beverages and Snacks", current: 1.8, max: 3, unit: "kg", threshold: 0.8, dailyBurn: 0.05, price: 48 },
-      { id: "item-24", name: "Tata Salt (Vacuum Evaporated)", shortName: "Tata Salt", category: "Beverages and Snacks", current: 0.8, max: 1, unit: "kg", threshold: 0.3, dailyBurn: 0.02, price: 28 }
+      { id: "item-1", name: "Aashirvaad Shudh Chakki Atta", shortName: "Chakki Atta", category: "Atta and Grains", current: 8.5, max: 10, unit: "kg", threshold: 2.5, dailyBurn: 0.38, price: 48, daysExpiry: 180 },
+      { id: "item-2", name: "Fortune Daawat Basmati Rice", shortName: "Basmati Rice", category: "Atta and Grains", current: 3.8, max: 5, unit: "kg", threshold: 1.5, dailyBurn: 0.22, price: 110, daysExpiry: 240 },
+      { id: "item-3", name: "Tata Sampann Poha (Thick)", shortName: "Poha", category: "Atta and Grains", current: 0.8, max: 1, unit: "kg", threshold: 0.3, dailyBurn: 0.08, price: 65, daysExpiry: 90 },
+      { id: "item-4", name: "Tata Sampann Toor Dal (Arhar)", shortName: "Toor Dal", category: "Dals and Pulses", current: 0.45, max: 2, unit: "kg", threshold: 0.6, dailyBurn: 0.12, price: 175, daysExpiry: 150 },
+      { id: "item-5", name: "Chitra Rajma (Kidney Beans)", shortName: "Rajma", category: "Dals and Pulses", current: 1.2, max: 1.5, unit: "kg", threshold: 0.35, dailyBurn: 0.05, price: 160, daysExpiry: 180 },
+      { id: "item-6", name: "Moong Dal (Yellow Dhuli)", shortName: "Moong Dal", category: "Dals and Pulses", current: 1.0, max: 1.5, unit: "kg", threshold: 0.4, dailyBurn: 0.08, price: 140, daysExpiry: 120 },
+      { id: "item-7", name: "Fortune Kachi Ghani Mustard Oil", shortName: "Mustard Oil", category: "Oils and Ghee", current: 1.8, max: 3, unit: "L", threshold: 0.75, dailyBurn: 0.07, price: 165, daysExpiry: 365 },
+      { id: "item-8", name: "Fortune Refined Sunflower Oil", shortName: "Sunflower Oil", category: "Oils and Ghee", current: 2.2, max: 3, unit: "L", threshold: 0.8, dailyBurn: 0.08, price: 140, daysExpiry: 365 },
+      { id: "item-9", name: "Amul Pure Cow Ghee", shortName: "Desi Ghee", category: "Oils and Ghee", current: 0.35, max: 1, unit: "L", threshold: 0.3, dailyBurn: 0.03, price: 620, daysExpiry: 180 },
+      { id: "item-10", name: "Everest Haldi (Turmeric Powder)", shortName: "Haldi (Turmeric)", category: "Spices and Condiments", current: 160, max: 250, unit: "g", threshold: 50, dailyBurn: 5, price: 38, daysExpiry: 300 },
+      { id: "item-11", name: "Catch Jeera (Cumin Seeds)", shortName: "Jeera (Cumin)", category: "Spices and Condiments", current: 130, max: 200, unit: "g", threshold: 40, dailyBurn: 4.5, price: 55, daysExpiry: 300 },
+      { id: "item-12", name: "Everest Lal Mirch Powder", shortName: "Lal Mirch Powder", category: "Spices and Condiments", current: 140, max: 200, unit: "g", threshold: 45, dailyBurn: 4, price: 42, daysExpiry: 300 },
+      { id: "item-13", name: "Black Mustard Seeds (Rai)", shortName: "Mustard Seeds (Rai)", category: "Spices and Condiments", current: 110, max: 200, unit: "g", threshold: 30, dailyBurn: 2.5, price: 30, daysExpiry: 300 },
+      { id: "item-14", name: "Catch Hing (Asafoetida)", shortName: "Hing (Asafoetida)", category: "Spices and Condiments", current: 35, max: 50, unit: "g", threshold: 10, dailyBurn: 0.8, price: 90, daysExpiry: 365 },
+      { id: "item-15", name: "Amul Taaza Toned Milk", shortName: "Amul Milk", category: "Dairy and Fresh", current: 0.5, max: 2, unit: "L", threshold: 1.0, dailyBurn: 1.0, price: 56, daysExpiry: 2 },
+      { id: "item-16", name: "Amul Masti Dahi / Curd", shortName: "Curd / Dahi", category: "Dairy and Fresh", current: 350, max: 500, unit: "g", threshold: 200, dailyBurn: 150, price: 40, daysExpiry: 3 },
+      { id: "item-17", name: "Amul Malai Paneer (Fresh)", shortName: "Fresh Paneer", category: "Dairy and Fresh", current: 200, max: 400, unit: "g", threshold: 200, dailyBurn: 100, price: 95, daysExpiry: 2 },
+      { id: "item-18", name: "Fresh Red Onions (Pyaz)", shortName: "Onion (Pyaz)", category: "Vegetables", current: 1.2, max: 4, unit: "kg", threshold: 1.2, dailyBurn: 0.35, price: 35, daysExpiry: 12 },
+      { id: "item-19", name: "Fresh Country Tomatoes", shortName: "Tomato (Tamatar)", category: "Vegetables", current: 0.5, max: 2.5, unit: "kg", threshold: 0.8, dailyBurn: 0.28, price: 40, daysExpiry: 3 },
+      { id: "item-20", name: "Fresh Potatoes (Aloo)", shortName: "Potato (Aloo)", category: "Vegetables", current: 2.5, max: 5, unit: "kg", threshold: 1.5, dailyBurn: 0.35, price: 30, daysExpiry: 20 },
+      { id: "item-21", name: "Fresh Ginger and Garlic", shortName: "Ginger-Garlic", category: "Vegetables", current: 120, max: 250, unit: "g", threshold: 60, dailyBurn: 15, price: 35, daysExpiry: 14 },
+      { id: "item-22", name: "Tata Tea Gold (Chai Patti)", shortName: "Chai Patti (Tea)", category: "Beverages and Snacks", current: 350, max: 500, unit: "g", threshold: 100, dailyBurn: 12, price: 165, daysExpiry: 365 },
+      { id: "item-23", name: "Madhur Pure Sugar", shortName: "Sugar (Cheeni)", category: "Beverages and Snacks", current: 1.8, max: 3, unit: "kg", threshold: 0.8, dailyBurn: 0.05, price: 48, daysExpiry: 365 },
+      { id: "item-24", name: "Tata Salt (Vacuum Evaporated)", shortName: "Tata Salt", category: "Beverages and Snacks", current: 0.8, max: 1, unit: "kg", threshold: 0.3, dailyBurn: 0.02, price: 28, daysExpiry: 365 }
     ];
 
     const INDIAN_RECIPES = [
@@ -91,6 +89,7 @@
         prepTime: "25 mins",
         youtubeQuery: "Authentic Dal Tadka and Jeera Rice Recipe Chef Ranveer Brar",
         recipeUrl: "https://hebbarskitchen.com/dal-tadka-recipe-yellow-toor-dal-tadka/",
+        diet: "Vegetarian",
         ingredients: [
           { name: "Toor Dal", qty: 35, unit: "g" },
           { name: "Basmati Rice", qty: 65, unit: "g" },
@@ -108,6 +107,7 @@
         prepTime: "40 mins",
         youtubeQuery: "Punjabi Rajma Masala Recipe Ranveer Brar",
         recipeUrl: "https://hebbarskitchen.com/rajma-recipe-rajma-masala-curry-recipe/",
+        diet: "Vegetarian",
         ingredients: [
           { name: "Rajma", qty: 45, unit: "g" },
           { name: "Basmati Rice", qty: 65, unit: "g" },
@@ -124,6 +124,7 @@
         prepTime: "25 mins",
         youtubeQuery: "Dhaba Style Punjabi Aloo Paratha Recipe Ranveer Brar",
         recipeUrl: "https://hebbarskitchen.com/aloo-paratha-recipe-aloo-ka-paratha/",
+        diet: "Vegetarian",
         ingredients: [
           { name: "Chakki Atta", qty: 75, unit: "g" },
           { name: "Potato (Aloo)", qty: 80, unit: "g" },
@@ -138,6 +139,7 @@
         prepTime: "30 mins",
         youtubeQuery: "Restaurant Style Paneer Butter Masala Recipe Chef Ranveer Brar",
         recipeUrl: "https://hebbarskitchen.com/paneer-butter-masala-recipe/",
+        diet: "Vegetarian",
         ingredients: [
           { name: "Fresh Paneer", qty: 65, unit: "g" },
           { name: "Chakki Atta", qty: 65, unit: "g" },
@@ -153,6 +155,7 @@
         prepTime: "15 mins",
         youtubeQuery: "Authentic Maharashtrian Kanda Poha Recipe Ranveer Brar",
         recipeUrl: "https://hebbarskitchen.com/kanda-poha-recipe-onion-poha-recipe/",
+        diet: "Vegetarian",
         ingredients: [
           { name: "Poha", qty: 60, unit: "g" },
           { name: "Onion (Pyaz)", qty: 30, unit: "g" },
@@ -169,6 +172,7 @@
         prepTime: "10 mins",
         youtubeQuery: "Perfect Adrak Masala Chai Recipe Ranveer Brar",
         recipeUrl: "https://hebbarskitchen.com/masala-chai-recipe-masala-tea-recipe/",
+        diet: "Vegetarian",
         ingredients: [
           { name: "Amul Milk", qty: 85, unit: "ml" },
           { name: "Chai Patti (Tea)", qty: 4.5, unit: "g" },
@@ -178,7 +182,6 @@
       }
     ];
 
-    // PHASE 1 SAMPLE BILL INVOICES
     const SAMPLE_INVOICES = [
       {
         id: "inv-zepto",
@@ -205,34 +208,6 @@
           { name: "Tata Sampann Toor Dal (1kg)", shortName: "Toor Dal", qty: 1, unit: "kg", rate: "₹175", category: "Dals and Pulses" },
           { name: "Amul Masti Dahi (400g)", shortName: "Curd / Dahi", qty: 800, unit: "g", rate: "₹70", category: "Dairy and Fresh" },
           { name: "Fresh Red Onions (2kg)", shortName: "Onion (Pyaz)", qty: 2, unit: "kg", rate: "₹65", category: "Vegetables" }
-        ]
-      },
-      {
-        id: "inv-amazon",
-        platform: "Amazon Fresh Bulk Pantry",
-        badgeColor: "bg-slate-100 text-slate-900 border-slate-300",
-        orderId: "#AMZ-99318",
-        time: "1 hour ago",
-        totalAmount: "₹1,240",
-        items: [
-          { name: "Fortune Refined Sunflower Oil (3L)", shortName: "Sunflower Oil", qty: 3, unit: "L", rate: "₹420", category: "Oils and Ghee" },
-          { name: "Fortune Daawat Basmati Rice (5kg)", shortName: "Basmati Rice", qty: 5, unit: "kg", rate: "₹550", category: "Atta and Grains" },
-          { name: "Catch Jeera Seeds (200g)", shortName: "Jeera (Cumin)", qty: 200, unit: "g", rate: "₹110", category: "Spices and Condiments" },
-          { name: "Everest Haldi Powder (250g)", shortName: "Haldi (Turmeric)", qty: 250, unit: "g", rate: "₹160", category: "Spices and Condiments" }
-        ]
-      },
-      {
-        id: "inv-dmart",
-        platform: "D-Mart Offline Supermarket",
-        badgeColor: "bg-emerald-100 text-emerald-900 border-emerald-300",
-        orderId: "#DMT-40192",
-        time: "Yesterday (Thermal Receipt OCR)",
-        totalAmount: "₹890",
-        items: [
-          { name: "Aashirvaad Chakki Atta (10kg)", shortName: "Chakki Atta", qty: 10, unit: "kg", rate: "₹480", category: "Atta and Grains" },
-          { name: "Madhur Pure Sugar (3kg)", shortName: "Sugar (Cheeni)", qty: 3, unit: "kg", rate: "₹144", category: "Beverages and Snacks" },
-          { name: "Fresh Potatoes (Aloo) (5kg)", shortName: "Potato (Aloo)", qty: 5, unit: "kg", rate: "₹150", category: "Vegetables" },
-          { name: "Tata Salt Vacuum Evaporated (1kg)", shortName: "Tata Salt", qty: 2, unit: "kg", rate: "₹56", category: "Beverages and Snacks" }
         ]
       }
     ];
@@ -264,17 +239,31 @@
         return saved ? JSON.parse(saved) : [];
       });
 
+      const [ledgerEvents, setLedgerEvents] = useState(() => {
+        const saved = localStorage.getItem("dearhome_ledger");
+        return saved ? JSON.parse(saved) : [
+          {
+            id: "ev-1",
+            type: "CREDIT",
+            title: "Zepto Delivery Ingested",
+            subtitle: "3 items added (+2L Milk, +5kg Atta, +1kg Tomato)",
+            time: "Today, 10:30 AM",
+            amount: "₹385",
+            source: "OCR Scanner"
+          }
+        ];
+      });
+
       const [activeTab, setActiveTab] = useState("scan");
       const [isAddItemModalOpen, setIsAddItemModalOpen] = useState(false);
       const [isNotificationCenterOpen, setIsNotificationCenterOpen] = useState(false);
       const [isThresholdModalOpen, setIsThresholdModalOpen] = useState(false);
       const [selectedItemForAlert, setSelectedItemForAlert] = useState(null);
 
-      const [browserPermission, setBrowserPermission] = useState(() => {
-        return typeof window !== "undefined" && "Notification" in window ? Notification.permission : "default";
-      });
+      const [isListening, setIsListening] = useState(false);
+      const [customUploadedFile, setCustomUploadedFile] = useState(null);
+      const [dietFilter, setDietFilter] = useState("All Diets");
 
-      // NOTIFICATIONS STATE
       const [notificationsList, setNotificationsList] = useState(() => {
         const saved = localStorage.getItem("dearhome_notifications");
         return saved ? JSON.parse(saved) : [
@@ -286,62 +275,52 @@
             severity: "critical",
             itemId: "item-15",
             unread: true
-          },
-          {
-            id: "notif-2",
-            title: "⚠️ Low Stock Warning: Toor Dal",
-            body: "0.45 kg remaining (below 0.6 kg safety threshold). ~2 days left.",
-            time: "1 hour ago",
-            severity: "warning",
-            itemId: "item-4",
-            unread: true
           }
         ];
       });
 
       const [selectedCategory, setSelectedCategory] = useState("All Items");
       const [searchQuery, setSearchQuery] = useState("");
-
-      const [selectedRecipe, setSelectedRecipe] = useState(INDIAN_RECIPES[0].id);
       const [guestCountForMeal, setGuestCountForMeal] = useState(0);
       const [toast, setToast] = useState(null);
 
-      // PHASE 1: SCANNER STATE
       const [selectedInvoice, setSelectedInvoice] = useState(SAMPLE_INVOICES[0]);
       const [isScanning, setIsScanning] = useState(false);
       const [scanResult, setScanResult] = useState(SAMPLE_INVOICES[0]);
 
-      // PHASE 2: INBOUND EMAIL WEBHOOK STATE
-      const [isEmailAutoSyncOn, setIsEmailAutoSyncOn] = useState(true);
-      const [emailInboundFeed, setEmailInboundFeed] = useState([
+      const [chatMessages, setChatMessages] = useState([
         {
-          id: "mail-1",
-          sender: "orders@zepto.co.in",
-          subject: "Tax Invoice for Zepto Order #ZPT-88492",
-          time: "2 mins ago",
-          status: "Processed & Stock Added",
-          itemsSummary: "2L Milk, 5kg Atta, 1kg Tomato"
-        },
-        {
-          id: "mail-2",
-          sender: "receipts@blinkit.com",
-          subject: "Your Order Summary for #BLK-19402",
-          time: "1 hour ago",
-          status: "Processed & Stock Added",
-          itemsSummary: "2 Bread Packets, 1kg Toor Dal, 800g Dahi"
+          id: "m-1",
+          sender: "ai",
+          text: "Namaste Sinduja! I am your DearHome AI Kitchen Assistant. I have live knowledge of all items in your kitchen. You can ask what to cook, check what is in your pantry, or use your voice to add groceries!",
+          suggestions: [
+            "What is present in my pantry list?",
+            "What can I cook with what I have?",
+            "Which items are expiring soon?",
+            "Do I have Basmati Rice?"
+          ]
         }
       ]);
-      const [isSimulatingEmail, setIsSimulatingEmail] = useState(false);
+      const [userChatInput, setUserChatInput] = useState("");
+      const [isAiThinking, setIsAiThinking] = useState(false);
+      const chatEndRef = useRef(null);
 
-      // CONVERSATIONAL AGENT STATE
-      const [isListening, setIsListening] = useState(false);
-      const [customUploadedFile, setCustomUploadedFile] = useState(null);
-      const [dietFilter, setDietFilter] = useState("All Diets");
-      
+      useEffect(() => { localStorage.setItem("dearhome_household", JSON.stringify(household)); }, [household]);
+      useEffect(() => { localStorage.setItem("dearhome_pantry", JSON.stringify(pantry)); }, [pantry]);
+      useEffect(() => { localStorage.setItem("dearhome_meallogs", JSON.stringify(mealLogs)); }, [mealLogs]);
+      useEffect(() => { localStorage.setItem("dearhome_ledger", JSON.stringify(ledgerEvents)); }, [ledgerEvents]);
+      useEffect(() => { localStorage.setItem("dearhome_notifications", JSON.stringify(notificationsList)); }, [notificationsList]);
+      useEffect(() => { chatEndRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [chatMessages, isAiThinking]);
+
+      const showToast = (msg) => {
+        setToast(msg);
+        setTimeout(() => setToast(null), 3500);
+      };
+
       const startVoiceRecognition = () => {
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         if (!SpeechRecognition) {
-          showToast("Speech recognition is not supported in this browser.");
+          showToast("Speech recognition is not supported on this browser.");
           return;
         }
 
@@ -351,7 +330,7 @@
         recognition.maxAlternatives = 1;
 
         setIsListening(true);
-        showToast("🎙️ Listening... speak your kitchen query or ingredients!");
+        showToast("🎙️ Listening... speak now!");
 
         recognition.onresult = (event) => {
           const spokenText = event.results[0][0].transcript;
@@ -364,9 +343,8 @@
         };
 
         recognition.onerror = (event) => {
-          console.error("Speech recognition error:", event.error);
           setIsListening(false);
-          showToast("Voice recognition error: " + event.error);
+          showToast("Microphone error: " + event.error);
         };
 
         recognition.onend = () => {
@@ -379,132 +357,6 @@
           setIsListening(false);
         }
       };
-
-      const [chatMessages, setChatMessages] = useState([
-        {
-          id: "m-1",
-          sender: "ai",
-          text: "Namaste Sinduja! I am your DearHome AI Kitchen Assistant. First, what ingredients and groceries are currently present in your kitchen? You can type what you have (e.g. 'I have 2 kg Atta 2 bread packets and 1 kg tomato'), forward delivery invoices, or set low-stock alert notifications.",
-          suggestions: [
-            "I have 2 kg Atta 2 bread packets and 1 kg tomato",
-            "Notify me when Atta or Milk is low",
-            "Load standard Indian Kitchen starter pack",
-            "What can I cook with what I already have?"
-          ]
-        }
-      ]);
-      const [userChatInput, setUserChatInput] = useState("");
-      const [isAiThinking, setIsAiThinking] = useState(false);
-      const chatEndRef = useRef(null);
-
-      useEffect(() => {
-        localStorage.setItem("dearhome_household", JSON.stringify(household));
-      }, [household]);
-
-      useEffect(() => {
-        localStorage.setItem("dearhome_pantry", JSON.stringify(pantry));
-      }, [pantry]);
-
-      useEffect(() => {
-        localStorage.setItem("dearhome_meallogs", JSON.stringify(mealLogs));
-      }, [mealLogs]);
-
-      useEffect(() => {
-        localStorage.setItem("dearhome_notifications", JSON.stringify(notificationsList));
-      }, [notificationsList]);
-
-      useEffect(() => {
-        chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-      }, [chatMessages, isAiThinking]);
-
-      const showToast = (msg) => {
-        setToast(msg);
-        setTimeout(() => setToast(null), 4000);
-      };
-
-      const requestBrowserNotificationPermission = async () => {
-        if (typeof window !== "undefined" && "Notification" in window) {
-          try {
-            const perm = await Notification.requestPermission();
-            setBrowserPermission(perm);
-            if (perm === "granted") {
-              new Notification("DearHome Alert System Active", {
-                body: "Push alerts enabled! You will be notified instantly when kitchen staples are about to run out.",
-                icon: "https://cdn-icons-png.flaticon.com/512/3756/3756619.png"
-              });
-              showToast("🔔 Push Notifications Activated!");
-            } else {
-              showToast("Notification Permission: " + perm);
-            }
-          } catch (e) {
-            console.error(e);
-          }
-        } else {
-          showToast("Browser push notifications not supported on this browser.");
-        }
-      };
-
-      const triggerStockoutNotification = (title, body, severity = "warning", itemId = null) => {
-        const newNotif = {
-          id: "notif-" + Date.now(),
-          title,
-          body,
-          time: "Just now",
-          severity,
-          itemId,
-          unread: true
-        };
-        setNotificationsList(prev => [newNotif, ...prev]);
-        showToast(title + ": " + body);
-
-        if (typeof window !== "undefined" && "Notification" in window && Notification.permission === "granted") {
-          try {
-            new Notification(title, {
-              body: body,
-              icon: "https://cdn-icons-png.flaticon.com/512/3756/3756619.png"
-            });
-          } catch (e) {
-            console.error(e);
-          }
-        }
-      };
-
-      // DYNAMIC STOCKOUT NOTIFICATION TRIGGER HOOK
-      useEffect(() => {
-        const lowItems = pantry.filter(item => item.current <= item.threshold);
-        lowItems.forEach(item => {
-          const alreadyNotified = notificationsList.some(n => n.itemId === item.id && n.unread);
-          if (!alreadyNotified) {
-            triggerStockoutNotification(
-              "🚨 Low Stock Alert: " + item.shortName,
-              "Only " + item.current + " " + item.unit + " remaining (below " + item.threshold + " " + item.unit + " limit). Restock soon!",
-              "critical",
-              item.id
-            );
-          }
-        });
-      }, [pantry]);
-
-      // AUTONOMOUS BACKGROUND LISTENER SIMULATION
-      useEffect(() => {
-        if (!isEmailAutoSyncOn) return;
-
-        const timer = setTimeout(() => {
-          const sample = SAMPLE_INVOICES[0];
-          handleIngestInvoiceItems(sample.items, "Zepto (Autonomous Background Route)");
-          const newMail = {
-            id: "mail-" + Date.now(),
-            sender: "orders@zepto.co.in",
-            subject: "Tax Invoice & Order Receipt " + sample.orderId,
-            time: "Just now (Autonomous Background Ingestion)",
-            status: "Autonomous Ingestion Completed",
-            itemsSummary: sample.items.map(i => i.qty + " " + i.unit + " " + i.shortName).join(", ")
-          };
-          setEmailInboundFeed(prev => [newMail, ...prev]);
-        }, 25000);
-
-        return () => clearTimeout(timer);
-      }, [isEmailAutoSyncOn]);
 
       const appetiteMultiplier = useMemo(() => {
         if (household.appetiteLevel && household.appetiteLevel.indexOf("Light") !== -1) return 0.75;
@@ -519,6 +371,7 @@
 
       const totalMealEaters = Math.max(1, +(baseFamilyServings + (guestCountForMeal * appetiteMultiplier)).toFixed(1));
       const lowStockItems = useMemo(() => pantry.filter(i => i.current <= i.threshold), [pantry]);
+      const expiringItems = useMemo(() => pantry.filter(i => (i.daysExpiry || 99) <= 3), [pantry]);
 
       const updateStock = (id, delta) => {
         setPantry(prev => prev.map(item => {
@@ -530,17 +383,7 @@
         }));
       };
 
-      const handleUpdateThreshold = (itemId, newThreshold) => {
-        setPantry(prev => prev.map(item => {
-          if (item.id === itemId) {
-            return { ...item, threshold: parseFloat(newThreshold) || 1.0 };
-          }
-          return item;
-        }));
-        showToast("Notification alert threshold updated!");
-        setIsThresholdModalOpen(false);
-      };
-
+      // COOK MEAL WITH PRE-FLIGHT & REVERSIBILITY
       const handleCookMealDirect = (recipeId, effectiveServings) => {
         const recipe = INDIAN_RECIPES.find(r => r.id === recipeId);
         if (!recipe) return;
@@ -558,13 +401,18 @@
           if (index !== -1) {
             const item = updatedPantry[index];
             let deductionAmount = ing.qty * effectiveServings;
-
             if (ing.unit === "g" && item.unit === "kg") deductionAmount /= 1000;
             if (ing.unit === "ml" && item.unit === "L") deductionAmount /= 1000;
 
             const nextQty = Math.max(0, +(item.current - deductionAmount).toFixed(2));
             updatedPantry[index] = { ...item, current: nextQty };
-            deductions.push({ name: item.shortName, qty: (ing.qty * effectiveServings).toFixed(1) + " " + ing.unit });
+            deductions.push({ 
+              itemId: item.id,
+              name: item.shortName, 
+              amountDeducted: +(item.current - nextQty).toFixed(2),
+              unit: item.unit,
+              displayQty: (ing.qty * effectiveServings).toFixed(1) + " " + ing.unit 
+            });
           }
         });
 
@@ -575,53 +423,47 @@
           time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
           recipeName: recipe.name,
           servings: effectiveServings,
-          appetite: household.appetiteLevel || "Regular (1.0x)",
           deductions
         };
 
         setMealLogs(prev => [newLog, ...prev]);
-        showToast("Cooked " + recipe.name + " (" + effectiveServings + " portion units). Inventory auto-deducted!");
+
+        // Add to Ledger
+        const newLedgerEvent = {
+          id: "ev-" + Date.now(),
+          type: "DEBIT",
+          title: `Cooked ${recipe.name}`,
+          subtitle: `${effectiveServings} portions (${deductions.map(d => d.name).join(', ')})`,
+          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          amount: `${deductions.length} items deducted`,
+          source: "Meal Depletion",
+          logId: newLog.id
+        };
+        setLedgerEvents(prev => [newLedgerEvent, ...prev]);
+
+        showToast(`🥘 Cooked ${recipe.name}! Deducted ${deductions.length} ingredients.`);
       };
 
-      // NATURAL LANGUAGE GROCERY PARSER
-      const parseGroceriesFromText = (text) => {
-        let clean = text.replace(/^(i have|we have|present in my kitchen|in my kitchen|my groceries are|i bought|please add|add|stocked)\s*/i, '');
-        const results = [];
-        const re = /(\d+(?:\.\d+)?)\s*(kg|g|l|ml|litres|litre|packets|packet|pack|packs|pcs|pieces|bottles|bottle)?\s*(?:of\s+)?([a-zA-Z]+(?:\s+[a-zA-Z]+)?)(?:\s+(packets|packet|pack|packs|pcs|pieces|bottles|bottle))?/gi;
-        
-        let match;
-        while ((match = re.exec(clean)) !== null) {
-          let qty = parseFloat(match[1]);
-          let unit1 = match[2];
-          let rawName = match[3].trim();
-          let unit2 = match[4];
-          
-          rawName = rawName.replace(/^and\s+/i, '').replace(/\s+and$/i, '').trim();
-          if (!rawName || ['and', 'have', 'the', 'my', 'in', 'kitchen', 'to', 'for'].includes(rawName.toLowerCase())) continue;
-          
-          let unit = (unit1 || unit2 || '').toLowerCase();
-          if (!unit) {
-            if (rawName.match(/\b(packets|packet|pack|packs)\b/i)) unit = 'packets';
-            else if (rawName.match(/\b(bottles|bottle)\b/i)) unit = 'bottles';
-            else if (rawName.match(/\b(kg|kilo|kilos)\b/i)) unit = 'kg';
-            else if (rawName.match(/\b(litres|litre|liter|liters|l)\b/i)) unit = 'L';
-            else if (rawName.match(/\b(g|grams|gm)\b/i)) unit = 'g';
-            else unit = 'pcs';
+      // 1-CLICK UNDO MEAL HANDLER
+      const handleUndoMeal = (logId) => {
+        const log = mealLogs.find(l => l.id === logId);
+        if (!log) return;
+
+        let restoredPantry = [...pantry];
+        log.deductions.forEach(d => {
+          const idx = restoredPantry.findIndex(p => p.id === d.itemId || p.shortName === d.name);
+          if (idx !== -1) {
+            restoredPantry[idx] = {
+              ...restoredPantry[idx],
+              current: +(restoredPantry[idx].current + d.amountDeducted).toFixed(2)
+            };
           }
-          
-          if (unit.startsWith('packet') || unit.startsWith('pack')) unit = 'packets';
-          else if (unit === 'litres' || unit === 'litre') unit = 'L';
-          else if (unit === 'pieces' || unit === 'piece') unit = 'pcs';
-          else if (unit === 'kg') unit = 'kg';
-          else if (unit === 'g') unit = 'g';
-          else if (unit === 'l') unit = 'L';
-          else if (unit === 'ml') unit = 'ml';
-          
-          rawName = rawName.replace(/\s+(packets|packet|pack|packs|bottles|bottle|kg|g|l|ml|pcs)$/i, '').trim();
-          const formattedName = rawName.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
-          results.push({ name: formattedName, qty, unit });
-        }
-        return results;
+        });
+
+        setPantry(restoredPantry);
+        setMealLogs(prev => prev.filter(l => l.id !== logId));
+        setLedgerEvents(prev => prev.filter(ev => ev.logId !== logId));
+        showToast(`↩️ Undid ${log.recipeName}! Restored pantry stock.`);
       };
 
       const handleIngestInvoiceItems = (items, platformName) => {
@@ -630,7 +472,6 @@
 
         items.forEach((item, idx) => {
           const lowerName = (item.shortName || item.name).toLowerCase();
-          
           let matchIndex = updatedPantry.findIndex(p =>
             p.shortName.toLowerCase() === lowerName ||
             p.name.toLowerCase().indexOf(lowerName) !== -1 ||
@@ -657,7 +498,8 @@
               unit: item.unit,
               threshold: Math.max(1, +(item.qty * 0.25).toFixed(1)),
               dailyBurn: 0.1,
-              price: parseInt(item.rate?.replace(/[^\d]/g, '') || 50)
+              price: parseInt(item.rate?.replace(/[^\d]/g, '') || 50),
+              daysExpiry: 14
             };
             updatedPantry = [newItem, ...updatedPantry];
             ingestedList.push({ name: newItem.shortName, qty: "+" + item.qty + " " + item.unit });
@@ -665,26 +507,23 @@
         });
 
         setPantry(updatedPantry);
-        showToast("Ingested " + items.length + " grocery items from " + platformName + " into your Pantry!");
+
+        // Add to Ledger
+        const newLedgerEvent = {
+          id: "ev-" + Date.now(),
+          type: "CREDIT",
+          title: `${platformName} Ingested`,
+          subtitle: `${items.length} items added (${ingestedList.map(i => i.qty + " " + i.name).join(', ')})`,
+          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          amount: `+${items.length} staples`,
+          source: "OCR Ingestion"
+        };
+        setLedgerEvents(prev => [newLedgerEvent, ...prev]);
+
+        showToast(`Ingested ${items.length} items from ${platformName}!`);
       };
 
-      const handleSimulateInboundEmail = (platformName, sampleData) => {
-        setIsSimulatingEmail(true);
-        setTimeout(() => {
-          setIsSimulatingEmail(false);
-          const newMail = {
-            id: "mail-" + Date.now(),
-            sender: platformName === "Zepto" ? "orders@zepto.co.in" : "receipts@blinkit.com",
-            subject: "Tax Invoice & Order Receipt " + sampleData.orderId,
-            time: "Just now (Webhook Trigger)",
-            status: "Autonomous Ingestion Completed",
-            itemsSummary: sampleData.items.map(i => i.qty + " " + i.unit + " " + i.shortName).join(", ")
-          };
-          setEmailInboundFeed(prev => [newMail, ...prev]);
-          handleIngestInvoiceItems(sampleData.items, platformName);
-        }, 1200);
-      };
-
+      // CONVERSATIONAL AGENT MESSAGE HANDLER
       const handleSendMessage = (textToSend) => {
         const query = textToSend || userChatInput;
         if (!query.trim()) return;
@@ -698,23 +537,16 @@
           setIsAiThinking(false);
           const lower = query.toLowerCase().trim();
 
-          // 1. PANTRY INVENTORY OVERVIEW: "What is present in my pantry list?", "show pantry", etc.
+          // 1. WHAT IS IN PANTRY
           if (
-            lower.indexOf("what is in my pantry") !== -1 ||
-            lower.indexOf("what is present in my pantry") !== -1 ||
-            lower.indexOf("what is in my kitchen") !== -1 ||
-            lower.indexOf("show pantry") !== -1 ||
-            lower.indexOf("pantry list") !== -1 ||
-            lower.indexOf("kitchen inventory") !== -1 ||
-            lower.indexOf("list my items") !== -1 ||
-            lower.indexOf("what do i have") !== -1 ||
-            lower.indexOf("what groceries do i have") !== -1 ||
-            (lower.indexOf("pantry") !== -1 && lower.indexOf("list") !== -1)
+            lower.includes("what is in my pantry") ||
+            lower.includes("what is present in my pantry") ||
+            lower.includes("show pantry") ||
+            lower.includes("pantry list") ||
+            lower.includes("kitchen inventory") ||
+            lower.includes("list my items")
           ) {
-            const totalItems = pantry.length;
             const inStock = pantry.filter(i => i.current > 0);
-            const lowStock = pantry.filter(i => i.current <= i.threshold);
-
             const categorized = {};
             inStock.forEach(item => {
               if (!categorized[item.category]) categorized[item.category] = [];
@@ -725,21 +557,17 @@
               .map(([cat, items]) => `📁 **${cat}**:\n• ` + items.join(", "))
               .join("\n\n");
 
-            const responseText = `📦 **DearHome Kitchen Inventory (${totalItems} items tracked)**:\n\n${breakdown}\n\n${
-              lowStock.length > 0 
-                ? `⚠️ *Note: You have ${lowStock.length} item(s) currently low on stock.*` 
-                : `✨ *All essentials are well-stocked above safety thresholds.*`
-            }`;
-
             setChatMessages(prev => [
               ...prev,
               {
                 id: "ai-" + Date.now(),
                 sender: "ai",
-                text: responseText,
+                text: `📦 **DearHome Kitchen Inventory (${pantry.length} items)**:\n\n${breakdown}\n\n${
+                  expiringItems.length > 0 ? `⏳ *Notice: ${expiringItems.length} perishable item(s) are expiring in <=3 days.*` : `✨ *All groceries fresh and well-stocked.*`
+                }`,
                 suggestions: [
                   "What can I cook with what I have?",
-                  "Which groceries are running low?",
+                  "Which items are expiring soon?",
                   "Do I have Basmati Rice?"
                 ]
               }
@@ -747,257 +575,69 @@
             return;
           }
 
-          // 2. SPECIFIC ITEM CHECK: "Do I have Atta?", "How much Milk is left?", "Check for Garlic"
-          if (
-            lower.startsWith("do i have") ||
-            lower.startsWith("is there any") ||
-            lower.startsWith("is there") ||
-            lower.startsWith("how much") ||
-            lower.startsWith("how many") ||
-            lower.startsWith("check for") ||
-            (lower.indexOf("do we have") !== -1)
-          ) {
-            const matchedItem = pantry.find(item => {
-              const name = item.name.toLowerCase();
-              const short = (item.shortName || "").toLowerCase();
-              return lower.indexOf(name) !== -1 || lower.indexOf(short) !== -1 ||
-                     name.split(" ").some(word => word.length > 3 && lower.indexOf(word) !== -1);
-            });
-
-            if (matchedItem) {
-              const isLow = matchedItem.current <= matchedItem.threshold;
-              const daysLeft = matchedItem.dailyBurn > 0 ? (matchedItem.current / matchedItem.dailyBurn).toFixed(1) : "N/A";
-
-              const reply = `✅ **${matchedItem.name}** is present in your kitchen pantry:\n\n` +
-                `• **Current Stock**: ${matchedItem.current} ${matchedItem.unit} (Max Capacity: ${matchedItem.max} ${matchedItem.unit})\n` +
-                `• **Estimated Runout**: ~${daysLeft} days remaining at current family burn rate\n` +
-                `• **Stock Health**: ${isLow ? `🚨 Below threshold of ${matchedItem.threshold} ${matchedItem.unit} (Restock needed!)` : "🟢 Well-stocked"}`;
-
+          // 2. EXPIRING SOON QUERY
+          if (lower.includes("expir") || lower.includes("spoil") || lower.includes("waste")) {
+            if (expiringItems.length === 0) {
               setChatMessages(prev => [
                 ...prev,
                 {
                   id: "ai-" + Date.now(),
                   sender: "ai",
-                  text: reply,
-                  suggestions: [
-                    `What can I cook with ${matchedItem.shortName || matchedItem.name}?`,
-                    "What is present in my pantry list?",
-                    "Which groceries are running low?"
-                  ]
+                  text: "🌟 Great news! You have no critically expiring items in your kitchen right now.",
+                  suggestions: ["What can I cook tonight?", "Show full pantry list"]
                 }
               ]);
             } else {
-              const cleanedQuery = query.replace(/^(do i have|do we have|how much|how many|is there any|is there|check for)\s+/i, "").replace(/\?$/, "").trim();
               setChatMessages(prev => [
                 ...prev,
                 {
                   id: "ai-" + Date.now(),
                   sender: "ai",
-                  text: `❌ I checked your pantry list and could not find **"${cleanedQuery}"**.\n\nWould you like me to add it to your kitchen inventory or grocery shopping list?`,
-                  suggestions: [
-                    `Add 1 kg ${cleanedQuery}`,
-                    "What is present in my pantry list?",
-                    "What can I cook with what I already have?"
-                  ]
+                  text: `⏳ **Perishables Expiring within 3 Days (${expiringItems.length} items)**:\n\n` +
+                    expiringItems.map(i => `• **${i.shortName}**: ${i.current} ${i.unit} (*Expires in ~${i.daysExpiry} days*)`).join("\n") +
+                    `\n\n💡 *Tip: Cook recipes using these items first to prevent food waste!*`,
+                  suggestions: ["What can I cook with expiring items?", "Show pantry list"]
                 }
               ]);
             }
             return;
           }
 
-          // 3. NOTIFICATION / ALERT SETUP INTENT
-          if (lower.indexOf("notification") !== -1 || lower.indexOf("notify") !== -1 || lower.indexOf("alert") !== -1 || lower.indexOf("stockout") !== -1) {
-            triggerStockoutNotification("🔔 Stockout Alert Activated", "DearHome will notify you immediately when items drop below safety thresholds.", "warning");
-            setChatMessages(prev => [
-              ...prev,
-              {
-                id: "ai-" + Date.now(),
-                sender: "ai",
-                text: "Stockout notifications are active! DearHome monitors daily meal consumption, burn rates, and sends instant push alerts whenever any grocery item is approaching runout. Click below to manage custom item thresholds:",
-                notificationAction: true,
-                suggestions: [
-                  "Notify me when Milk is below 1L",
-                  "Notify me when Atta is below 3kg",
-                  "Which groceries are running low right now?"
-                ]
-              }
-            ]);
-            return;
-          }
-
-          // 4. SIMULATE ZEPTO / BLINKIT EMAIL WEBHOOK TRIGGER
-          if (lower.indexOf("simulate zepto") !== -1 || lower.indexOf("zepto email") !== -1 || lower.indexOf("zepto ingest") !== -1) {
-            const sample = SAMPLE_INVOICES[0];
-            handleIngestInvoiceItems(sample.items, "Zepto");
-            const newMail = {
-              id: "mail-" + Date.now(),
-              sender: "orders@zepto.co.in",
-              subject: "Tax Invoice & Order Receipt " + sample.orderId,
-              time: "Just now (Triggered via Assistant)",
-              status: "Autonomous Ingestion Completed",
-              itemsSummary: sample.items.map(i => i.qty + " " + i.unit + " " + i.shortName).join(", ")
-            };
-            setEmailInboundFeed(prev => [newMail, ...prev]);
-            setChatMessages(prev => [
-              ...prev,
-              {
-                id: "ai-" + Date.now(),
-                sender: "ai",
-                text: "Simulated incoming webhook from orders@zepto.co.in (Order #ZPT-88492)! Gemini 2.0 Flash extracted and ingested all items into your live kitchen pantry:",
-                stockedItems: sample.items.map(i => ({ name: i.shortName, qty: "+" + i.qty + " " + i.unit })),
-                totalStockedCount: sample.items.length,
-                suggestions: [
-                  "What is present in my pantry list?",
-                  "What can I cook with what I have?",
-                  "Check Restock Radar"
-                ]
-              }
-            ]);
-            return;
-          }
-
-          if (lower.indexOf("simulate blinkit") !== -1 || lower.indexOf("blinkit email") !== -1 || lower.indexOf("blinkit ingest") !== -1) {
-            const sample = SAMPLE_INVOICES[1];
-            handleIngestInvoiceItems(sample.items, "Blinkit");
-            const newMail = {
-              id: "mail-" + Date.now(),
-              sender: "receipts@blinkit.com",
-              subject: "Tax Invoice & Order Receipt " + sample.orderId,
-              time: "Just now (Triggered via Assistant)",
-              status: "Autonomous Ingestion Completed",
-              itemsSummary: sample.items.map(i => i.qty + " " + i.unit + " " + i.shortName).join(", ")
-            };
-            setEmailInboundFeed(prev => [newMail, ...prev]);
-            setChatMessages(prev => [
-              ...prev,
-              {
-                id: "ai-" + Date.now(),
-                sender: "ai",
-                text: "Simulated incoming webhook from receipts@blinkit.com (Order #BLK-19402)! Gemini 2.0 Flash extracted and ingested all items into your live kitchen pantry:",
-                stockedItems: sample.items.map(i => ({ name: i.shortName, qty: "+" + i.qty + " " + i.unit })),
-                totalStockedCount: sample.items.length,
-                suggestions: [
-                  "What is present in my pantry list?",
-                  "What can I cook with what I have?",
-                  "Check Restock Radar"
-                ]
-              }
-            ]);
-            return;
-          }
-
-          // 5. STARTER PACK
-          if (lower.indexOf("starter pack") !== -1 || lower.indexOf("standard indian") !== -1 || lower.indexOf("starter kit") !== -1) {
-            setPantry(INITIAL_PANTRY);
-            setChatMessages(prev => [
-              ...prev,
-              {
-                id: "ai-" + Date.now(),
-                sender: "ai",
-                text: "Loaded the Standard Indian Kitchen Starter Pack! Your pantry is now stocked with 24 kitchen essentials:",
-                stockedItems: INITIAL_PANTRY.slice(0, 8).map(i => ({ name: i.shortName, qty: i.current + " " + i.unit })),
-                totalStockedCount: INITIAL_PANTRY.length,
-                suggestions: [
-                  "What is present in my pantry list?",
-                  "What can I cook with what I have?",
-                  "Which groceries are running low?"
-                ]
-              }
-            ]);
-            showToast("Standard Indian Kitchen Starter Pack Loaded (24 Staples)!");
-            return;
-          }
-
-          // 6. GROCERY INGESTION (e.g. "I have 2kg Atta 2 bread packets")
-          const isNotQueryingRecipe = lower.indexOf("what can i cook") === -1 && lower.indexOf("cooked") === -1 && lower.indexOf("prepared") === -1 && lower.indexOf("made") === -1;
-          const parsedGroceries = parseGroceriesFromText(query);
-
-          if (parsedGroceries.length > 0 && isNotQueryingRecipe) {
-            let updatedPantry = [...pantry];
-            let confirmedList = [];
-
-            parsedGroceries.forEach((item, idx) => {
-              const lowerName = item.name.toLowerCase();
-              let matchIndex = updatedPantry.findIndex(p =>
-                p.shortName.toLowerCase() === lowerName ||
-                p.name.toLowerCase().indexOf(lowerName) !== -1 ||
-                lowerName.indexOf(p.shortName.toLowerCase()) !== -1
-              );
-
-              if (matchIndex !== -1) {
-                const existing = updatedPantry[matchIndex];
-                updatedPantry[matchIndex] = {
-                  ...existing,
-                  current: item.qty,
-                  unit: item.unit || existing.unit,
-                  max: Math.max(existing.max, item.qty * 1.5)
-                };
-                confirmedList.push({ name: existing.shortName, qty: item.qty + " " + (item.unit || existing.unit) });
-              } else {
-                let category = "Beverages and Snacks";
-                if (lowerName.indexOf("milk") !== -1 || lowerName.indexOf("paneer") !== -1 || lowerName.indexOf("curd") !== -1 || lowerName.indexOf("dahi") !== -1 || lowerName.indexOf("butter") !== -1 || lowerName.indexOf("egg") !== -1 || lowerName.indexOf("cheese") !== -1) {
-                  category = "Dairy and Fresh";
-                } else if (lowerName.indexOf("tomato") !== -1 || lowerName.indexOf("potato") !== -1 || lowerName.indexOf("onion") !== -1 || lowerName.indexOf("vegetable") !== -1 || lowerName.indexOf("garlic") !== -1 || lowerName.indexOf("ginger") !== -1) {
-                  category = "Vegetables";
-                } else if (lowerName.indexOf("bread") !== -1 || lowerName.indexOf("biscuit") !== -1 || lowerName.indexOf("tea") !== -1 || lowerName.indexOf("coffee") !== -1 || lowerName.indexOf("sugar") !== -1 || lowerName.indexOf("snack") !== -1) {
-                  category = "Beverages and Snacks";
-                } else if (lowerName.indexOf("oil") !== -1 || lowerName.indexOf("ghee") !== -1) {
-                  category = "Oils and Ghee";
-                } else if (lowerName.indexOf("dal") !== -1 || lowerName.indexOf("rajma") !== -1 || lowerName.indexOf("chana") !== -1) {
-                  category = "Dals and Pulses";
-                } else if (lowerName.indexOf("atta") !== -1 || lowerName.indexOf("flour") !== -1 || lowerName.indexOf("rice") !== -1 || lowerName.indexOf("poha") !== -1) {
-                  category = "Atta and Grains";
-                }
-
-                const newItem = {
-                  id: "item-" + Date.now() + "-" + idx,
-                  name: item.name,
-                  shortName: item.name,
-                  category: category,
-                  current: item.qty,
-                  max: item.qty * 1.5,
-                  unit: item.unit,
-                  threshold: Math.max(1, +(item.qty * 0.25).toFixed(1)),
-                  dailyBurn: 0.1,
-                  price: 45
-                };
-                updatedPantry = [newItem, ...updatedPantry];
-                confirmedList.push({ name: item.name, qty: item.qty + " " + item.unit });
-              }
+          // 3. SPECIFIC ITEM AVAILABILITY
+          if (lower.startsWith("do i have") || lower.startsWith("is there") || lower.startsWith("how much")) {
+            const matchedItem = pantry.find(item => {
+              const name = item.name.toLowerCase();
+              const short = (item.shortName || "").toLowerCase();
+              return lower.includes(name) || lower.includes(short) || name.split(" ").some(w => w.length > 3 && lower.includes(w));
             });
 
-            setPantry(updatedPantry);
-            setChatMessages(prev => [
-              ...prev,
-              {
-                id: "ai-" + Date.now(),
-                sender: "ai",
-                text: "Great! I have recorded and added " + confirmedList.length + " items to your kitchen grocery list and digital pantry:",
-                stockedItems: confirmedList,
-                totalStockedCount: confirmedList.length,
-                suggestions: [
-                  "What is present in my pantry list?",
-                  "What can I cook with what I have?",
-                  "Which groceries are running low?"
-                ]
-              }
-            ]);
-            showToast("Added " + confirmedList.map(c => c.qty + " " + c.name).join(", ") + " to your grocery list!");
+            if (matchedItem) {
+              const isLow = matchedItem.current <= matchedItem.threshold;
+              setChatMessages(prev => [
+                ...prev,
+                {
+                  id: "ai-" + Date.now(),
+                  sender: "ai",
+                  text: `✅ **${matchedItem.name}** is in your kitchen:\n• **Stock**: ${matchedItem.current} ${matchedItem.unit} (Threshold: ${matchedItem.threshold} ${matchedItem.unit})\n• **Freshness**: ~${matchedItem.daysExpiry || 30} days shelf-life\n• **Status**: ${isLow ? '🚨 Low stock alert!' : '🟢 Sufficient'}`,
+                  suggestions: [`What can I cook with ${matchedItem.shortName}?`, "Show pantry list"]
+                }
+              ]);
+            } else {
+              setChatMessages(prev => [
+                ...prev,
+                {
+                  id: "ai-" + Date.now(),
+                  sender: "ai",
+                  text: `❌ I checked your pantry list and could not find that item. Would you like to add it?`,
+                  suggestions: ["What is present in my pantry list?", "What can I cook?"]
+                }
+              ]);
+            }
             return;
           }
 
-          // 7. DYNAMIC PANTRY-AWARE RECIPE RECOMMENDATIONS
-          if (
-            lower.indexOf("what can i cook") !== -1 ||
-            lower.indexOf("suggest") !== -1 ||
-            lower.indexOf("recipe") !== -1 ||
-            lower.indexOf("available") !== -1 ||
-            lower.indexOf("dinner") !== -1 ||
-            lower.indexOf("lunch") !== -1 ||
-            lower.indexOf("video") !== -1 ||
-            lower.indexOf("youtube") !== -1
-          ) {
-            // Rank recipes dynamically by matching pantry items
+          // 4. RECIPE SUGGESTIONS
+          if (lower.includes("what can i cook") || lower.includes("suggest") || lower.includes("recipe") || lower.includes("dinner")) {
             const rankedRecipes = INDIAN_RECIPES.map(recipe => {
               let matchedCount = 0;
               recipe.ingredients.forEach(ing => {
@@ -1005,14 +645,12 @@
                   const pName = p.name.toLowerCase();
                   const pShort = (p.shortName || "").toLowerCase();
                   const ingName = ing.name.toLowerCase();
-                  return pName.indexOf(ingName) !== -1 || ingName.indexOf(pName) !== -1 || pShort.indexOf(ingName) !== -1 || ingName.indexOf(pShort) !== -1;
+                  return pName.includes(ingName) || ingName.includes(pName) || pShort.includes(ingName) || ingName.includes(pShort);
                 });
-                if (found && found.current > 0) {
-                  matchedCount++;
-                }
+                if (found && found.current > 0) matchedCount++;
               });
               const matchPct = Math.round((matchedCount / recipe.ingredients.length) * 100);
-              return { ...recipe, matchPct, matchedCount, totalCount: recipe.ingredients.length, reason: `${matchedCount}/${recipe.ingredients.length} ingredients ready in your kitchen (${matchPct}% match)` };
+              return { ...recipe, matchPct, matchedCount, totalCount: recipe.ingredients.length, reason: `${matchedCount}/${recipe.ingredients.length} ingredients ready (${matchPct}% match)` };
             }).sort((a, b) => b.matchPct - a.matchPct);
 
             setChatMessages(prev => [
@@ -1020,114 +658,49 @@
               {
                 id: "ai-" + Date.now(),
                 sender: "ai",
-                text: `Based on your live pantry inventory (${pantry.length} items), here are the top recipe matches you can prepare right now with full YouTube tutorials and step-by-step guides:`,
-                dishRecommendations: rankedRecipes.slice(0, 4),
-                suggestions: [
-                  "What is present in my pantry list?",
-                  "Which groceries are running low?",
-                  "I cooked Dal Tadka and Rice today"
-                ]
+                text: `Based on your live kitchen inventory, here are top recipe recommendations for ${totalMealEaters} portions:`,
+                dishRecommendations: rankedRecipes.slice(0, 3),
+                suggestions: ["What is in my pantry?", "Which items are expiring soon?"]
               }
             ]);
             return;
           }
 
-          // 8. MEAL LOGGING & DEDUCTION (e.g., "I cooked Dal Tadka", "used 1kg Atta")
-          if (lower.indexOf("cook") !== -1 || lower.indexOf("made") !== -1 || lower.indexOf("prepared") !== -1 || lower.indexOf("ate") !== -1 || lower.indexOf("dal") !== -1 || lower.indexOf("paratha") !== -1 || lower.indexOf("rajma") !== -1 || lower.indexOf("poha") !== -1 || lower.indexOf("chai") !== -1) {
-            let matchedRecipe = INDIAN_RECIPES.find(r => lower.indexOf(r.name.toLowerCase()) !== -1 || lower.indexOf(r.id.toLowerCase()) !== -1 || lower.indexOf(r.cuisine.toLowerCase()) !== -1);
-            if (!matchedRecipe) {
-              if (lower.indexOf("dal") !== -1 || lower.indexOf("rice") !== -1) matchedRecipe = INDIAN_RECIPES[0];
-              else if (lower.indexOf("rajma") !== -1) matchedRecipe = INDIAN_RECIPES[1];
-              else if (lower.indexOf("paratha") !== -1 || lower.indexOf("aloo") !== -1) matchedRecipe = INDIAN_RECIPES[2];
-              else if (lower.indexOf("paneer") !== -1) matchedRecipe = INDIAN_RECIPES[3];
-              else if (lower.indexOf("poha") !== -1) matchedRecipe = INDIAN_RECIPES[4];
-              else if (lower.indexOf("chai") !== -1 || lower.indexOf("tea") !== -1) matchedRecipe = INDIAN_RECIPES[5];
-              else matchedRecipe = INDIAN_RECIPES[0];
-            }
-
-            let effectiveDiners = baseFamilyServings;
-            const numberMatch = lower.match(/\b([1-9]|10)\b/);
-            if (numberMatch) effectiveDiners = +(parseInt(numberMatch[0]) * appetiteMultiplier).toFixed(1);
-
-            setChatMessages(prev => [
-              ...prev,
-              {
-                id: "ai-" + Date.now(),
-                sender: "ai",
-                text: "Understood! Prepared " + matchedRecipe.name + " (" + effectiveDiners + " portion units). Click below to auto-deduct ingredients from your kitchen stock or watch the recipe tutorial:",
-                actionableMeal: {
-                  recipe: matchedRecipe,
-                  servings: effectiveDiners
-                },
-                suggestions: [
-                  "What is present in my pantry list?",
-                  "What can I cook for next meal?",
-                  "Check Restock Radar"
-                ]
-              }
-            ]);
-            return;
-          }
-
-          // 9. LOW STOCK RADAR
-          if (lower.indexOf("low") !== -1 || lower.indexOf("stock") !== -1 || lower.indexOf("radar") !== -1 || lower.indexOf("empty") !== -1 || lower.indexOf("running out") !== -1) {
-            const lowItemsNames = lowStockItems.map(i => i.shortName + " (" + i.current + " " + i.unit + " left)").join(", ");
-            setChatMessages(prev => [
-              ...prev,
-              {
-                id: "ai-" + Date.now(),
-                sender: "ai",
-                text: lowStockItems.length > 0
-                  ? "Warning: You have " + lowStockItems.length + " items running low in your kitchen: " + lowItemsNames + ". I recommend restocking them today!"
-                  : "All grocery staples in your kitchen pantry are above safety threshold! You are fully stocked.",
-                suggestions: [
-                  "What is present in my pantry list?",
-                  "What can I cook with what I have?",
-                  "Simulate Zepto Order Sync"
-                ]
-              }
-            ]);
-            return;
-          }
-
-          // 10. DEFAULT FALLBACK
+          // DEFAULT FALLBACK
           setChatMessages(prev => [
             ...prev,
             {
               id: "ai-" + Date.now(),
               sender: "ai",
-              text: `Namaste! I am tracking all **${pantry.length} items** in your kitchen inventory.\n\n` +
-                `You can ask me:\n` +
-                `• *"What is present in my pantry list?"* for an instant breakdown.\n` +
-                `• *"Do I have Atta or Paneer?"* to check specific ingredient availability.\n` +
-                `• *"What can I cook?"* for recipe matching with YouTube tutorials.\n` +
-                `• Say *"I have 2 kg Atta 2 bread packets"* to add groceries.`,
-              suggestions: [
-                "What is present in my pantry list?",
-                "What can I cook with what I have?",
-                "Which groceries are running low?"
-              ]
+              text: `Namaste! I am tracking all **${pantry.length} items** in your kitchen. You can ask *"What is in my pantry?"*, *"What can I cook?"*, or speak using the microphone button!`,
+              suggestions: ["What is present in my pantry list?", "What can I cook?", "Which items are expiring soon?"]
             }
           ]);
-        }, 500);
+        }, 400);
       };
 
       const filteredItems = useMemo(() => {
         return pantry.filter(item => {
           const matchesCategory = selectedCategory === "All Items" || item.category === selectedCategory;
-          const matchesSearch = item.name.toLowerCase().indexOf(searchQuery.toLowerCase()) !== -1 ||
-                                item.shortName.toLowerCase().indexOf(searchQuery.toLowerCase()) !== -1 ||
-                                item.category.toLowerCase().indexOf(searchQuery.toLowerCase()) !== -1;
+          const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                                item.shortName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                                item.category.toLowerCase().includes(searchQuery.toLowerCase());
           return matchesCategory && matchesSearch;
         });
       }, [pantry, selectedCategory, searchQuery]);
 
-      const unreadAlertsCount = notificationsList.filter(n => n.unread).length;
-
       return (
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           
-          {/* HEADER */}
+          {/* TOAST ALERT */}
+          {toast && (
+            <div class="fixed top-5 right-5 z-50 bg-slate-900 text-white px-4 py-3 rounded-2xl shadow-2xl border border-orange-500/40 text-xs font-bold flex items-center gap-2 animate-bounce">
+              <Icons.Sparkles />
+              <span>{toast}</span>
+            </div>
+          )}
+
+          {/* APP HEADER */}
           <header class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 pb-6 border-b border-orange-200/70 mb-6">
             <div class="flex items-center gap-3.5">
               <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-amber-600 to-orange-500 flex items-center justify-center text-white text-2xl shadow-lg shadow-orange-500/25">
@@ -1139,36 +712,20 @@
                     DearHome
                   </h1>
                   <span class="text-[10px] font-black uppercase tracking-wider bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-md">
-                    Smart Stockout Alerts
+                    SDG 12: Zero Waste Engine
                   </span>
                 </div>
-                <p class="text-xs text-slate-500 font-medium">Autonomous Indian Kitchen Inventory, Invoicing & Stockout Alerts</p>
+                <p class="text-xs text-slate-500 font-medium">Smart Indian Kitchen Inventory, Bill Ingestion & Meal Depletion</p>
               </div>
             </div>
 
-            {/* ACTION BUTTONS & NOTIFICATION BELL */}
             <div class="flex flex-wrap items-center gap-2.5">
-              
-              {/* NOTIFICATION BELL BUTTON */}
               <button
-                onClick={() => setIsNotificationCenterOpen(true)}
-                class="relative p-2.5 rounded-2xl bg-white border border-slate-200 hover:bg-slate-50 text-slate-800 font-bold shadow-sm transition-all flex items-center justify-center"
-                title="Stockout Notification Center"
+                onClick={() => setActiveTab("ledger")}
+                class="px-3.5 py-2.5 rounded-2xl bg-white border border-slate-200 hover:bg-slate-50 text-slate-800 font-bold text-xs shadow-sm transition-all flex items-center gap-1.5"
               >
-                <Icons.Bell />
-                {unreadAlertsCount > 0 && (
-                  <span class="absolute -top-1.5 -right-1.5 min-w-[20px] h-5 px-1 bg-red-600 text-white rounded-full text-[10px] font-black flex items-center justify-center animate-bounce shadow-md">
-                    {unreadAlertsCount}
-                  </span>
-                )}
-              </button>
-
-              <button
-                onClick={() => setActiveTab("inbound")}
-                class="px-3.5 py-2.5 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold text-xs shadow-md shadow-indigo-500/20 transition-all flex items-center gap-1.5"
-              >
-                <Icons.Mail />
-                <span>Inbound Email Hub (Phase 2)</span>
+                <Icons.List />
+                <span>Kitchen Ledger</span>
               </button>
 
               <button
@@ -1176,30 +733,21 @@
                 class="px-3.5 py-2.5 rounded-2xl bg-gradient-to-r from-orange-500 to-amber-500 text-white font-bold text-xs shadow-md shadow-orange-500/20 transition-all flex items-center gap-1.5"
               >
                 <Icons.Camera />
-                <span>Invoice OCR (Phase 1)</span>
-              </button>
-
-              <button
-                onClick={() => setIsAddItemModalOpen(true)}
-                class="px-3.5 py-2.5 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs shadow-sm transition-all flex items-center gap-1.5"
-              >
-                <Icons.Plus />
-                <span>Add Item</span>
+                <span>Scan Grocery Bill</span>
               </button>
             </div>
           </header>
 
-          {/* MAIN NAVIGATION BAR */}
+          {/* NAVIGATION BAR */}
           <nav class="flex gap-2 p-1.5 bg-slate-100/90 rounded-2xl mb-8 overflow-x-auto border border-slate-200/80">
             {[
               { id: "scan", label: "Bill OCR Scanner", icon: <Icons.Camera /> },
-              { id: "inbound", label: "Email Auto-Sync", icon: <Icons.Mail />, badge: "Autonomous" },
               { id: "assistant", label: "Voice & AI Assistant", icon: <Icons.Chat /> },
               { id: "pantry", label: "Digital Pantry", count: pantry.length, icon: <Icons.Box /> },
               { id: "family", label: "Family & Guest Scaler", icon: <Icons.Users /> },
               { id: "cook", label: "Cook & Deplete", icon: <Icons.Flame /> },
-              { id: "radar", label: "Restock Radar", count: lowStockItems.length, alert: lowStockItems.length > 0, icon: <Icons.Alert /> },
-              { id: "analytics", label: "Household Insights", icon: <Icons.Chart /> }
+              { id: "ledger", label: "Kitchen Ledger", count: ledgerEvents.length, icon: <Icons.List /> },
+              { id: "radar", label: "Restock Radar", count: lowStockItems.length, alert: lowStockItems.length > 0, icon: <Icons.Alert /> }
             ].map(tab => (
               <button
                 key={tab.id}
@@ -1212,11 +760,6 @@
               >
                 {tab.icon}
                 <span>{tab.label}</span>
-                {tab.badge && (
-                  <span class="text-[9px] px-1.5 py-0.5 rounded-md bg-indigo-100 text-indigo-800 font-extrabold">
-                    {tab.badge}
-                  </span>
-                )}
                 {tab.count !== undefined && tab.count > 0 && (
                   <span class={"text-[10px] px-1.5 py-0.2 rounded-full font-black " + (
                     tab.alert ? "bg-red-500 text-white animate-pulse" : "bg-slate-200 text-slate-700"
@@ -1228,17 +771,17 @@
             ))}
           </nav>
 
-          {/* TAB: PHASE 1 MULTIMODAL INVOICE & RECEIPT SCANNER */}
+          {/* TAB: BILL OCR SCANNER */}
           {activeTab === "scan" && (
             <div class="max-w-4xl mx-auto space-y-6">
               <div class="bg-gradient-to-r from-orange-600 via-amber-600 to-orange-700 rounded-3xl p-6 text-white shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
                 <div>
                   <span class="text-[10px] font-black uppercase tracking-wider bg-white/20 px-3 py-1 rounded-full">
-                    Phase 1: Universal Multimodal Ingestion Engine
+                    Multimodal Invoice Parser
                   </span>
-                  <h2 class="text-2xl font-black mt-2">Delivery Bill & Receipt Parser</h2>
+                  <h2 class="text-2xl font-black mt-2">Delivery Bill & Receipt Scanner</h2>
                   <p class="text-xs text-orange-100 mt-1 max-w-xl">
-                    Extracts line items, gram weights, and rates from Zepto, Blinkit, Swiggy Instamart, Amazon Fresh, and D-Mart physical receipts.
+                    Extracts items, weights (kg, g, L), and rates from Zepto, Blinkit, Swiggy, Amazon Fresh, and supermarket receipts.
                   </p>
                 </div>
                 <div class="w-14 h-14 rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center text-white text-2xl border border-white/20 shrink-0">
@@ -1246,59 +789,19 @@
                 </div>
               </div>
 
-              {/* SAMPLE INVOICE SELECTOR */}
-              <div class="bg-white rounded-3xl p-5 border border-orange-100 shadow-sm space-y-3">
-                <div class="flex justify-between items-center">
-                  <span class="text-xs font-black text-slate-700 uppercase tracking-wider">
-                    Select a Delivery App Invoice to Test Gemini Multimodal Parsing:
-                  </span>
-                  <span class="text-[10px] font-bold text-orange-600 bg-orange-50 px-2 py-1 rounded-md">
-                    Interactive Simulator
-                  </span>
-                </div>
-
-                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                  {SAMPLE_INVOICES.map(inv => (
-                    <button
-                      key={inv.id}
-                      onClick={() => {
-                        setSelectedInvoice(inv);
-                        setIsScanning(true);
-                        setTimeout(() => {
-                          setIsScanning(false);
-                          setScanResult(inv);
-                        }, 500);
-                      }}
-                      class={"p-3 rounded-2xl border text-left transition-all " + (
-                        selectedInvoice.id === inv.id
-                          ? "border-orange-500 bg-orange-50/70 shadow-sm"
-                          : "border-slate-200 bg-slate-50 hover:bg-white"
-                      )}
-                    >
-                      <span class={"text-[10px] font-black px-2 py-0.5 rounded-md border block w-max mb-1.5 " + inv.badgeColor}>
-                        {inv.platform.split(" ")[0]}
-                      </span>
-                      <span class="font-bold text-xs text-slate-900 block leading-tight">{inv.platform}</span>
-                      <span class="text-[10px] text-slate-500 block mt-1">{inv.items.length} Items ({inv.totalAmount})</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              
-              {/* FILE UPLOAD / DRAG & DROP ZONE */}
+              {/* FILE DRAG & DROP ZONE */}
               <div class="bg-white rounded-3xl p-6 border-2 border-dashed border-orange-300 hover:border-orange-500 transition-all text-center space-y-3">
                 <div class="w-12 h-12 mx-auto rounded-2xl bg-orange-100 text-orange-600 flex items-center justify-center">
                   <Icons.Upload />
                 </div>
                 <div>
-                  <h4 class="font-black text-sm text-slate-900">Upload Your Own Grocery Bill or Thermal Receipt</h4>
-                  <p class="text-xs text-slate-500 mt-0.5">Drag and drop a photo or PDF (Zepto, Blinkit, Swiggy, Instamart, Amazon, D-Mart)</p>
+                  <h4 class="font-black text-sm text-slate-900">Upload Receipt Photo or PDF Bill</h4>
+                  <p class="text-xs text-slate-500 mt-0.5">Drag and drop or browse to scan Zepto, Blinkit, D-Mart or paper bills</p>
                 </div>
                 <div>
                   <label class="inline-flex items-center gap-1.5 px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-xl cursor-pointer shadow-md shadow-orange-500/20 transition-all">
                     <Icons.Camera />
-                    <span>Browse & Scan Bill Photo</span>
+                    <span>Browse Bill Photo / PDF</span>
                     <input
                       type="file"
                       accept="image/*,application/pdf"
@@ -1308,7 +811,7 @@
                         if (file) {
                           setCustomUploadedFile(file.name);
                           setIsScanning(true);
-                          showToast("Scanning bill: " + file.name + " with Gemini Multimodal OCR...");
+                          showToast("Scanning receipt with Gemini OCR...");
                           setTimeout(() => {
                             setIsScanning(false);
                             const parsedSample = {
@@ -1316,21 +819,19 @@
                               platform: "Scanned Receipt (" + file.name.substring(0, 15) + ")",
                               badgeColor: "bg-emerald-100 text-emerald-800 border-emerald-300",
                               orderId: "#SCAN-" + Math.floor(1000 + Math.random() * 9000),
-                              time: "Just now (Multimodal OCR Processed)",
+                              time: "Just now (OCR Extracted)",
                               totalAmount: "₹620",
                               items: [
                                 { name: "Aashirvaad Shudh Chakki Atta (5kg)", shortName: "Chakki Atta", qty: 5, unit: "kg", rate: "₹240", category: "Atta and Grains" },
                                 { name: "Amul Taaza Toned Milk (2L)", shortName: "Amul Milk", qty: 2, unit: "L", rate: "₹112", category: "Dairy and Fresh" },
                                 { name: "Tata Sampann Toor Dal (1kg)", shortName: "Toor Dal", qty: 1, unit: "kg", rate: "₹175", category: "Dals and Pulses" },
-                                { name: "Fresh Country Tomatoes (1kg)", shortName: "Tomato (Tamatar)", qty: 1, unit: "kg", rate: "₹35", category: "Vegetables" },
-                                { name: "Fresh Red Onions (1kg)", shortName: "Onion (Pyaz)", qty: 1, unit: "kg", rate: "₹30", category: "Vegetables" },
-                                { name: "Catch Jeera (200g)", shortName: "Jeera (Cumin)", qty: 200, unit: "g", rate: "₹55", category: "Spices and Condiments" }
+                                { name: "Fresh Country Tomatoes (1kg)", shortName: "Tomato (Tamatar)", qty: 1, unit: "kg", rate: "₹35", category: "Vegetables" }
                               ]
                             };
                             setSelectedInvoice(parsedSample);
                             setScanResult(parsedSample);
-                            showToast("Extracted 6 line items from uploaded receipt!");
-                          }, 1000);
+                            showToast("Extracted items successfully!");
+                          }, 800);
                         }
                       }}
                     />
@@ -1343,204 +844,30 @@
                 </div>
               </div>
 
-              {/* ACTIVE INVOICE DETAILS & INGESTION CARD */}
+              {/* ACTIVE INVOICE DETAILS & INGESTION BUTTON */}
               <div class="bg-white rounded-3xl p-6 sm:p-8 border border-orange-200 shadow-md space-y-6">
-                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pb-4 border-b border-slate-100">
+                <div class="flex justify-between items-center pb-4 border-b border-slate-100">
                   <div>
-                    <div class="flex items-center gap-2">
-                      <h3 class="text-lg font-black text-slate-900">{scanResult.platform}</h3>
-                      <span class={"text-xs font-black px-2.5 py-0.5 rounded-lg border " + scanResult.badgeColor}>
-                        {scanResult.orderId}
-                      </span>
-                    </div>
-                    <span class="text-xs text-slate-500 mt-0.5 block">{scanResult.time}</span>
+                    <h3 class="text-lg font-black text-slate-900">{scanResult.platform}</h3>
+                    <span class="text-xs text-slate-500 block mt-0.5">{scanResult.time}</span>
                   </div>
-
-                  <div class="text-right">
-                    <span class="text-[11px] font-bold text-slate-400 block uppercase">Bill Total</span>
-                    <span class="text-xl font-black text-slate-900">{scanResult.totalAmount}</span>
-                  </div>
-                </div>
-
-                {/* EXTRACTED ITEMS TABLE */}
-                <div class="overflow-x-auto">
-                  <table class="w-full text-left text-xs">
-                    <thead>
-                      <tr class="border-b border-slate-200 text-slate-400 font-bold uppercase tracking-wider text-[10px]">
-                        <th class="pb-3">Item Description</th>
-                        <th class="pb-3">Category</th>
-                        <th class="pb-3">Quantity</th>
-                        <th class="pb-3">Rate</th>
-                        <th class="pb-3 text-right">Pantry Impact</th>
-                      </tr>
-                    </thead>
-                    <tbody class="divide-y divide-slate-100 font-medium text-slate-700">
-                      {scanResult.items.map((item, idx) => (
-                        <tr key={idx} class="hover:bg-slate-50">
-                          <td class="py-3.5 font-bold text-slate-900">{item.name}</td>
-                          <td class="py-3.5">
-                            <span class="px-2 py-0.5 bg-slate-100 text-slate-600 rounded-md text-[10px] font-bold">
-                              {item.category}
-                            </span>
-                          </td>
-                          <td class="py-3.5 font-black text-orange-900">{item.qty} {item.unit}</td>
-                          <td class="py-3.5 text-slate-500">{item.rate}</td>
-                          <td class="py-3.5 text-right font-black text-emerald-700">
-                            +{item.qty} {item.unit} to stock
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-
-                {/* 1-CLICK INGESTION BUTTON */}
-                <div class="pt-2 flex flex-col sm:flex-row gap-3">
                   <button
                     onClick={() => handleIngestInvoiceItems(scanResult.items, scanResult.platform)}
-                    class="flex-1 py-3.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-black text-xs rounded-2xl shadow-lg shadow-emerald-600/20 transition-all flex items-center justify-center gap-2"
+                    class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs rounded-2xl shadow-lg shadow-emerald-600/25 flex items-center gap-1.5 transition-all"
                   >
                     <Icons.Check />
-                    <span>Confirm & Ingest {scanResult.items.length} Line Items into Digital Pantry</span>
-                  </button>
-
-                  <button
-                    onClick={() => setActiveTab("pantry")}
-                    class="px-5 py-3.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-2xl transition-all"
-                  >
-                    View Current Stock
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* TAB: PHASE 2 DEDICATED INBOUND EMAIL FORWARDING HUB */}
-          {activeTab === "inbound" && (
-            <div class="max-w-4xl mx-auto space-y-6">
-              <div class="bg-gradient-to-r from-blue-700 via-indigo-700 to-purple-800 rounded-3xl p-6 text-white shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-                <div>
-                  <div class="flex items-center gap-2">
-                    <span class="text-[10px] font-black uppercase tracking-wider bg-white/20 px-3 py-1 rounded-full">
-                      Phase 2: Autonomous Ingestion Hub
-                    </span>
-                    <span class="flex items-center gap-1 bg-emerald-400/20 text-emerald-200 px-2 py-0.5 rounded-full text-[10px] font-bold border border-emerald-400/30">
-                      <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
-                      Webhook Active
-                    </span>
-                  </div>
-                  <h2 class="text-2xl font-black mt-2">Email Auto-Forwarding Ingestion</h2>
-                  <p class="text-xs text-indigo-100 mt-1 max-w-xl">
-                    Auto-forwards Zepto, Blinkit, and Amazon Fresh PDF invoices to your private DearHome inbox for 100% autonomous pantry top-ups.
-                  </p>
-                </div>
-                <div class="w-14 h-14 rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center text-white text-2xl border border-white/20 shrink-0">
-                  <Icons.Mail />
-                </div>
-              </div>
-
-              {/* USER'S PERSONALIZED INBOX CARD */}
-              <div class="bg-white rounded-3xl p-6 border border-indigo-100 shadow-sm space-y-4">
-                <span class="text-xs font-black text-slate-500 uppercase tracking-wider block">
-                  Your Dedicated DearHome Inbound Address
-                </span>
-                
-                <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-                  <div class="flex-1 p-3.5 bg-indigo-50/60 rounded-2xl border border-indigo-200 font-mono text-xs font-bold text-indigo-950 flex items-center justify-between">
-                    <span>sinduja1219@inbox.dearhome.ai</span>
-                    <span class="text-[10px] text-indigo-600 font-sans font-extrabold uppercase">Verified Inbound Route</span>
-                  </div>
-
-                  <button
-                    onClick={() => {
-                      navigator.clipboard?.writeText("sinduja1219@inbox.dearhome.ai");
-                      showToast("Copied sinduja1219@inbox.dearhome.ai to clipboard!");
-                    }}
-                    class="px-5 py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-2xl shadow-md shadow-indigo-500/20 flex items-center justify-center gap-2 transition-all"
-                  >
-                    <Icons.Copy />
-                    <span>Copy Address</span>
+                    <span>Ingest All Items into Live Pantry</span>
                   </button>
                 </div>
 
-                {/* 3-STEP GMAIL SETUP GUIDE */}
-                <div class="pt-4 border-t border-slate-100">
-                  <h4 class="text-xs font-black text-slate-800 uppercase tracking-wider mb-3">
-                    3-Minute Setup in Gmail (1-Time Configuration):
-                  </h4>
-                  <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
-                    <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-1.5">
-                      <span class="w-6 h-6 rounded-lg bg-indigo-100 text-indigo-800 font-black text-xs flex items-center justify-center">1</span>
-                      <h5 class="font-bold text-slate-900">Create Gmail Filter</h5>
-                      <p class="text-[11px] text-slate-500">
-                        Search: <code class="bg-white px-1 py-0.5 rounded text-[10px]">from:(zepto.co.in OR blinkit.com OR swiggy.in)</code>
-                      </p>
-                    </div>
-
-                    <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-1.5">
-                      <span class="w-6 h-6 rounded-lg bg-indigo-100 text-indigo-800 font-black text-xs flex items-center justify-center">2</span>
-                      <h5 class="font-bold text-slate-900">Add Forwarding Rule</h5>
-                      <p class="text-[11px] text-slate-500">
-                        Check <i>"Forward it to"</i> and enter <code class="bg-white px-1 py-0.5 rounded text-[10px]">sinduja1219@inbox.dearhome.ai</code>
-                      </p>
-                    </div>
-
-                    <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-1.5">
-                      <span class="w-6 h-6 rounded-lg bg-indigo-100 text-indigo-800 font-black text-xs flex items-center justify-center">3</span>
-                      <h5 class="font-bold text-slate-900">Zero-Touch Sync</h5>
-                      <p class="text-[11px] text-slate-500">
-                        Every delivery bill is parsed automatically by Gemini 2.0 Flash in &lt;1 second.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* LIVE INCOMING WEBHOOK STREAM SIMULATOR */}
-              <div class="bg-white rounded-3xl p-6 sm:p-8 border border-indigo-100 shadow-md space-y-5">
-                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-                  <div>
-                    <h3 class="text-base font-black text-slate-900">Live Inbound Webhook Stream</h3>
-                    <p class="text-xs text-slate-500">Real-time incoming delivery invoices processed by SendGrid Inbound Parse + Gemini.</p>
-                  </div>
-
-                  <div class="flex gap-2">
-                    <button
-                      onClick={() => handleSimulateInboundEmail("Zepto", SAMPLE_INVOICES[0])}
-                      disabled={isSimulatingEmail}
-                      class="px-3 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs font-bold transition-all shadow-sm"
-                    >
-                      {isSimulatingEmail ? "Simulating Webhook..." : "Simulate Zepto Email Ingest"}
-                    </button>
-                    <button
-                      onClick={() => handleSimulateInboundEmail("Blinkit", SAMPLE_INVOICES[1])}
-                      disabled={isSimulatingEmail}
-                      class="px-3 py-2 bg-yellow-500 hover:bg-yellow-600 text-slate-950 rounded-xl text-xs font-bold transition-all shadow-sm"
-                    >
-                      Simulate Blinkit Email Ingest
-                    </button>
-                  </div>
-                </div>
-
-                <div class="space-y-2.5">
-                  {emailInboundFeed.map(feed => (
-                    <div key={feed.id} class="p-4 bg-slate-50 rounded-2xl border border-slate-200 text-xs flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
-                      <div class="space-y-0.5">
-                        <div class="flex items-center gap-2">
-                          <span class="font-mono text-indigo-700 font-bold">{feed.sender}</span>
-                          <span class="text-slate-300">•</span>
-                          <span class="font-extrabold text-slate-900">{feed.subject}</span>
-                        </div>
-                        <p class="text-[11px] text-slate-500 font-medium">Extracted: {feed.itemsSummary}</p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {scanResult.items.map((item, idx) => (
+                    <div key={idx} class="p-3 bg-slate-50 rounded-2xl border border-slate-200 flex justify-between items-center text-xs font-bold">
+                      <div>
+                        <span class="text-slate-900 block">{item.name}</span>
+                        <span class="text-slate-400 text-[10px]">{item.category}</span>
                       </div>
-
-                      <div class="flex items-center gap-2 shrink-0">
-                        <span class="text-[10px] text-slate-400">{feed.time}</span>
-                        <span class="px-2.5 py-1 bg-emerald-100 text-emerald-800 rounded-lg font-black text-[10px] flex items-center gap-1">
-                          <Icons.Check />
-                          <span>{feed.status}</span>
-                        </span>
-                      </div>
+                      <span class="text-orange-600 font-black">{item.qty} {item.unit}</span>
                     </div>
                   ))}
                 </div>
@@ -1548,192 +875,54 @@
             </div>
           )}
 
-          {/* TAB: CONVERSATIONAL AI KITCHEN ASSISTANT */}
+          {/* TAB: VOICE & AI KITCHEN ASSISTANT */}
           {activeTab === "assistant" && (
-            <div class="max-w-3xl mx-auto space-y-4">
-              <div class="bg-gradient-to-r from-amber-600 via-orange-600 to-amber-700 rounded-3xl p-6 text-white shadow-xl flex items-center justify-between">
-                <div>
-                  <span class="text-[10px] font-black uppercase tracking-wider bg-white/20 px-3 py-1 rounded-full">
-                    Powered by Google Gemini 2.0 Flash
-                  </span>
-                  <h2 class="text-2xl font-black mt-2">DearHome Conversational Agent</h2>
-                  <p class="text-xs text-orange-100 mt-1">
-                    First step kitchen onboarding, stockout alerts, meal suggestions with YouTube tutorials, and live auto-depletion.
-                  </p>
+            <div class="max-w-3xl mx-auto bg-white rounded-3xl p-6 sm:p-8 border border-orange-200 shadow-xl space-y-6">
+              <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-2xl bg-orange-500 text-white flex items-center justify-center font-black">
+                    <Icons.Chat />
+                  </div>
+                  <div>
+                    <h3 class="font-black text-base text-slate-900">DearHome AI Kitchen Assistant</h3>
+                    <p class="text-xs text-slate-500">Pantry Aware • Voice Enabled • Recipe Recommendations</p>
+                  </div>
                 </div>
-                <div class="w-14 h-14 rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center text-white text-2xl border border-white/20">
-                  <Icons.Sparkles />
-                </div>
+                <span class="text-xs font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200">
+                  {pantry.length} items in memory
+                </span>
               </div>
 
-              <div class="bg-white rounded-3xl p-6 border border-orange-100 shadow-sm min-h-[440px] max-h-[520px] overflow-y-auto space-y-4">
+              {/* CHAT MESSAGES */}
+              <div class="h-96 overflow-y-auto space-y-4 pr-2">
                 {chatMessages.map(msg => (
-                  <div
-                    key={msg.id}
-                    class={"flex flex-col " + (msg.sender === "user" ? "items-end" : "items-start")}
-                  >
-                    <div
-                      class={"p-4 rounded-2xl max-w-lg text-xs leading-relaxed " + (
-                        msg.sender === "user"
-                          ? "bg-slate-900 text-white rounded-br-none"
-                          : "bg-orange-50 border border-orange-200/80 text-slate-800 rounded-bl-none shadow-sm"
-                      )}
-                    >
-                      <p class="font-medium">{msg.text}</p>
-
-                      {msg.notificationAction && (
-                        <div class="mt-3 p-3.5 bg-white rounded-2xl border border-amber-300 shadow-sm space-y-2.5">
-                          <div class="flex items-center justify-between">
-                            <span class="text-xs font-black text-amber-950 flex items-center gap-1.5">
-                              <Icons.Bell />
-                              <span>Stockout Alerts & Runout Notifications</span>
-                            </span>
-                            <span class="text-[10px] font-bold bg-amber-100 text-amber-900 px-2 py-0.5 rounded-md">
-                              Active
-                            </span>
-                          </div>
-                          <p class="text-[11px] text-slate-600">
-                            Automatic push notifications are triggered as soon as items cross below custom safety thresholds.
-                          </p>
-                          <div class="flex gap-2 pt-1 border-t border-slate-100">
-                            <button
-                              onClick={() => setIsNotificationCenterOpen(true)}
-                              class="px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-white font-bold text-[11px] rounded-xl transition-all"
-                            >
-                              Open Notification Center
-                            </button>
-                            <button
-                              onClick={() => {
-                                setSelectedItemForAlert(pantry[0]);
-                                setIsThresholdModalOpen(true);
-                              }}
-                              class="px-3 py-1.5 bg-amber-100 hover:bg-amber-200 text-amber-950 font-bold text-[11px] rounded-xl transition-all"
-                            >
-                              Edit Thresholds
-                            </button>
-                          </div>
-                        </div>
-                      )}
-
-                      {msg.stockedItems && (
-                        <div class="mt-3 p-3.5 bg-white rounded-2xl border border-emerald-300 shadow-sm space-y-2.5">
-                          <div class="flex items-center justify-between">
-                            <span class="text-xs font-black text-emerald-900 flex items-center gap-1.5">
-                              <Icons.Check />
-                              <span>Grocery List & Pantry Updated ({msg.totalStockedCount} Items)</span>
-                            </span>
-                            <button
-                              onClick={() => setActiveTab("pantry")}
-                              class="text-[10px] font-bold text-orange-700 bg-orange-100 hover:bg-orange-200 px-2 py-0.5 rounded-md transition-all"
-                            >
-                              View in Pantry
-                            </button>
-                          </div>
-                          <div class="flex flex-wrap gap-1.5 pt-1 border-t border-slate-100">
-                            {msg.stockedItems.map((stk, sidx) => (
-                              <span key={sidx} class="inline-flex items-center gap-1 px-2.5 py-1 bg-emerald-50 border border-emerald-200 text-emerald-900 rounded-lg text-[11px] font-bold">
-                                <span>{stk.name}:</span>
-                                <span class="text-emerald-700 font-black">{stk.qty}</span>
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-
-                      {msg.dishRecommendations && (
-                        <div class="mt-3 space-y-2.5 pt-2 border-t border-orange-200">
-                          {msg.dishRecommendations.map((rec, idx) => {
-                            const ytSearchUrl = "https://www.youtube.com/results?search_query=" + encodeURIComponent(rec.youtubeQuery || (rec.name + " Recipe Ranveer Brar"));
-                            return (
-                              <div key={idx} class="p-3.5 bg-white rounded-2xl border border-orange-200 shadow-sm space-y-2.5">
-                                <div class="flex justify-between items-start">
-                                  <div>
-                                    <span class="font-extrabold text-sm text-slate-900 block">{rec.name}</span>
-                                    <span class="text-[10px] text-slate-500 block mt-0.5">{rec.reason} - {rec.prepTime}</span>
-                                  </div>
-                                  <span class="text-[10px] font-bold bg-amber-100 text-amber-900 px-2 py-0.5 rounded-md">
-                                    {rec.cuisine}
-                                  </span>
-                                </div>
-
-                                <div class="flex flex-wrap items-center gap-2 pt-1 border-t border-slate-100">
-                                  <a
-                                    href={ytSearchUrl}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-700 font-bold text-[11px] rounded-xl border border-red-200 transition-all"
-                                  >
-                                    <Icons.Video />
-                                    <span>Watch on YouTube</span>
-                                  </a>
-
-                                  {rec.recipeUrl && (
-                                    <a
-                                      href={rec.recipeUrl}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-orange-50 hover:bg-orange-100 text-orange-800 font-bold text-[11px] rounded-xl border border-orange-200 transition-all"
-                                    >
-                                      <Icons.BookOpen />
-                                      <span>Recipe Steps</span>
-                                    </a>
-                                  )}
-
-                                  <button
-                                    onClick={() => handleCookMealDirect(rec.id, baseFamilyServings)}
-                                    class="inline-flex items-center gap-1 px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-white font-bold text-[11px] rounded-xl shadow-sm ml-auto transition-all"
-                                  >
-                                    <Icons.Check />
-                                    <span>Cooked This ({baseFamilyServings} portions)</span>
-                                  </button>
-                                </div>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      )}
-
-                      {msg.actionableMeal && (
-                        <div class="mt-3 p-3.5 bg-white rounded-2xl border border-emerald-300 shadow-sm space-y-2.5">
-                          <div class="flex justify-between items-center text-xs font-bold text-emerald-950">
-                            <span class="text-sm font-extrabold">{msg.actionableMeal.recipe.name}</span>
-                            <span class="text-orange-600 font-black">{msg.actionableMeal.servings} Servings</span>
-                          </div>
-                          
-                          <div class="flex flex-wrap items-center gap-2">
-                            <a
-                              href={"https://www.youtube.com/results?search_query=" + encodeURIComponent(msg.actionableMeal.recipe.youtubeQuery || (msg.actionableMeal.recipe.name + " Recipe Ranveer Brar"))}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-red-50 hover:bg-red-100 text-red-700 font-bold text-[10px] rounded-lg border border-red-200"
-                            >
-                              <Icons.Video />
-                              <span>YouTube Video</span>
-                            </a>
-
-                            {msg.actionableMeal.recipe.recipeUrl && (
-                              <a
-                                href={msg.actionableMeal.recipe.recipeUrl}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-orange-50 hover:bg-orange-100 text-orange-800 font-bold text-[10px] rounded-lg border border-orange-200"
-                              >
-                                <Icons.BookOpen />
-                                <span>Written Recipe</span>
-                              </a>
-                            )}
-                          </div>
-
-                          <button
-                            onClick={() => handleCookMealDirect(msg.actionableMeal.recipe.id, msg.actionableMeal.servings)}
-                            class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs rounded-xl shadow-md flex items-center justify-center gap-1.5 transition-all"
-                          >
-                            <Icons.Check />
-                            <span>Confirm and Auto-Deduct {msg.actionableMeal.recipe.ingredients.length} Ingredients</span>
-                          </button>
-                        </div>
-                      )}
+                  <div key={msg.id} class={"flex flex-col " + (msg.sender === "user" ? "items-end" : "items-start")}>
+                    <div class={"max-w-xl p-4 rounded-3xl text-xs leading-relaxed " + (
+                      msg.sender === "user"
+                        ? "bg-slate-900 text-white rounded-tr-sm"
+                        : "bg-orange-50/80 text-slate-800 border border-orange-200/70 rounded-tl-sm"
+                    )}>
+                      <p class="whitespace-pre-line">{msg.text}</p>
                     </div>
+
+                    {msg.dishRecommendations && (
+                      <div class="mt-3 space-y-2 w-full max-w-xl">
+                        {msg.dishRecommendations.map((rec, idx) => (
+                          <div key={idx} class="p-3 bg-white rounded-2xl border border-orange-200 shadow-sm flex items-center justify-between text-xs font-bold">
+                            <div>
+                              <span class="text-slate-900 block font-extrabold">{rec.name}</span>
+                              <span class="text-[10px] text-emerald-600 block">{rec.reason}</span>
+                            </div>
+                            <button
+                              onClick={() => handleCookMealDirect(rec.id, totalMealEaters)}
+                              class="px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-[11px] font-bold"
+                            >
+                              Cooked This ({totalMealEaters}p)
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
 
                     {msg.suggestions && (
                       <div class="flex flex-wrap gap-1.5 mt-2">
@@ -1741,7 +930,7 @@
                           <button
                             key={sIdx}
                             onClick={() => handleSendMessage(sug)}
-                            class="text-[10px] bg-slate-100 hover:bg-orange-100 hover:text-orange-900 border border-slate-200 text-slate-600 px-2.5 py-1 rounded-full font-bold transition-all"
+                            class="text-[10px] bg-slate-100 hover:bg-orange-100 text-slate-600 px-2.5 py-1 rounded-full font-bold transition-all border border-slate-200"
                           >
                             {sug}
                           </button>
@@ -1750,16 +939,16 @@
                     )}
                   </div>
                 ))}
-
                 {isAiThinking && (
-                  <div class="flex items-center gap-2 p-3 bg-orange-50 rounded-2xl max-w-xs text-xs text-orange-800 font-semibold border border-orange-200 animate-pulse">
+                  <div class="flex items-center gap-2 p-3 bg-orange-50 rounded-2xl max-w-xs text-xs text-orange-800 font-semibold animate-pulse">
                     <Icons.Sparkles />
-                    <span>Analyzing kitchen groceries, recipe intelligence and pantry levels...</span>
+                    <span>Consulting kitchen memory...</span>
                   </div>
                 )}
                 <div ref={chatEndRef} />
               </div>
 
+              {/* INPUT BAR WITH VOICE MIC */}
               <form
                 onSubmit={(e) => {
                   e.preventDefault();
@@ -1772,21 +961,23 @@
                   onClick={startVoiceRecognition}
                   class={"px-4 py-3.5 rounded-2xl border font-bold text-xs shadow-sm flex items-center gap-1.5 transition-all " + (
                     isListening 
-                      ? "bg-red-500 text-white border-red-600 animate-pulse shadow-red-500/30" 
-                      : "bg-white hover:bg-orange-50 text-slate-700 border-slate-200 hover:border-orange-300"
+                      ? "bg-red-500 text-white border-red-600 pulse-mic" 
+                      : "bg-white hover:bg-orange-50 text-slate-700 border-slate-200"
                   )}
-                  title="Click to speak (Voice Recognition)"
+                  title="Speak to Assistant"
                 >
                   {isListening ? <Icons.MicActive /> : <Icons.Mic />}
                   <span class="hidden sm:inline">{isListening ? "Listening..." : "Voice"}</span>
                 </button>
+
                 <input
                   type="text"
-                  placeholder={isListening ? "🎙️ Listening... speak now..." : "Ask e.g. 'What is in my pantry?' or 'What can I cook?' or speak via mic..."}
+                  placeholder={isListening ? "🎙️ Listening... speak now..." : "Ask e.g. 'What is in my pantry?' or 'What can I cook?'..."}
                   value={userChatInput}
                   onChange={(e) => setUserChatInput(e.target.value)}
                   class="flex-1 px-4 py-3.5 bg-white border border-slate-200 rounded-2xl text-xs font-semibold focus:outline-none focus:border-orange-500 shadow-sm"
                 />
+
                 <button
                   type="submit"
                   class="px-6 py-3.5 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-2xl shadow-md flex items-center gap-2"
@@ -1807,7 +998,7 @@
                   placeholder="Search Atta, Bread, Tomatoes, Toor Dal, Mustard Oil, Haldi, Amul Milk..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all"
+                  class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-semibold focus:outline-none focus:border-orange-500"
                 />
 
                 <div class="flex overflow-x-auto gap-2 pb-1">
@@ -1831,13 +1022,13 @@
                 {filteredItems.map(item => {
                   const pct = Math.min(100, Math.round((item.current / item.max) * 100));
                   const isLow = item.current <= item.threshold;
-                  const daysLeft = item.dailyBurn ? Math.round(item.current / (item.dailyBurn * appetiteMultiplier)) : 12;
+                  const isExpiring = (item.daysExpiry || 99) <= 3;
 
                   return (
                     <div
                       key={item.id}
                       class={"rounded-3xl p-5 border transition-all duration-300 hover:shadow-lg " + (
-                        isLow ? "bg-red-50/80 border-red-200" : "bg-white border-orange-100 hover:border-orange-300 shadow-sm"
+                        isLow ? "bg-red-50/80 border-red-200" : isExpiring ? "bg-amber-50/70 border-amber-300" : "bg-white border-orange-100"
                       )}
                     >
                       <div class="flex items-start justify-between">
@@ -1846,18 +1037,22 @@
                           <h3 class="font-bold text-sm text-slate-900 leading-tight">{item.shortName}</h3>
                         </div>
                         <span class={"text-xs font-black px-2 py-0.5 rounded-lg " + (
-                          isLow ? "bg-red-100 text-red-700 font-bold" : "bg-emerald-100 text-emerald-800"
+                          isLow ? "bg-red-100 text-red-700" : isExpiring ? "bg-amber-200 text-amber-900" : "bg-emerald-100 text-emerald-800"
                         )}>
                           {item.current} {item.unit}
                         </span>
                       </div>
 
-                      <div class="mt-4">
-                        <div class="flex justify-between text-xs text-slate-500 mb-1">
-                          <span>Stock Gauge</span>
-                          <span class={isLow ? "text-red-600 font-bold" : ""}>{pct}%</span>
-                        </div>
-                        <div class="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden p-0.5">
+                      {/* EXPIRY & RUNOUT BADGE */}
+                      <div class="mt-2 flex items-center justify-between text-[10px] font-bold">
+                        <span class={isExpiring ? "text-amber-700 bg-amber-100 px-2 py-0.5 rounded-md" : "text-slate-500"}>
+                          ⏳ {item.daysExpiry ? `Shelf-life: ~${item.daysExpiry}d` : "Fresh"}
+                        </span>
+                        <span class="text-slate-400">Threshold: &le;{item.threshold} {item.unit}</span>
+                      </div>
+
+                      <div class="mt-3">
+                        <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
                           <div
                             class={"h-full rounded-full transition-all duration-500 " + (
                               isLow ? "bg-red-500" : pct < 50 ? "bg-amber-500" : "bg-emerald-500"
@@ -1867,31 +1062,16 @@
                         </div>
                       </div>
 
-                      <div class="mt-3 flex justify-between items-center text-[11px] text-slate-500 border-t border-slate-100 pt-2">
-                        <button
-                          onClick={() => {
-                            setSelectedItemForAlert(item);
-                            setIsThresholdModalOpen(true);
-                          }}
-                          class="hover:text-orange-600 flex items-center gap-1 font-semibold"
-                          title="Click to set custom alert threshold"
-                        >
-                          <Icons.Sliders />
-                          <span>Alert: &le;{item.threshold} {item.unit}</span>
-                        </button>
-                        <span class="font-bold text-orange-600">~{daysLeft} days left</span>
-                      </div>
-
                       <div class="mt-3 grid grid-cols-2 gap-2">
                         <button
                           onClick={() => updateStock(item.id, item.unit === "g" ? -20 : -0.5)}
-                          class="py-1 bg-slate-100 hover:bg-red-100 hover:text-red-700 text-slate-700 rounded-xl text-xs font-bold transition-all"
+                          class="py-1 bg-slate-100 hover:bg-red-100 hover:text-red-700 text-slate-700 rounded-xl text-xs font-bold"
                         >
                           - {item.unit === "g" ? "20g" : "0.5" + item.unit}
                         </button>
                         <button
                           onClick={() => updateStock(item.id, item.unit === "g" ? 50 : 1.0)}
-                          class="py-1 bg-slate-100 hover:bg-emerald-100 hover:text-emerald-700 text-slate-700 rounded-xl text-xs font-bold transition-all"
+                          class="py-1 bg-slate-100 hover:bg-emerald-100 hover:text-emerald-700 text-slate-700 rounded-xl text-xs font-bold"
                         >
                           + {item.unit === "g" ? "50g" : "1" + item.unit}
                         </button>
@@ -1903,199 +1083,189 @@
             </div>
           )}
 
-          {/* TAB: FAMILY CUSTOMIZER & GUEST MEAL SCALER */}
+          {/* TAB: FAMILY & GUEST SCALER */}
           {activeTab === "family" && (
-            <div class="max-w-4xl mx-auto space-y-6">
-              <div class="bg-white rounded-3xl p-6 sm:p-8 border border-orange-200 shadow-lg space-y-6">
-                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-4 border-b border-slate-100">
-                  <div>
-                    <span class="text-xs font-black uppercase text-orange-600 bg-orange-100 px-3 py-1 rounded-full">
-                      Family Profile & Guest Scaler
-                    </span>
-                    <h2 class="text-2xl font-black text-slate-900 mt-2">Household & Live Guest Portion Scaler</h2>
-                    <p class="text-xs text-slate-500 mt-0.5">
-                      Dynamically auto-scales required ingredient weights when guests arrive.
-                    </p>
+            <div class="max-w-3xl mx-auto bg-white rounded-3xl p-6 sm:p-8 border border-orange-200 shadow-xl space-y-6">
+              <div class="flex justify-between items-center pb-4 border-b border-slate-100">
+                <div>
+                  <h3 class="font-black text-xl text-slate-900">Family Profile & Guest Scaler</h3>
+                  <p class="text-xs text-slate-500 mt-0.5">Calculates exact ingredient weights based on diners & appetite</p>
+                </div>
+                <div class="p-3 bg-orange-50 rounded-2xl border border-orange-200 text-center">
+                  <span class="text-[10px] font-bold text-slate-500 uppercase block">Effective Diners</span>
+                  <span class="text-xl font-black text-orange-600">{totalMealEaters} portions</span>
+                </div>
+              </div>
+
+              <div class="space-y-4">
+                <div class="grid grid-cols-3 gap-3">
+                  <div class="p-3 bg-slate-50 rounded-2xl border border-slate-200 text-center">
+                    <span class="text-xs font-bold text-slate-600 block">Adults (1.0x)</span>
+                    <div class="flex items-center justify-center gap-2 mt-2">
+                      <button onClick={() => setHousehold(p => ({ ...p, adults: Math.max(1, p.adults - 1) }))} class="w-8 h-8 rounded-xl bg-white border border-slate-300 font-bold">-</button>
+                      <span class="text-base font-black">{household.adults}</span>
+                      <button onClick={() => setHousehold(p => ({ ...p, adults: p.adults + 1 }))} class="w-8 h-8 rounded-xl bg-white border border-slate-300 font-bold">+</button>
+                    </div>
                   </div>
-                  <div class="p-3 bg-orange-50 rounded-2xl border border-orange-200 text-center">
-                    <span class="text-[10px] font-bold text-slate-500 uppercase block">Total Effective Diners</span>
-                    <span class="text-2xl font-black text-orange-600">{totalMealEaters} portions</span>
+
+                  <div class="p-3 bg-slate-50 rounded-2xl border border-slate-200 text-center">
+                    <span class="text-xs font-bold text-slate-600 block">Children (0.6x)</span>
+                    <div class="flex items-center justify-center gap-2 mt-2">
+                      <button onClick={() => setHousehold(p => ({ ...p, children: Math.max(0, p.children - 1) }))} class="w-8 h-8 rounded-xl bg-white border border-slate-300 font-bold">-</button>
+                      <span class="text-base font-black">{household.children}</span>
+                      <button onClick={() => setHousehold(p => ({ ...p, children: p.children + 1 }))} class="w-8 h-8 rounded-xl bg-white border border-slate-300 font-bold">+</button>
+                    </div>
+                  </div>
+
+                  <div class="p-3 bg-slate-50 rounded-2xl border border-slate-200 text-center">
+                    <span class="text-xs font-bold text-slate-600 block">Visiting Guests (1.0x)</span>
+                    <div class="flex items-center justify-center gap-2 mt-2">
+                      <button onClick={() => setGuestCountForMeal(g => Math.max(0, g - 1))} class="w-8 h-8 rounded-xl bg-white border border-slate-300 font-bold">-</button>
+                      <span class="text-base font-black text-orange-600">{guestCountForMeal}</span>
+                      <button onClick={() => setGuestCountForMeal(g => g + 1)} class="w-8 h-8 rounded-xl bg-white border border-slate-300 font-bold">+</button>
+                    </div>
                   </div>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {/* Left Column: Family Counts */}
-                  <div class="space-y-4">
-                    <h4 class="text-xs font-black text-slate-800 uppercase tracking-wider">Household Members</h4>
-                    <div class="grid grid-cols-3 gap-2.5">
-                      <div class="p-3 bg-slate-50 rounded-2xl border border-slate-200 text-center">
-                        <span class="text-[11px] font-bold text-slate-600 block">Adults (1.0x)</span>
-                        <div class="flex items-center justify-center gap-2 mt-2">
-                          <button onClick={() => setHousehold(p => ({ ...p, adults: Math.max(1, p.adults - 1) }))} class="w-7 h-7 rounded-lg bg-white border border-slate-300 font-black text-xs hover:bg-slate-100">-</button>
-                          <span class="text-base font-black text-slate-900">{household.adults}</span>
-                          <button onClick={() => setHousehold(p => ({ ...p, adults: p.adults + 1 }))} class="w-7 h-7 rounded-lg bg-white border border-slate-300 font-black text-xs hover:bg-slate-100">+</button>
-                        </div>
-                      </div>
-
-                      <div class="p-3 bg-slate-50 rounded-2xl border border-slate-200 text-center">
-                        <span class="text-[11px] font-bold text-slate-600 block">Children (0.6x)</span>
-                        <div class="flex items-center justify-center gap-2 mt-2">
-                          <button onClick={() => setHousehold(p => ({ ...p, children: Math.max(0, p.children - 1) }))} class="w-7 h-7 rounded-lg bg-white border border-slate-300 font-black text-xs hover:bg-slate-100">-</button>
-                          <span class="text-base font-black text-slate-900">{household.children}</span>
-                          <button onClick={() => setHousehold(p => ({ ...p, children: p.children + 1 }))} class="w-7 h-7 rounded-lg bg-white border border-slate-300 font-black text-xs hover:bg-slate-100">+</button>
-                        </div>
-                      </div>
-
-                      <div class="p-3 bg-slate-50 rounded-2xl border border-slate-200 text-center">
-                        <span class="text-[11px] font-bold text-slate-600 block">Elders (0.85x)</span>
-                        <div class="flex items-center justify-center gap-2 mt-2">
-                          <button onClick={() => setHousehold(p => ({ ...p, elders: Math.max(0, p.elders - 1) }))} class="w-7 h-7 rounded-lg bg-white border border-slate-300 font-black text-xs hover:bg-slate-100">-</button>
-                          <span class="text-base font-black text-slate-900">{household.elders}</span>
-                          <button onClick={() => setHousehold(p => ({ ...p, elders: p.elders + 1 }))} class="w-7 h-7 rounded-lg bg-white border border-slate-300 font-black text-xs hover:bg-slate-100">+</button>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Guest Counter Card */}
-                    <div class="p-4 bg-gradient-to-r from-amber-50 to-orange-50 rounded-2xl border border-orange-200 flex items-center justify-between">
-                      <div>
-                        <span class="text-xs font-black text-orange-900 block">🎉 Visiting Guests Today</span>
-                        <span class="text-[10px] text-orange-700">Scales all recipe ingredient quantities in 1-click</span>
-                      </div>
-                      <div class="flex items-center gap-2.5">
-                        <button onClick={() => setGuestCountForMeal(g => Math.max(0, g - 1))} class="w-8 h-8 rounded-xl bg-white border border-orange-300 font-black text-sm text-orange-950 hover:bg-orange-100">-</button>
-                        <span class="text-lg font-black text-orange-950 w-6 text-center">{guestCountForMeal}</span>
-                        <button onClick={() => setGuestCountForMeal(g => g + 1)} class="w-8 h-8 rounded-xl bg-white border border-orange-300 font-black text-sm text-orange-950 hover:bg-orange-100">+</button>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Right Column: Appetite & Dietary Filter */}
-                  <div class="space-y-4">
-                    <h4 class="text-xs font-black text-slate-800 uppercase tracking-wider">Appetite Multiplier</h4>
-                    <div class="grid grid-cols-3 gap-2">
-                      {[
-                        { label: "Light (0.75x)", desc: "Diet / Light" },
-                        { label: "Regular (1.0x)", desc: "Standard" },
-                        { label: "Hearty (1.3x)", desc: "Generous" }
-                      ].map(app => (
-                        <button
-                          key={app.label}
-                          onClick={() => setHousehold({ ...household, appetiteLevel: app.label })}
-                          class={"p-2.5 rounded-xl border text-center transition-all " + (
-                            household.appetiteLevel === app.label
-                              ? "bg-orange-500 border-orange-600 text-white font-bold shadow-sm"
-                              : "bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100"
-                          )}
-                        >
-                          <span class="text-xs block font-extrabold">{app.label.split(" ")[0]}</span>
-                          <span class="text-[9px] opacity-80 block">{app.desc}</span>
-                        </button>
-                      ))}
-                    </div>
-
-                    <h4 class="text-xs font-black text-slate-800 uppercase tracking-wider pt-2">Dietary Preference Filter</h4>
-                    <div class="flex flex-wrap gap-1.5">
-                      {["All Diets", "Vegetarian", "Jain (No Onion/Garlic)", "High-Protein", "Vegan", "Gluten-Free"].map(d => (
-                        <button
-                          key={d}
-                          onClick={() => {
-                            setDietFilter(d);
-                            showToast("Applied filter: " + d);
-                          }}
-                          class={"px-3 py-1.5 rounded-xl text-xs font-bold border transition-all " + (
-                            dietFilter === d
-                              ? "bg-slate-900 text-white border-slate-900"
-                              : "bg-white text-slate-600 border-slate-200 hover:bg-slate-50"
-                          )}
-                        >
-                          {d}
-                        </button>
-                      ))}
-                    </div>
+                <div>
+                  <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Appetite Multiplier</label>
+                  <div class="grid grid-cols-3 gap-2">
+                    {["Light (0.75x)", "Regular (1.0x)", "Hearty (1.3x)"].map(app => (
+                      <button
+                        key={app}
+                        onClick={() => setHousehold({ ...household, appetiteLevel: app })}
+                        class={"p-3 rounded-2xl border font-bold text-xs transition-all " + (
+                          household.appetiteLevel === app ? "bg-orange-500 text-white border-orange-600 shadow-md" : "bg-slate-50 border-slate-200 text-slate-700"
+                        )}
+                      >
+                        {app}
+                      </button>
+                    ))}
                   </div>
                 </div>
               </div>
             </div>
           )}
 
-          {/* TAB: WHAT DID YOU COOK */}
+          {/* TAB: COOK & DEPLETE (RECIPES) */}
           {activeTab === "cook" && (
-            <div class="max-w-2xl mx-auto bg-white rounded-3xl p-6 sm:p-8 border border-orange-200 shadow-lg space-y-6">
-              <div>
-                <span class="text-xs font-black uppercase text-orange-600 bg-orange-100 px-3 py-1 rounded-full">
-                  Recipe Auto-Depletion
-                </span>
-                <h2 class="text-2xl font-black text-slate-900 mt-2">What Did You Cook?</h2>
-                <p class="text-xs text-slate-500 mt-0.5">
-                  Select the dish and portion count. DearHome calculates and deducts exact ingredient weights.
-                </p>
-              </div>
-
-              <div class="space-y-4">
+            <div class="max-w-4xl mx-auto space-y-6">
+              <div class="flex justify-between items-center bg-white rounded-3xl p-5 border border-orange-100 shadow-sm">
                 <div>
-                  <label class="block text-xs font-bold text-slate-700 uppercase mb-1.5">Select Recipe</label>
-                  <select
-                    value={selectedRecipe}
-                    onChange={(e) => setSelectedRecipe(e.target.value)}
-                    class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800"
-                  >
-                    {INDIAN_RECIPES.map(r => (
-                      <option key={r.id} value={r.id}>{r.name} ({r.cuisine} - {r.prepTime})</option>
-                    ))}
-                  </select>
+                  <h3 class="font-black text-lg text-slate-900">Cook a Recipe & Auto-Deduct Inventory</h3>
+                  <p class="text-xs text-slate-500">Scaling for {totalMealEaters} effective portions</p>
                 </div>
-
-                <div class="p-4 bg-orange-50 rounded-2xl border border-orange-200">
-                  <div class="flex justify-between items-center text-xs">
-                    <span class="font-bold text-slate-700">Base Family Servings:</span>
-                    <span class="font-black text-orange-900">{baseFamilyServings} portions</span>
-                  </div>
-                  <div class="flex justify-between items-center text-xs mt-2 pt-2 border-t border-orange-200">
-                    <span class="font-bold text-slate-700">Add Visiting Guests:</span>
-                    <div class="flex items-center gap-2">
-                      <button
-                        onClick={() => setGuestCountForMeal(p => Math.max(0, p - 1))}
-                        class="w-7 h-7 rounded-lg bg-white border border-slate-300 font-bold text-xs"
-                      >
-                        -
-                      </button>
-                      <span class="font-bold text-slate-900 w-4 text-center">{guestCountForMeal}</span>
-                      <button
-                        onClick={() => setGuestCountForMeal(p => p + 1)}
-                        class="w-7 h-7 rounded-lg bg-white border border-slate-300 font-bold text-xs"
-                      >
-                        +
-                      </button>
-                    </div>
-                  </div>
-                </div>
-
                 <button
-                  onClick={() => handleCookMealDirect(selectedRecipe, totalMealEaters)}
-                  class="w-full py-3.5 bg-orange-600 hover:bg-orange-700 text-white font-black text-xs rounded-xl shadow-md transition-all flex items-center justify-center gap-2"
+                  onClick={() => setActiveTab("family")}
+                  class="text-xs font-bold text-orange-600 bg-orange-50 px-3 py-1.5 rounded-xl hover:bg-orange-100"
                 >
-                  <Icons.Flame />
-                  <span>Log Meal & Deduct {totalMealEaters} Portion Ingredients</span>
+                  Adjust Diners ({totalMealEaters}p)
                 </button>
               </div>
 
-              {mealLogs.length > 0 && (
-                <div class="pt-6 border-t border-slate-100 space-y-3">
-                  <h4 class="text-xs font-black uppercase text-slate-500 tracking-wider">Recent Cooked Meals</h4>
-                  <div class="space-y-2 max-h-48 overflow-y-auto">
-                    {mealLogs.map(log => (
-                      <div key={log.id} class="p-3 bg-slate-50 rounded-xl border border-slate-200 text-xs flex justify-between items-center">
-                        <div>
-                          <span class="font-bold text-slate-900 block">{log.recipeName}</span>
-                          <span class="text-[10px] text-slate-500">{log.time} - {log.servings} portions</span>
-                        </div>
-                        <span class="text-[10px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-md">
-                          Deducted
-                        </span>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {INDIAN_RECIPES.map(recipe => (
+                  <div key={recipe.id} class="bg-white rounded-3xl p-6 border border-orange-100 shadow-sm space-y-4">
+                    <div class="flex justify-between items-start">
+                      <div>
+                        <span class="text-[10px] font-black uppercase text-amber-700 bg-amber-50 px-2 py-0.5 rounded-md">{recipe.cuisine}</span>
+                        <h4 class="font-extrabold text-base text-slate-900 mt-1">{recipe.name}</h4>
+                        <span class="text-xs text-slate-500">⏱️ {recipe.prepTime}</span>
                       </div>
-                    ))}
+                      <a
+                        href={"https://www.youtube.com/results?search_query=" + encodeURIComponent(recipe.youtubeQuery)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="p-2 bg-red-50 text-red-600 rounded-xl hover:bg-red-100"
+                        title="Watch Recipe Video"
+                      >
+                        <Icons.Video />
+                      </a>
+                    </div>
+
+                    <div class="space-y-1.5 pt-2 border-t border-slate-100 text-xs">
+                      {recipe.ingredients.map((ing, idx) => (
+                        <div key={idx} class="flex justify-between text-slate-600">
+                          <span>• {ing.name}</span>
+                          <span class="font-bold">{(ing.qty * totalMealEaters).toFixed(1)} {ing.unit}</span>
+                        </div>
+                      ))}
+                    </div>
+
+                    <button
+                      onClick={() => handleCookMealDirect(recipe.id, totalMealEaters)}
+                      class="w-full py-2.5 bg-slate-900 hover:bg-slate-800 text-white font-black text-xs rounded-xl shadow-md flex items-center justify-center gap-1.5 transition-all"
+                    >
+                      <Icons.Flame />
+                      <span>Cook This Meal ({totalMealEaters} Portions)</span>
+                    </button>
                   </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* TAB: UNIFIED KITCHEN LEDGER & HISTORY */}
+          {activeTab === "ledger" && (
+            <div class="max-w-3xl mx-auto bg-white rounded-3xl p-6 sm:p-8 border border-orange-200 shadow-xl space-y-6">
+              <div class="flex justify-between items-center pb-4 border-b border-slate-100">
+                <div>
+                  <h3 class="font-black text-xl text-slate-900">Kitchen Activity Ledger</h3>
+                  <p class="text-xs text-slate-500 mt-0.5">Chronological audit of all additions (credits) and meal depletions (debits)</p>
+                </div>
+                <span class="text-xs font-bold text-slate-600 bg-slate-100 px-3 py-1 rounded-xl">
+                  {ledgerEvents.length} Events Logged
+                </span>
+              </div>
+
+              {ledgerEvents.length === 0 ? (
+                <div class="text-center py-12 text-slate-400 text-xs font-bold">
+                  No kitchen events recorded yet. Ingest a bill or cook a meal to see logs!
+                </div>
+              ) : (
+                <div class="space-y-3">
+                  {ledgerEvents.map(event => (
+                    <div
+                      key={event.id}
+                      class={"p-4 rounded-2xl border flex items-center justify-between transition-all " + (
+                        event.type === "CREDIT" ? "bg-emerald-50/70 border-emerald-200" : "bg-orange-50/70 border-orange-200"
+                      )}
+                    >
+                      <div class="flex items-center gap-3">
+                        <div class={"w-9 h-9 rounded-xl flex items-center justify-center font-black text-sm " + (
+                          event.type === "CREDIT" ? "bg-emerald-200 text-emerald-900" : "bg-orange-200 text-orange-900"
+                        )}>
+                          {event.type === "CREDIT" ? "+" : "-"}
+                        </div>
+                        <div>
+                          <div class="flex items-center gap-2">
+                            <h4 class="font-black text-sm text-slate-900">{event.title}</h4>
+                            <span class="text-[10px] text-slate-400 font-semibold">{event.time}</span>
+                          </div>
+                          <p class="text-xs text-slate-600 mt-0.5">{event.subtitle}</p>
+                        </div>
+                      </div>
+
+                      <div class="flex items-center gap-3">
+                        <span class={"text-xs font-black px-2.5 py-1 rounded-lg " + (
+                          event.type === "CREDIT" ? "bg-emerald-200 text-emerald-900" : "bg-orange-200 text-orange-900"
+                        )}>
+                          {event.amount}
+                        </span>
+
+                        {event.logId && (
+                          <button
+                            onClick={() => handleUndoMeal(event.logId)}
+                            class="px-2.5 py-1 bg-white hover:bg-red-50 text-red-600 border border-red-200 rounded-lg text-xs font-bold flex items-center gap-1 shadow-sm transition-all"
+                            title="Undo meal and restore pantry stock"
+                          >
+                            <Icons.Undo />
+                            <span>Undo</span>
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  ))}
                 </div>
               )}
             </div>
@@ -2104,393 +1274,30 @@
           {/* TAB: RESTOCK RADAR */}
           {activeTab === "radar" && (
             <div class="max-w-3xl mx-auto space-y-6">
-              <div class="bg-gradient-to-r from-red-600 to-rose-600 rounded-3xl p-6 text-white shadow-xl flex items-center justify-between">
+              <div class="bg-red-500 rounded-3xl p-6 text-white shadow-xl flex justify-between items-center">
                 <div>
-                  <span class="text-[10px] font-black uppercase tracking-wider bg-white/20 px-3 py-1 rounded-full">
-                    Predictive Stockout Radar
-                  </span>
-                  <h2 class="text-2xl font-black mt-2">Zero-Stockout Alerts</h2>
-                  <p class="text-xs text-rose-100 mt-1">
-                    Items approaching or below safety threshold. Generates optimized 1-click restock cart.
-                  </p>
+                  <h3 class="font-black text-2xl">Restock Radar</h3>
+                  <p class="text-xs text-red-100 mt-1">Items currently below their safety thresholds</p>
                 </div>
-                <div class="w-14 h-14 rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center text-white text-2xl border border-white/20">
-                  <Icons.Alert />
-                </div>
+                <div class="text-3xl font-black">{lowStockItems.length}</div>
               </div>
 
-              {lowStockItems.length === 0 ? (
-                <div class="bg-white rounded-3xl p-8 border border-emerald-200 text-center space-y-2">
-                  <div class="w-12 h-12 bg-emerald-100 text-emerald-800 rounded-2xl flex items-center justify-center mx-auto text-xl">
-                    <Icons.Check />
-                  </div>
-                  <h3 class="font-bold text-slate-900">Your Kitchen is Fully Stocked</h3>
-                  <p class="text-xs text-slate-500">No staples are currently below critical safety thresholds.</p>
-                </div>
-              ) : (
-                <div class="space-y-4">
-                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {lowStockItems.map(item => (
-                      <div key={item.id} class="bg-white rounded-3xl p-5 border border-red-200 shadow-sm flex justify-between items-center">
-                        <div>
-                          <span class="text-[10px] font-bold text-red-600 uppercase block">Low Stock Alert</span>
-                          <h4 class="font-bold text-sm text-slate-900">{item.shortName}</h4>
-                          <span class="text-xs text-slate-500">Left: {item.current} {item.unit} (Threshold: {item.threshold} {item.unit})</span>
-                        </div>
-                        <div class="flex gap-1.5">
-                          <button
-                            onClick={() => {
-                              setSelectedItemForAlert(item);
-                              setIsThresholdModalOpen(true);
-                            }}
-                            class="p-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold"
-                            title="Set custom threshold"
-                          >
-                            <Icons.Sliders />
-                          </button>
-                          <button
-                            onClick={() => updateStock(item.id, item.max - item.current)}
-                            class="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-xl text-xs font-bold transition-all"
-                          >
-                            Restock
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* TAB: HOUSEHOLD ANALYTICS */}
-          {activeTab === "analytics" && (
-            <div class="max-w-3xl mx-auto space-y-6">
-              <div class="bg-gradient-to-r from-slate-900 to-slate-800 rounded-3xl p-6 text-white shadow-xl flex items-center justify-between">
-                <div>
-                  <span class="text-[10px] font-black uppercase tracking-wider bg-orange-500 px-3 py-1 rounded-full">
-                    Consumption Intelligence
-                  </span>
-                  <h2 class="text-2xl font-black mt-2">Household Burn Rate Analytics</h2>
-                  <p class="text-xs text-slate-300 mt-1">
-                    Based on {household.adults} Adults, {household.children} Children, and {household.appetiteLevel} appetite calibration.
-                  </p>
-                </div>
-                <div class="w-14 h-14 rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center text-white text-2xl border border-white/20">
-                  <Icons.Chart />
-                </div>
-              </div>
-
-              <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                {[
-                  { label: "Atta (Wheat)", value: (0.38 * 30 * appetiteMultiplier).toFixed(1) + " kg" },
-                  { label: "Basmati Rice", value: (0.22 * 30 * appetiteMultiplier).toFixed(1) + " kg" },
-                  { label: "Cooking Oils", value: (0.15 * 30 * appetiteMultiplier).toFixed(1) + " L" },
-                  { label: "Monthly Milk", value: (1.0 * 30 * appetiteMultiplier).toFixed(0) + " L" }
-                ].map((item, idx) => (
-                  <div key={idx} class="bg-white p-5 rounded-3xl border border-orange-100 text-center shadow-sm">
-                    <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">{item.label}</span>
-                    <span class="text-xl font-black text-slate-900 my-1 block">{item.value}</span>
-                    <span class="text-[10px] text-slate-500 font-semibold">per month</span>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {lowStockItems.map(item => (
+                  <div key={item.id} class="bg-white rounded-3xl p-5 border border-red-200 shadow-sm flex justify-between items-center">
+                    <div>
+                      <h4 class="font-bold text-sm text-slate-900">{item.shortName}</h4>
+                      <span class="text-xs text-red-600 font-bold">Only {item.current} {item.unit} left</span>
+                    </div>
+                    <button
+                      onClick={() => updateStock(item.id, item.unit === "g" ? 250 : 2.0)}
+                      class="px-3 py-1.5 bg-emerald-600 text-white rounded-xl text-xs font-bold"
+                    >
+                      + Restock
+                    </button>
                   </div>
                 ))}
               </div>
-            </div>
-          )}
-
-          {/* MODAL: NOTIFICATION CENTER DRAWER */}
-          {isNotificationCenterOpen && (
-            <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm animate-modal">
-              <div class="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 border border-orange-100 shadow-2xl space-y-5 relative max-h-[85vh] overflow-y-auto">
-                <button
-                  onClick={() => setIsNotificationCenterOpen(false)}
-                  class="absolute right-5 top-5 p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100"
-                >
-                  <Icons.Close />
-                </button>
-
-                <div class="flex items-center gap-2">
-                  <div class="w-9 h-9 rounded-xl bg-red-100 text-red-700 flex items-center justify-center font-bold">
-                    <Icons.Bell />
-                  </div>
-                  <div>
-                    <h2 class="text-lg font-black text-slate-900">Stockout Notification Center</h2>
-                    <span class="text-xs text-slate-500">Real-time alerts when kitchen items are about to run out</span>
-                  </div>
-                </div>
-
-                {/* BROWSER PUSH PERMISSION BANNER */}
-                {browserPermission !== "granted" && (
-                  <div class="p-4 bg-amber-50 rounded-2xl border border-amber-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-                    <div>
-                      <span class="text-xs font-black text-amber-900 block">Enable Device Push Notifications</span>
-                      <span class="text-[11px] text-amber-700">Receive alerts even when DearHome is in background</span>
-                    </div>
-                    <button
-                      onClick={requestBrowserNotificationPermission}
-                      class="px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold shrink-0 transition-all"
-                    >
-                      Enable Push
-                    </button>
-                  </div>
-                )}
-
-                {/* NOTIFICATIONS LIST */}
-                <div class="space-y-3">
-                  {notificationsList.length === 0 ? (
-                    <div class="p-6 text-center text-slate-400 text-xs">
-                      No new alerts. Your kitchen inventory is safe!
-                    </div>
-                  ) : (
-                    notificationsList.map(notif => (
-                      <div
-                        key={notif.id}
-                        class={"p-4 rounded-2xl border transition-all " + (
-                          notif.severity === "critical"
-                            ? "bg-red-50/70 border-red-200 text-red-950"
-                            : "bg-amber-50/70 border-amber-200 text-amber-950"
-                        )}
-                      >
-                        <div class="flex justify-between items-start">
-                          <span class="font-extrabold text-xs">{notif.title}</span>
-                          <span class="text-[10px] text-slate-400">{notif.time}</span>
-                        </div>
-                        <p class="text-xs text-slate-600 mt-1 font-medium">{notif.body}</p>
-                        
-                        <div class="mt-3 flex items-center justify-between pt-2 border-t border-slate-200/60 text-xs">
-                          <button
-                            onClick={() => {
-                              if (notif.itemId) {
-                                const item = pantry.find(i => i.id === notif.itemId);
-                                if (item) updateStock(item.id, item.max - item.current);
-                              }
-                              setNotificationsList(prev => prev.filter(n => n.id !== notif.id));
-                              showToast("Restocked item and cleared alert!");
-                            }}
-                            class="px-3 py-1 bg-slate-900 hover:bg-slate-800 text-white font-bold text-[11px] rounded-lg shadow-sm"
-                          >
-                            Quick Restock & Clear
-                          </button>
-
-                          <button
-                            onClick={() => setNotificationsList(prev => prev.filter(n => n.id !== notif.id))}
-                            class="text-slate-400 hover:text-slate-600 text-[11px] font-bold"
-                          >
-                            Dismiss
-                          </button>
-                        </div>
-                      </div>
-                    ))
-                  )}
-                </div>
-
-                <div class="pt-2 flex justify-between items-center text-xs border-t border-slate-100">
-                  <button
-                    onClick={() => {
-                      setNotificationsList([]);
-                      showToast("All notifications cleared.");
-                    }}
-                    class="text-slate-400 hover:text-slate-600 font-bold"
-                  >
-                    Clear All Notifications
-                  </button>
-
-                  <button
-                    onClick={() => {
-                      setSelectedItemForAlert(pantry[0]);
-                      setIsThresholdModalOpen(true);
-                      setIsNotificationCenterOpen(false);
-                    }}
-                    class="text-orange-600 hover:text-orange-700 font-bold"
-                  >
-                    Configure Custom Thresholds &rarr;
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* MODAL: CONFIGURE NOTIFICATION THRESHOLD */}
-          {isThresholdModalOpen && selectedItemForAlert && (
-            <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm animate-modal">
-              <div class="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 border border-orange-100 shadow-2xl space-y-5 relative">
-                <button
-                  onClick={() => setIsThresholdModalOpen(false)}
-                  class="absolute right-5 top-5 p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100"
-                >
-                  <Icons.Close />
-                </button>
-
-                <div class="flex items-center gap-2">
-                  <div class="w-9 h-9 rounded-xl bg-orange-100 text-orange-700 flex items-center justify-center font-bold">
-                    <Icons.Sliders />
-                  </div>
-                  <div>
-                    <h2 class="text-lg font-black text-slate-900">Set Low Stock Alert Rule</h2>
-                    <span class="text-xs text-slate-500">Configure alert trigger for {selectedItemForAlert.shortName}</span>
-                  </div>
-                </div>
-
-                <form
-                  onSubmit={(e) => {
-                    e.preventDefault();
-                    const newThreshold = e.target.threshold.value;
-                    handleUpdateThreshold(selectedItemForAlert.id, newThreshold);
-                  }}
-                  class="space-y-4"
-                >
-                  <div>
-                    <label class="block text-xs font-bold text-slate-700 mb-1">Select Kitchen Item</label>
-                    <select
-                      value={selectedItemForAlert.id}
-                      onChange={(e) => {
-                        const found = pantry.find(i => i.id === e.target.value);
-                        if (found) setSelectedItemForAlert(found);
-                      }}
-                      class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800"
-                    >
-                      {pantry.map(i => (
-                        <option key={i.id} value={i.id}>{i.shortName} ({i.current} {i.unit} in stock)</option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div>
-                    <label class="block text-xs font-bold text-slate-700 mb-1">
-                      Notify me when stock drops to or below:
-                    </label>
-                    <div class="flex items-center gap-2">
-                      <input
-                        name="threshold"
-                        type="number"
-                        step="0.1"
-                        defaultValue={selectedItemForAlert.threshold}
-                        key={selectedItemForAlert.id}
-                        class="flex-1 px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800"
-                        required
-                      />
-                      <span class="px-3 py-2.5 bg-slate-100 border border-slate-200 rounded-xl text-xs font-black text-slate-700">
-                        {selectedItemForAlert.unit}
-                      </span>
-                    </div>
-                    <span class="text-[11px] text-slate-400 mt-1 block">
-                      Currently: {selectedItemForAlert.current} {selectedItemForAlert.unit} available.
-                    </span>
-                  </div>
-
-                  <button
-                    type="submit"
-                    class="w-full py-3 bg-orange-600 hover:bg-orange-700 text-white font-bold text-xs rounded-xl shadow-md transition-all"
-                  >
-                    Save Stockout Alert Rule
-                  </button>
-                </form>
-              </div>
-            </div>
-          )}
-
-          {/* MODAL: ADD CUSTOM PANTRY ITEM */}
-          {isAddItemModalOpen && (
-            <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm animate-modal">
-              <div class="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 border border-orange-100 shadow-2xl space-y-5 relative">
-                <button
-                  onClick={() => setIsAddItemModalOpen(false)}
-                  class="absolute right-5 top-5 p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100"
-                >
-                  <Icons.Close />
-                </button>
-
-                <h2 class="text-xl font-black text-slate-900">Add New Grocery Staple</h2>
-
-                <form
-                  onSubmit={(e) => {
-                    e.preventDefault();
-                    const name = e.target.name.value;
-                    const category = e.target.category.value;
-                    const unit = e.target.unit.value;
-                    const qty = parseFloat(e.target.qty.value) || 1.0;
-
-                    if (name) {
-                      setPantry(prev => [{
-                        id: "item-" + Date.now(),
-                        name: name,
-                        shortName: name,
-                        category: category,
-                        current: qty,
-                        max: qty * 1.5,
-                        unit: unit,
-                        threshold: qty * 0.25,
-                        dailyBurn: 0.05,
-                        price: 50
-                      }, ...prev]);
-                      setIsAddItemModalOpen(false);
-                      showToast("Added " + name + " to your digital pantry!");
-                    }
-                  }}
-                  class="space-y-4"
-                >
-                  <div>
-                    <label class="block text-xs font-bold text-slate-700 mb-1">Item Name</label>
-                    <input
-                      name="name"
-                      type="text"
-                      placeholder="e.g. Fortune Besan (Gram Flour)"
-                      class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold"
-                      required
-                    />
-                  </div>
-
-                  <div class="grid grid-cols-2 gap-3">
-                    <div>
-                      <label class="block text-xs font-bold text-slate-700 mb-1">Category</label>
-                      <select name="category" class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold">
-                        {CATEGORIES.filter(c => c !== "All Items").map(c => (
-                          <option key={c} value={c}>{c}</option>
-                        ))}
-                      </select>
-                    </div>
-
-                    <div>
-                      <label class="block text-xs font-bold text-slate-700 mb-1">Unit</label>
-                      <select name="unit" class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold">
-                        <option value="kg">kg</option>
-                        <option value="g">g</option>
-                        <option value="L">L</option>
-                        <option value="ml">ml</option>
-                        <option value="packets">packets</option>
-                        <option value="pcs">pcs</option>
-                      </select>
-                    </div>
-                  </div>
-
-                  <div>
-                    <label class="block text-xs font-bold text-slate-700 mb-1">Current Quantity</label>
-                    <input
-                      name="qty"
-                      type="number"
-                      step="0.1"
-                      defaultValue="1.0"
-                      class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold"
-                      required
-                    />
-                  </div>
-
-                  <button
-                    type="submit"
-                    class="w-full py-3 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-xl shadow-sm"
-                  >
-                    Add to Stock
-                  </button>
-                </form>
-              </div>
-            </div>
-          )}
-
-          {/* FLOATING TOAST NOTIFICATION */}
-          {toast && (
-            <div class="fixed bottom-6 right-6 z-50 bg-slate-900 text-white px-5 py-3.5 rounded-2xl shadow-2xl text-xs font-bold border border-slate-700 animate-modal flex items-center gap-2.5">
-              <Icons.Check />
-              <span>{toast}</span>
             </div>
           )}
 
