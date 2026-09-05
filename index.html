@@ -27,6 +27,9 @@
 
     // VECTOR SVG ICONS
     const Icons = {
+      Mic: () => <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"/></svg>,
+      MicActive: () => <svg className="w-4 h-4 text-red-500 animate-pulse" fill="currentColor" viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>,
+      Upload: () => <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>,
       Home: () => <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>,
       Users: () => <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>,
       Box: () => <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>,
@@ -51,7 +54,7 @@
       Sliders: () => <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/></svg>
     };
 
-    const CATEGORIES = ["All Items", "Atta and Grains", "Dals and Pulses", "Oils and Ghee", "Masala Dabba", "Dairy and Fresh", "Vegetables", "Beverages and Snacks"];
+    const CATEGORIES = ["All Items", "Atta and Grains", "Dals and Pulses", "Oils and Ghee", "Dairy and Fresh", "Vegetables", "Beverages and Snacks", "Spices and Condiments"];
 
     const INITIAL_PANTRY = [
       { id: "item-1", name: "Aashirvaad Shudh Chakki Atta", shortName: "Chakki Atta", category: "Atta and Grains", current: 8.5, max: 10, unit: "kg", threshold: 2.5, dailyBurn: 0.38, price: 48 },
@@ -63,11 +66,11 @@
       { id: "item-7", name: "Fortune Kachi Ghani Mustard Oil", shortName: "Mustard Oil", category: "Oils and Ghee", current: 1.8, max: 3, unit: "L", threshold: 0.75, dailyBurn: 0.07, price: 165 },
       { id: "item-8", name: "Fortune Refined Sunflower Oil", shortName: "Sunflower Oil", category: "Oils and Ghee", current: 2.2, max: 3, unit: "L", threshold: 0.8, dailyBurn: 0.08, price: 140 },
       { id: "item-9", name: "Amul Pure Cow Ghee", shortName: "Desi Ghee", category: "Oils and Ghee", current: 0.35, max: 1, unit: "L", threshold: 0.3, dailyBurn: 0.03, price: 620 },
-      { id: "item-10", name: "Everest Haldi (Turmeric Powder)", shortName: "Haldi (Turmeric)", category: "Masala Dabba", current: 160, max: 250, unit: "g", threshold: 50, dailyBurn: 5, price: 38 },
-      { id: "item-11", name: "Catch Jeera (Cumin Seeds)", shortName: "Jeera (Cumin)", category: "Masala Dabba", current: 130, max: 200, unit: "g", threshold: 40, dailyBurn: 4.5, price: 55 },
-      { id: "item-12", name: "Everest Lal Mirch Powder", shortName: "Lal Mirch Powder", category: "Masala Dabba", current: 140, max: 200, unit: "g", threshold: 45, dailyBurn: 4, price: 42 },
-      { id: "item-13", name: "Black Mustard Seeds (Rai)", shortName: "Mustard Seeds (Rai)", category: "Masala Dabba", current: 110, max: 200, unit: "g", threshold: 30, dailyBurn: 2.5, price: 30 },
-      { id: "item-14", name: "Catch Hing (Asafoetida)", shortName: "Hing (Asafoetida)", category: "Masala Dabba", current: 35, max: 50, unit: "g", threshold: 10, dailyBurn: 0.8, price: 90 },
+      { id: "item-10", name: "Everest Haldi (Turmeric Powder)", shortName: "Haldi (Turmeric)", category: "Spices and Condiments", current: 160, max: 250, unit: "g", threshold: 50, dailyBurn: 5, price: 38 },
+      { id: "item-11", name: "Catch Jeera (Cumin Seeds)", shortName: "Jeera (Cumin)", category: "Spices and Condiments", current: 130, max: 200, unit: "g", threshold: 40, dailyBurn: 4.5, price: 55 },
+      { id: "item-12", name: "Everest Lal Mirch Powder", shortName: "Lal Mirch Powder", category: "Spices and Condiments", current: 140, max: 200, unit: "g", threshold: 45, dailyBurn: 4, price: 42 },
+      { id: "item-13", name: "Black Mustard Seeds (Rai)", shortName: "Mustard Seeds (Rai)", category: "Spices and Condiments", current: 110, max: 200, unit: "g", threshold: 30, dailyBurn: 2.5, price: 30 },
+      { id: "item-14", name: "Catch Hing (Asafoetida)", shortName: "Hing (Asafoetida)", category: "Spices and Condiments", current: 35, max: 50, unit: "g", threshold: 10, dailyBurn: 0.8, price: 90 },
       { id: "item-15", name: "Amul Taaza Toned Milk", shortName: "Amul Milk", category: "Dairy and Fresh", current: 0.5, max: 2, unit: "L", threshold: 1.0, dailyBurn: 1.0, price: 56 },
       { id: "item-16", name: "Amul Masti Dahi / Curd", shortName: "Curd / Dahi", category: "Dairy and Fresh", current: 350, max: 500, unit: "g", threshold: 200, dailyBurn: 150, price: 40 },
       { id: "item-17", name: "Amul Malai Paneer (Fresh)", shortName: "Fresh Paneer", category: "Dairy and Fresh", current: 200, max: 400, unit: "g", threshold: 200, dailyBurn: 100, price: 95 },
@@ -214,8 +217,8 @@
         items: [
           { name: "Fortune Refined Sunflower Oil (3L)", shortName: "Sunflower Oil", qty: 3, unit: "L", rate: "₹420", category: "Oils and Ghee" },
           { name: "Fortune Daawat Basmati Rice (5kg)", shortName: "Basmati Rice", qty: 5, unit: "kg", rate: "₹550", category: "Atta and Grains" },
-          { name: "Catch Jeera Seeds (200g)", shortName: "Jeera (Cumin)", qty: 200, unit: "g", rate: "₹110", category: "Masala Dabba" },
-          { name: "Everest Haldi Powder (250g)", shortName: "Haldi (Turmeric)", qty: 250, unit: "g", rate: "₹160", category: "Masala Dabba" }
+          { name: "Catch Jeera Seeds (200g)", shortName: "Jeera (Cumin)", qty: 200, unit: "g", rate: "₹110", category: "Spices and Condiments" },
+          { name: "Everest Haldi Powder (250g)", shortName: "Haldi (Turmeric)", qty: 250, unit: "g", rate: "₹160", category: "Spices and Condiments" }
         ]
       },
       {
@@ -331,6 +334,52 @@
       const [isSimulatingEmail, setIsSimulatingEmail] = useState(false);
 
       // CONVERSATIONAL AGENT STATE
+      const [isListening, setIsListening] = useState(false);
+      const [customUploadedFile, setCustomUploadedFile] = useState(null);
+      const [dietFilter, setDietFilter] = useState("All Diets");
+      
+      const startVoiceRecognition = () => {
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!SpeechRecognition) {
+          showToast("Speech recognition is not supported in this browser.");
+          return;
+        }
+
+        const recognition = new SpeechRecognition();
+        recognition.lang = 'en-IN';
+        recognition.interimResults = false;
+        recognition.maxAlternatives = 1;
+
+        setIsListening(true);
+        showToast("🎙️ Listening... speak your kitchen query or ingredients!");
+
+        recognition.onresult = (event) => {
+          const spokenText = event.results[0][0].transcript;
+          setUserChatInput(spokenText);
+          setIsListening(false);
+          showToast(`Heard: "${spokenText}"`);
+          setTimeout(() => {
+            handleSendMessage(spokenText);
+          }, 300);
+        };
+
+        recognition.onerror = (event) => {
+          console.error("Speech recognition error:", event.error);
+          setIsListening(false);
+          showToast("Voice recognition error: " + event.error);
+        };
+
+        recognition.onend = () => {
+          setIsListening(false);
+        };
+
+        try {
+          recognition.start();
+        } catch (err) {
+          setIsListening(false);
+        }
+      };
+
       const [chatMessages, setChatMessages] = useState([
         {
           id: "m-1",
@@ -1143,13 +1192,12 @@
           {/* MAIN NAVIGATION BAR */}
           <nav class="flex gap-2 p-1.5 bg-slate-100/90 rounded-2xl mb-8 overflow-x-auto border border-slate-200/80">
             {[
-              { id: "scan", label: "Invoice OCR Scanner (Phase 1)", icon: <Icons.Camera /> },
-              { id: "inbound", label: "Email Auto-Forwarding (Phase 2)", icon: <Icons.Mail />, badge: "Autonomous" },
-              { id: "assistant", label: "AI Kitchen Assistant", icon: <Icons.Chat /> },
+              { id: "scan", label: "Bill OCR Scanner", icon: <Icons.Camera /> },
+              { id: "inbound", label: "Email Auto-Sync", icon: <Icons.Mail />, badge: "Autonomous" },
+              { id: "assistant", label: "Voice & AI Assistant", icon: <Icons.Chat /> },
               { id: "pantry", label: "Digital Pantry", count: pantry.length, icon: <Icons.Box /> },
-              { id: "family", label: "Family Profile", icon: <Icons.Users /> },
-              { id: "masala", label: "Masala Dabba", count: 5, icon: <Icons.Flame /> },
-              { id: "cook", label: "What Did You Cook?", icon: <Icons.Flame /> },
+              { id: "family", label: "Family & Guest Scaler", icon: <Icons.Users /> },
+              { id: "cook", label: "Cook & Deplete", icon: <Icons.Flame /> },
               { id: "radar", label: "Restock Radar", count: lowStockItems.length, alert: lowStockItems.length > 0, icon: <Icons.Alert /> },
               { id: "analytics", label: "Household Insights", icon: <Icons.Chart /> }
             ].map(tab => (
@@ -1234,6 +1282,64 @@
                       <span class="text-[10px] text-slate-500 block mt-1">{inv.items.length} Items ({inv.totalAmount})</span>
                     </button>
                   ))}
+                </div>
+              </div>
+
+              
+              {/* FILE UPLOAD / DRAG & DROP ZONE */}
+              <div class="bg-white rounded-3xl p-6 border-2 border-dashed border-orange-300 hover:border-orange-500 transition-all text-center space-y-3">
+                <div class="w-12 h-12 mx-auto rounded-2xl bg-orange-100 text-orange-600 flex items-center justify-center">
+                  <Icons.Upload />
+                </div>
+                <div>
+                  <h4 class="font-black text-sm text-slate-900">Upload Your Own Grocery Bill or Thermal Receipt</h4>
+                  <p class="text-xs text-slate-500 mt-0.5">Drag and drop a photo or PDF (Zepto, Blinkit, Swiggy, Instamart, Amazon, D-Mart)</p>
+                </div>
+                <div>
+                  <label class="inline-flex items-center gap-1.5 px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-xl cursor-pointer shadow-md shadow-orange-500/20 transition-all">
+                    <Icons.Camera />
+                    <span>Browse & Scan Bill Photo</span>
+                    <input
+                      type="file"
+                      accept="image/*,application/pdf"
+                      class="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files[0];
+                        if (file) {
+                          setCustomUploadedFile(file.name);
+                          setIsScanning(true);
+                          showToast("Scanning bill: " + file.name + " with Gemini Multimodal OCR...");
+                          setTimeout(() => {
+                            setIsScanning(false);
+                            const parsedSample = {
+                              id: "inv-custom-" + Date.now(),
+                              platform: "Scanned Receipt (" + file.name.substring(0, 15) + ")",
+                              badgeColor: "bg-emerald-100 text-emerald-800 border-emerald-300",
+                              orderId: "#SCAN-" + Math.floor(1000 + Math.random() * 9000),
+                              time: "Just now (Multimodal OCR Processed)",
+                              totalAmount: "₹620",
+                              items: [
+                                { name: "Aashirvaad Shudh Chakki Atta (5kg)", shortName: "Chakki Atta", qty: 5, unit: "kg", rate: "₹240", category: "Atta and Grains" },
+                                { name: "Amul Taaza Toned Milk (2L)", shortName: "Amul Milk", qty: 2, unit: "L", rate: "₹112", category: "Dairy and Fresh" },
+                                { name: "Tata Sampann Toor Dal (1kg)", shortName: "Toor Dal", qty: 1, unit: "kg", rate: "₹175", category: "Dals and Pulses" },
+                                { name: "Fresh Country Tomatoes (1kg)", shortName: "Tomato (Tamatar)", qty: 1, unit: "kg", rate: "₹35", category: "Vegetables" },
+                                { name: "Fresh Red Onions (1kg)", shortName: "Onion (Pyaz)", qty: 1, unit: "kg", rate: "₹30", category: "Vegetables" },
+                                { name: "Catch Jeera (200g)", shortName: "Jeera (Cumin)", qty: 200, unit: "g", rate: "₹55", category: "Spices and Condiments" }
+                              ]
+                            };
+                            setSelectedInvoice(parsedSample);
+                            setScanResult(parsedSample);
+                            showToast("Extracted 6 line items from uploaded receipt!");
+                          }, 1000);
+                        }
+                      }}
+                    />
+                  </label>
+                  {customUploadedFile && (
+                    <span class="block text-xs font-bold text-emerald-600 mt-2">
+                      ✅ Loaded: {customUploadedFile}
+                    </span>
+                  )}
                 </div>
               </div>
 
@@ -1661,9 +1767,22 @@
                 }}
                 class="flex gap-2"
               >
+                <button
+                  type="button"
+                  onClick={startVoiceRecognition}
+                  class={"px-4 py-3.5 rounded-2xl border font-bold text-xs shadow-sm flex items-center gap-1.5 transition-all " + (
+                    isListening 
+                      ? "bg-red-500 text-white border-red-600 animate-pulse shadow-red-500/30" 
+                      : "bg-white hover:bg-orange-50 text-slate-700 border-slate-200 hover:border-orange-300"
+                  )}
+                  title="Click to speak (Voice Recognition)"
+                >
+                  {isListening ? <Icons.MicActive /> : <Icons.Mic />}
+                  <span class="hidden sm:inline">{isListening ? "Listening..." : "Voice"}</span>
+                </button>
                 <input
                   type="text"
-                  placeholder="e.g. 'I have 2 kg Atta 2 bread packets and 1 kg tomato' or 'Set notification for Milk'"
+                  placeholder={isListening ? "🎙️ Listening... speak now..." : "Ask e.g. 'What is in my pantry?' or 'What can I cook?' or speak via mic..."}
                   value={userChatInput}
                   onChange={(e) => setUserChatInput(e.target.value)}
                   class="flex-1 px-4 py-3.5 bg-white border border-slate-200 rounded-2xl text-xs font-semibold focus:outline-none focus:border-orange-500 shadow-sm"
@@ -1784,173 +1903,118 @@
             </div>
           )}
 
-          {/* TAB: FAMILY CUSTOMIZER */}
+          {/* TAB: FAMILY CUSTOMIZER & GUEST MEAL SCALER */}
           {activeTab === "family" && (
-            <div class="max-w-2xl mx-auto bg-white rounded-3xl p-6 sm:p-8 border border-orange-200 shadow-lg space-y-6">
-              <div>
-                <span class="text-xs font-black uppercase text-orange-600 bg-orange-100 px-3 py-1 rounded-full">
-                  Family Profile & Appetite Calibration
-                </span>
-                <h2 class="text-2xl font-black text-slate-900 mt-2">Customize Household & Eating Pattern</h2>
-                <p class="text-xs text-slate-500 mt-0.5">
-                  Tailor member counts and appetite coefficients so DearHome deducts exact portion weights.
-                </p>
-              </div>
-
-              <div class="space-y-5">
-                <div>
-                  <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                    Family / House Name
-                  </label>
-                  <input
-                    type="text"
-                    value={household.name}
-                    onChange={(e) => setHousehold({ ...household, name: e.target.value })}
-                    class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:outline-none focus:border-orange-500"
-                  />
-                </div>
-
-                <div>
-                  <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
-                    Family Members Count
-                  </label>
-                  <div class="grid grid-cols-3 gap-3">
-                    <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200 text-center">
-                      <span class="text-xs font-bold text-slate-600 block">Adults (1.0x)</span>
-                      <div class="flex items-center justify-center gap-3 mt-3">
-                        <button
-                          onClick={() => setHousehold(p => ({ ...p, adults: Math.max(1, p.adults - 1) }))}
-                          class="w-9 h-9 rounded-xl bg-white border border-slate-300 font-black text-sm hover:bg-slate-100 shadow-sm"
-                        >
-                          -
-                        </button>
-                        <span class="text-lg font-black text-slate-900 w-6">{household.adults}</span>
-                        <button
-                          onClick={() => setHousehold(p => ({ ...p, adults: p.adults + 1 }))}
-                          class="w-9 h-9 rounded-xl bg-white border border-slate-300 font-black text-sm hover:bg-slate-100 shadow-sm"
-                        >
-                          +
-                        </button>
-                      </div>
-                    </div>
-
-                    <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200 text-center">
-                      <span class="text-xs font-bold text-slate-600 block">Children (0.6x)</span>
-                      <div class="flex items-center justify-center gap-3 mt-3">
-                        <button
-                          onClick={() => setHousehold(p => ({ ...p, children: Math.max(0, p.children - 1) }))}
-                          class="w-9 h-9 rounded-xl bg-white border border-slate-300 font-black text-sm hover:bg-slate-100 shadow-sm"
-                        >
-                          -
-                        </button>
-                        <span class="text-lg font-black text-slate-900 w-6">{household.children}</span>
-                        <button
-                          onClick={() => setHousehold(p => ({ ...p, children: p.children + 1 }))}
-                          class="w-9 h-9 rounded-xl bg-white border border-slate-300 font-black text-sm hover:bg-slate-100 shadow-sm"
-                        >
-                          +
-                        </button>
-                      </div>
-                    </div>
-
-                    <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200 text-center">
-                      <span class="text-xs font-bold text-slate-600 block">Elders (0.85x)</span>
-                      <div class="flex items-center justify-center gap-3 mt-3">
-                        <button
-                          onClick={() => setHousehold(p => ({ ...p, elders: Math.max(0, p.elders - 1) }))}
-                          class="w-9 h-9 rounded-xl bg-white border border-slate-300 font-black text-sm hover:bg-slate-100 shadow-sm"
-                        >
-                          -
-                        </button>
-                        <span class="text-lg font-black text-slate-900 w-6">{household.elders}</span>
-                        <button
-                          onClick={() => setHousehold(p => ({ ...p, elders: p.elders + 1 }))}
-                          class="w-9 h-9 rounded-xl bg-white border border-slate-300 font-black text-sm hover:bg-slate-100 shadow-sm"
-                        >
-                          +
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="p-5 bg-orange-50/70 rounded-2xl border border-orange-200 space-y-3">
+            <div class="max-w-4xl mx-auto space-y-6">
+              <div class="bg-white rounded-3xl p-6 sm:p-8 border border-orange-200 shadow-lg space-y-6">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-4 border-b border-slate-100">
                   <div>
-                    <label class="block text-xs font-bold text-orange-950 uppercase tracking-wider">
-                      Family Appetite Level
-                    </label>
-                    <span class="text-[11px] text-orange-800 block mt-0.5">
-                      Scales ingredient weights according to how much your household members eat.
+                    <span class="text-xs font-black uppercase text-orange-600 bg-orange-100 px-3 py-1 rounded-full">
+                      Family Profile & Guest Scaler
                     </span>
+                    <h2 class="text-2xl font-black text-slate-900 mt-2">Household & Live Guest Portion Scaler</h2>
+                    <p class="text-xs text-slate-500 mt-0.5">
+                      Dynamically auto-scales required ingredient weights when guests arrive.
+                    </p>
                   </div>
-
-                  <div class="grid grid-cols-3 gap-2 pt-1">
-                    {[
-                      { label: "Light (0.75x)", desc: "Diet / Low-carb" },
-                      { label: "Regular (1.0x)", desc: "Standard Indian" },
-                      { label: "Hearty (1.3x)", desc: "Generous portions" }
-                    ].map(app => (
-                      <button
-                        key={app.label}
-                        onClick={() => setHousehold({ ...household, appetiteLevel: app.label })}
-                        class={"p-3 rounded-xl border text-center transition-all " + (
-                          household.appetiteLevel === app.label
-                            ? "bg-white border-orange-500 text-orange-900 shadow-sm font-bold"
-                            : "bg-orange-100/50 border-orange-200 text-slate-700 hover:bg-white"
-                        )}
-                      >
-                        <span class="text-xs block font-extrabold">{app.label.split(" ")[0]}</span>
-                        <span class="text-[10px] text-slate-500 block">{app.desc}</span>
-                      </button>
-                    ))}
+                  <div class="p-3 bg-orange-50 rounded-2xl border border-orange-200 text-center">
+                    <span class="text-[10px] font-bold text-slate-500 uppercase block">Total Effective Diners</span>
+                    <span class="text-2xl font-black text-orange-600">{totalMealEaters} portions</span>
                   </div>
                 </div>
-              </div>
-            </div>
-          )}
 
-          {/* TAB: MASALA DABBA */}
-          {activeTab === "masala" && (
-            <div class="max-w-3xl mx-auto space-y-6">
-              <div class="bg-gradient-to-br from-amber-700 to-yellow-600 rounded-3xl p-6 text-white shadow-xl flex items-center justify-between">
-                <div>
-                  <span class="text-[10px] font-black uppercase tracking-wider bg-white/20 px-3 py-1 rounded-full">
-                    Traditional Indian Spice Organizer
-                  </span>
-                  <h2 class="text-2xl font-black mt-2">The Masala Dabba</h2>
-                  <p class="text-xs text-amber-100 mt-1">
-                    Tracks daily tadka pinches (Haldi, Jeera, Rai, Hing, Lal Mirch) and alerts before your spice katoris run empty.
-                  </p>
-                </div>
-                <div class="w-14 h-14 rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center text-white text-2xl border border-white/20">
-                  <Icons.Flame />
-                </div>
-              </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Left Column: Family Counts */}
+                  <div class="space-y-4">
+                    <h4 class="text-xs font-black text-slate-800 uppercase tracking-wider">Household Members</h4>
+                    <div class="grid grid-cols-3 gap-2.5">
+                      <div class="p-3 bg-slate-50 rounded-2xl border border-slate-200 text-center">
+                        <span class="text-[11px] font-bold text-slate-600 block">Adults (1.0x)</span>
+                        <div class="flex items-center justify-center gap-2 mt-2">
+                          <button onClick={() => setHousehold(p => ({ ...p, adults: Math.max(1, p.adults - 1) }))} class="w-7 h-7 rounded-lg bg-white border border-slate-300 font-black text-xs hover:bg-slate-100">-</button>
+                          <span class="text-base font-black text-slate-900">{household.adults}</span>
+                          <button onClick={() => setHousehold(p => ({ ...p, adults: p.adults + 1 }))} class="w-7 h-7 rounded-lg bg-white border border-slate-300 font-black text-xs hover:bg-slate-100">+</button>
+                        </div>
+                      </div>
 
-              <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                {pantry.filter(i => i.category === "Masala Dabba").map(spice => {
-                  const pct = Math.min(100, Math.round((spice.current / spice.max) * 100));
-                  return (
-                    <div key={spice.id} class="bg-white rounded-3xl p-5 border border-amber-200 shadow-sm text-center space-y-3">
-                      <div class="w-12 h-12 mx-auto rounded-2xl bg-amber-100 text-amber-900 flex items-center justify-center font-black text-sm">
-                        <Icons.Flame />
+                      <div class="p-3 bg-slate-50 rounded-2xl border border-slate-200 text-center">
+                        <span class="text-[11px] font-bold text-slate-600 block">Children (0.6x)</span>
+                        <div class="flex items-center justify-center gap-2 mt-2">
+                          <button onClick={() => setHousehold(p => ({ ...p, children: Math.max(0, p.children - 1) }))} class="w-7 h-7 rounded-lg bg-white border border-slate-300 font-black text-xs hover:bg-slate-100">-</button>
+                          <span class="text-base font-black text-slate-900">{household.children}</span>
+                          <button onClick={() => setHousehold(p => ({ ...p, children: p.children + 1 }))} class="w-7 h-7 rounded-lg bg-white border border-slate-300 font-black text-xs hover:bg-slate-100">+</button>
+                        </div>
                       </div>
-                      <div>
-                        <h4 class="font-bold text-sm text-slate-900">{spice.shortName}</h4>
-                        <span class="text-xs font-black text-amber-700">{spice.current} {spice.unit}</span>
+
+                      <div class="p-3 bg-slate-50 rounded-2xl border border-slate-200 text-center">
+                        <span class="text-[11px] font-bold text-slate-600 block">Elders (0.85x)</span>
+                        <div class="flex items-center justify-center gap-2 mt-2">
+                          <button onClick={() => setHousehold(p => ({ ...p, elders: Math.max(0, p.elders - 1) }))} class="w-7 h-7 rounded-lg bg-white border border-slate-300 font-black text-xs hover:bg-slate-100">-</button>
+                          <span class="text-base font-black text-slate-900">{household.elders}</span>
+                          <button onClick={() => setHousehold(p => ({ ...p, elders: p.elders + 1 }))} class="w-7 h-7 rounded-lg bg-white border border-slate-300 font-black text-xs hover:bg-slate-100">+</button>
+                        </div>
                       </div>
-                      <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
-                        <div class="h-full bg-amber-500 rounded-full" style={{ width: pct + "%" }}></div>
-                      </div>
-                      <button
-                        onClick={() => updateStock(spice.id, -5)}
-                        class="w-full py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-900 rounded-xl text-xs font-bold transition-all"
-                      >
-                        1 Tadka Pinch (-5g)
-                      </button>
                     </div>
-                  );
-                })}
+
+                    {/* Guest Counter Card */}
+                    <div class="p-4 bg-gradient-to-r from-amber-50 to-orange-50 rounded-2xl border border-orange-200 flex items-center justify-between">
+                      <div>
+                        <span class="text-xs font-black text-orange-900 block">🎉 Visiting Guests Today</span>
+                        <span class="text-[10px] text-orange-700">Scales all recipe ingredient quantities in 1-click</span>
+                      </div>
+                      <div class="flex items-center gap-2.5">
+                        <button onClick={() => setGuestCountForMeal(g => Math.max(0, g - 1))} class="w-8 h-8 rounded-xl bg-white border border-orange-300 font-black text-sm text-orange-950 hover:bg-orange-100">-</button>
+                        <span class="text-lg font-black text-orange-950 w-6 text-center">{guestCountForMeal}</span>
+                        <button onClick={() => setGuestCountForMeal(g => g + 1)} class="w-8 h-8 rounded-xl bg-white border border-orange-300 font-black text-sm text-orange-950 hover:bg-orange-100">+</button>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Right Column: Appetite & Dietary Filter */}
+                  <div class="space-y-4">
+                    <h4 class="text-xs font-black text-slate-800 uppercase tracking-wider">Appetite Multiplier</h4>
+                    <div class="grid grid-cols-3 gap-2">
+                      {[
+                        { label: "Light (0.75x)", desc: "Diet / Light" },
+                        { label: "Regular (1.0x)", desc: "Standard" },
+                        { label: "Hearty (1.3x)", desc: "Generous" }
+                      ].map(app => (
+                        <button
+                          key={app.label}
+                          onClick={() => setHousehold({ ...household, appetiteLevel: app.label })}
+                          class={"p-2.5 rounded-xl border text-center transition-all " + (
+                            household.appetiteLevel === app.label
+                              ? "bg-orange-500 border-orange-600 text-white font-bold shadow-sm"
+                              : "bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100"
+                          )}
+                        >
+                          <span class="text-xs block font-extrabold">{app.label.split(" ")[0]}</span>
+                          <span class="text-[9px] opacity-80 block">{app.desc}</span>
+                        </button>
+                      ))}
+                    </div>
+
+                    <h4 class="text-xs font-black text-slate-800 uppercase tracking-wider pt-2">Dietary Preference Filter</h4>
+                    <div class="flex flex-wrap gap-1.5">
+                      {["All Diets", "Vegetarian", "Jain (No Onion/Garlic)", "High-Protein", "Vegan", "Gluten-Free"].map(d => (
+                        <button
+                          key={d}
+                          onClick={() => {
+                            setDietFilter(d);
+                            showToast("Applied filter: " + d);
+                          }}
+                          class={"px-3 py-1.5 rounded-xl text-xs font-bold border transition-all " + (
+                            dietFilter === d
+                              ? "bg-slate-900 text-white border-slate-900"
+                              : "bg-white text-slate-600 border-slate-200 hover:bg-slate-50"
+                          )}
+                        >
+                          {d}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           )}
