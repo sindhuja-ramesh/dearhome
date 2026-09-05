@@ -19,17 +19,17 @@ steps:
       echo "=================================================="
       echo "Verifying Secret Manager Integration..."
       if [ -n "$$GEMINI_API_KEY" ]; then
-        echo "SUCCESS: GEMINI_API_KEY retrieved securely from Google Cloud Secret Manager!"
+        echo "SUCCESS: Dearhome_api_key retrieved securely from Google Cloud Secret Manager!"
         echo "Key verification: Length is $${#GEMINI_API_KEY} characters."
       else
-        echo "NOTICE: GEMINI_API_KEY not found or IAM Secret Accessor role pending."
+        echo "NOTICE: Dearhome_api_key not found or IAM Secret Accessor role pending."
       fi
       echo "DearHome Cloud Build pipeline completed successfully."
       echo "=================================================="
 
 availableSecrets:
   secretManager:
-    - versionName: projects/$PROJECT_ID/secrets/GEMINI_API_KEY/versions/latest
+    - versionName: projects/$PROJECT_ID/secrets/Dearhome_api_key/versions/latest
       env: 'GEMINI_API_KEY'
 
 options:
