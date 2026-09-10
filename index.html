@@ -1325,6 +1325,38 @@ const SAMPLE_INVOICES = [{
   }]
 }];
 function App() {
+
+  // CULINARY FAMILY TASTE & RECIPE CONFIGURATOR STATES
+  const [culinaryProfile, setCulinaryProfile] = useState(() => {
+    try {
+      const saved = localStorage.getItem("dearhome_culinary_profile");
+      return saved ? JSON.parse(saved) : CULINARY_ARCHETYPES[0];
+    } catch(e) {
+      return CULINARY_ARCHETYPES[0];
+    }
+  });
+  const [isCulinaryModalOpen, setIsCulinaryModalOpen] = useState(false);
+  const [culinaryWizardStep, setCulinaryWizardStep] = useState(1);
+  const [draftCulinaryProfile, setDraftCulinaryProfile] = useState(() => ({ ...CULINARY_ARCHETYPES[0] }));
+  const [activeRecipeForConfig, setActiveRecipeForConfig] = useState(null);
+  const [customRecipeConfigs, setCustomRecipeConfigs] = useState(() => {
+    try {
+      const saved = localStorage.getItem("dearhome_recipe_configs");
+      return saved ? JSON.parse(saved) : {};
+    } catch(e) { return {}; }
+  });
+  const [savedFamilyForks, setSavedFamilyForks] = useState(() => {
+    try {
+      const saved = localStorage.getItem("dearhome_family_forks");
+      return saved ? JSON.parse(saved) : [];
+    } catch(e) { return []; }
+  });
+  const [configModalTab, setConfigModalTab] = useState("configured");
+  const [isPlayingAudio, setIsPlayingAudio] = useState(false);
+  const [forkTitleInput, setForkTitleInput] = useState("");
+  const [forkAuthorInput, setForkAuthorInput] = useState("Maa");
+  const [forkNotesInput, setForkNotesInput] = useState("");
+
   const [household, setHousehold] = useState(() => {
     const saved = localStorage.getItem("dearhome_household");
     return saved ? JSON.parse(saved) : {
