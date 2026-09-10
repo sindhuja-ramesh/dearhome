@@ -22,6 +22,15 @@
     ::-webkit-scrollbar-thumb { background: rgba(245, 135, 11, 0.3); border-radius: 9999px; }
     @keyframes pulseGlow { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.6; transform: scale(0.95); } }
     .pulse-mic { animation: pulseGlow 1.5s infinite; }
+  
+    @keyframes waveBar { 0% { height: 4px; } 100% { height: 22px; } }
+    .wave-bar-1 { animation: waveBar 0.5s ease-in-out infinite alternate; }
+    .wave-bar-2 { animation: waveBar 0.65s ease-in-out infinite alternate 0.1s; }
+    .wave-bar-3 { animation: waveBar 0.45s ease-in-out infinite alternate 0.2s; }
+    .wave-bar-4 { animation: waveBar 0.7s ease-in-out infinite alternate 0.15s; }
+    .wave-bar-5 { animation: waveBar 0.55s ease-in-out infinite alternate 0.25s; }
+    .glow-amber { box-shadow: 0 0 25px rgba(245, 158, 11, 0.25); }
+
   </style>
 </head>
 <body class="bg-[#faf8f5] text-slate-800 min-h-screen selection:bg-orange-500 selection:text-white pb-16">
@@ -76,6 +85,167 @@
       List: () => <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg>
     };
 
+    
+    // CULINARY FAMILY ARCHETYPES & TASTE CONFIGURATOR DATA
+    const CULINARY_ARCHETYPES = [
+      {
+        id: 'punjabi_sharma',
+        familyName: 'The Sharma Household',
+        region: 'punjabi',
+        regionLabel: 'North Indian (Punjabi)',
+        cookingFat: 'pure_ghee',
+        cookingFatLabel: 'Pure Desi Ghee & Butter',
+        defaultTadka: 'cumin_garlic_hing',
+        defaultTadkaLabel: 'Jeera + Golden Garlic + Hing + Kashmiri Mirch',
+        souringAgent: 'fresh_tomatoes_amchur',
+        souringAgentLabel: 'Ripe Tomatoes & Pinch of Amchur (Dry Mango)',
+        spiceLevel: 4,
+        spiceLabel: 'Desi Fiery (4/5)',
+        sweetSavoryBalance: false,
+        unitSystem: 'desi',
+        dietaryMode: 'regular',
+        avatar: '🥘',
+        description: 'Rich gravies with double tadka in desi ghee and roasted kasuri methi.'
+      },
+      {
+        id: 'tamil_iyer',
+        familyName: 'Iyer Kudumbam',
+        region: 'tamil',
+        regionLabel: 'South Indian (Tamil Nadu / Brahmin)',
+        cookingFat: 'sesame_gingelly',
+        cookingFatLabel: 'Gingelly (Sesame) & Coconut Oil',
+        defaultTadka: 'mustard_curry_urad',
+        defaultTadkaLabel: 'Mustard Seeds + Curry Leaves + Urad Dal + Asafoetida',
+        souringAgent: 'tamarind_extract',
+        souringAgentLabel: 'Aged Tamarind Pulp (Puli)',
+        spiceLevel: 3,
+        spiceLabel: 'Medium Spicy (3/5)',
+        sweetSavoryBalance: false,
+        unitSystem: 'desi',
+        dietaryMode: 'satvik_no_garlic',
+        avatar: '🌿',
+        description: 'Freshly roasted sambar podi, curry leaf aroma, satvik without onion/garlic.'
+      },
+      {
+        id: 'bengali_roy',
+        familyName: 'Roy Family Heritage',
+        region: 'bengali',
+        regionLabel: 'Eastern (Bengali)',
+        cookingFat: 'mustard_oil',
+        cookingFatLabel: 'Pungent Cold-Pressed Mustard Oil (Kachi Ghani)',
+        defaultTadka: 'panch_phoron',
+        defaultTadkaLabel: 'Panch Phoron (5 Spices) + Green Chillies',
+        souringAgent: 'curd_tomatoes',
+        souringAgentLabel: 'Whisked Tok Doi (Curd) & Tomato',
+        spiceLevel: 3,
+        spiceLabel: 'Balanced Pungent (3/5)',
+        sweetSavoryBalance: true,
+        unitSystem: 'desi',
+        dietaryMode: 'regular',
+        avatar: '🐟',
+        description: 'Tempered in smoky mustard oil with panch phoron and gentle sweetness.'
+      },
+      {
+        id: 'maharashtrian_joshi',
+        familyName: 'Joshi Parivaar',
+        region: 'maharashtrian',
+        regionLabel: 'Western (Maharashtrian / Deshastha)',
+        cookingFat: 'groundnut_oil',
+        cookingFatLabel: 'Kachi Ghani Groundnut (Peanut) Oil & Ghee',
+        defaultTadka: 'mustard_cumin_hing_curry',
+        defaultTadkaLabel: 'Mohari (Mustard) + Jeera + Hing + Kadi Patta + Garlic',
+        souringAgent: 'kokum_tamarind',
+        souringAgentLabel: 'Amsul / Kokum Rind & Jaggery (Gul)',
+        spiceLevel: 4,
+        spiceLabel: 'Zanzanit Spicy (4/5)',
+        sweetSavoryBalance: true,
+        unitSystem: 'desi',
+        dietaryMode: 'regular',
+        avatar: '🥥',
+        description: 'Distinctive Goda Masala depth, roasted peanut powder crunch, and kokum tanginess.'
+      },
+      {
+        id: 'gujarati_patel',
+        familyName: 'Patel Parivar Kitchen',
+        region: 'gujarati',
+        regionLabel: 'Western (Gujarati Kathiyawadi & Surati)',
+        cookingFat: 'peanut_oil',
+        cookingFatLabel: 'Sing Tel (Peanut Oil) & Desi Ghee',
+        defaultTadka: 'mustard_sesame_curry',
+        defaultTadkaLabel: 'Mustard + White Til (Sesame) + Hing + Cinnamon/Clove',
+        souringAgent: 'kokum_jaggery',
+        souringAgentLabel: 'Kokum / Lemon with Jaggery (Gord)',
+        spiceLevel: 2,
+        spiceLabel: 'Mild-Sweet Tangy (2/5)',
+        sweetSavoryBalance: true,
+        unitSystem: 'desi',
+        dietaryMode: 'pure_veg',
+        avatar: '🌾',
+        description: 'Sweet, sour, and savory harmony with white sesame seeds and jaggery.'
+      },
+      {
+        id: 'andhra_reddy',
+        familyName: 'Reddy Gari Vantillu',
+        region: 'andhra',
+        regionLabel: 'South Indian (Andhra / Rayalaseema)',
+        cookingFat: 'gingelly_ghee',
+        cookingFatLabel: 'Gingelly Oil + Hot Ghee on Top',
+        defaultTadka: 'mustard_garlic_redchilli',
+        defaultTadkaLabel: 'Crushed Garlic + Mustard + Guntur Red Chillies',
+        souringAgent: 'tamarind_gongura',
+        souringAgentLabel: 'Thick Tamarind Extract & Gongura Leaves',
+        spiceLevel: 5,
+        spiceLabel: 'Fiery Andhra Hot (5/5)',
+        sweetSavoryBalance: false,
+        unitSystem: 'desi',
+        dietaryMode: 'regular',
+        avatar: '🌶️',
+        description: 'High heat intensity, pungent Guntur chillies, aromatic crushed garlic and tangy tamarind.'
+      }
+    ];
+
+    const REGIONS_LIST = [
+      { id: 'punjabi', name: 'North Indian (Punjabi / Awadhi)', icon: '🥘' },
+      { id: 'tamil', name: 'South Indian (Tamil / Udupi / Kerala)', icon: '🌿' },
+      { id: 'andhra', name: 'South Indian (Andhra / Telangana)', icon: '🌶️' },
+      { id: 'maharashtrian', name: 'Western (Maharashtrian / Konkani)', icon: '🥥' },
+      { id: 'gujarati', name: 'Western (Gujarati / Kathiyawadi)', icon: '🌾' },
+      { id: 'bengali', name: 'Eastern (Bengali / Odia)', icon: '🐟' },
+      { id: 'rajasthani', name: 'Western (Rajasthani Marwari)', icon: '🏺' }
+    ];
+
+    const COOKING_FATS_LIST = [
+      { id: 'pure_ghee', name: 'Desi Cow Ghee (Pure Clarified Butter)', icon: '🧈', pantryItem: 'Desi Ghee' },
+      { id: 'mustard_oil', name: 'Cold-Pressed Mustard Oil (Kachi Ghani)', icon: '🫒', pantryItem: 'Mustard Oil' },
+      { id: 'coconut_oil', name: 'Virgin Coconut Oil', icon: '🥥', pantryItem: 'Sunflower Oil' },
+      { id: 'sesame_gingelly', name: 'Gingelly (Sesame / Nallennai) Oil', icon: '🌱', pantryItem: 'Sunflower Oil' },
+      { id: 'groundnut_oil', name: 'Cold-Pressed Groundnut (Peanut) Oil', icon: '🥜', pantryItem: 'Sunflower Oil' }
+    ];
+
+    const TADKA_STYLES_LIST = [
+      { id: 'cumin_garlic_hing', name: 'North Style: Jeera, Golden Garlic, Hing & Kashmiri Mirch', icon: '🧄', steps: 'Fry sliced garlic in hot ghee until golden bronze, add jeera, hing, whole chillies, and swirl in kashmiri mirch powder.' },
+      { id: 'mustard_curry_urad', name: 'South Style: Mustard Seeds, Curry Leaves, Urad Dal & Asafoetida', icon: '🍃', steps: 'Splutter mustard seeds in hot oil, add urad dal until golden, throw in fresh curry leaves and slit green chillies.' },
+      { id: 'panch_phoron', name: 'Eastern Style: Panch Phoron (5-Spice) & Slit Green Chillies', icon: '✨', steps: 'Heat mustard oil to smoking point. Crackle panch phoron, add bay leaves and slit green chillies until fragrant.' },
+      { id: 'mustard_sesame_curry', name: 'Gujarati/Konkani: Mustard, Roasted White Sesame & Cloves', icon: '🌾', steps: 'Crackle mustard seeds, add roasted white til and cloves with a generous pinch of hing.' },
+      { id: 'mustard_garlic_redchilli', name: 'Andhra Style: Crushed Garlic & Guntur Red Chillies', icon: '🔥', steps: 'Sauté crushed garlic pods with whole Guntur red chillies and mustard until deeply aromatic.' }
+    ];
+
+    const SOURING_AGENTS_LIST = [
+      { id: 'fresh_tomatoes_amchur', name: 'Fresh Ripe Tomatoes + Amchur (Dry Mango)', icon: '🍅', pantryItem: 'Tomato (Tamatar)' },
+      { id: 'tamarind_extract', name: 'Aged Tamarind Pulp (Puli / Imli)', icon: '🟤', pantryItem: 'Tomato (Tamatar)' },
+      { id: 'kokum_rind', name: 'Dried Kokum Petals (Amsul)', icon: '🫐', pantryItem: 'Tomato (Tamatar)' },
+      { id: 'curd_dahi', name: 'Whisked Sour Curd (Dahi / Tok Doi)', icon: '🥣', pantryItem: 'Curd / Dahi' },
+      { id: 'lemon_juice', name: 'Fresh Lime/Lemon Juice at the finish', icon: '🍋', pantryItem: 'Tomato (Tamatar)' }
+    ];
+
+    const SPECIAL_TWISTS_LIST = [
+      { id: 'dhungar_smoke', name: 'Dhungar (Charcoal & Clove Ghee smoke infusion)', icon: '💨', note: 'Sealed with red hot charcoal and clove ghee for 5 mins' },
+      { id: 'kasuri_methi_crush', name: 'Toasted Kasuri Methi crushed between palms', icon: '🌿', note: 'Hand-crushed roasted fenugreek leaves at finish' },
+      { id: 'roasted_peanut_powder', name: 'Coarsely pounded roasted peanut powder (Danayache Koot)', icon: '🥜', note: 'Adds signature nutty Maharashtrian texture' },
+      { id: 'pinch_of_jaggery', name: 'Pinch of Organic Jaggery (Gur/Gul) for sweet-tangy lift', icon: '🍯', note: 'Balances acidity with gentle warmth' },
+      { id: 'none', name: 'Clean Traditional Home Style (No extra twists)', icon: '✨', note: 'Simple, pure home flavors' }
+    ];
+
     const CATEGORIES = ["All Items", "Atta and Grains", "Dals and Pulses", "Oils and Ghee", "Dairy and Fresh", "Vegetables", "Beverages and Snacks", "Spices and Condiments"];
 
     const INITIAL_PANTRY = [
@@ -105,7 +275,7 @@
       { id: "item-24", name: "Tata Salt (Vacuum Evaporated)", shortName: "Tata Salt", category: "Beverages and Snacks", current: 0.8, max: 1, unit: "kg", threshold: 0.3, dailyBurn: 0.02, price: 28, daysExpiry: 365 }
     ];
 
-    const INDIAN_RECIPES = [
+        const INDIAN_RECIPES = [
       {
         id: "dal_tadka_rice",
         name: "Dal Tadka and Jeera Rice",
@@ -114,14 +284,32 @@
         youtubeQuery: "Authentic Dal Tadka and Jeera Rice Recipe Chef Ranveer Brar",
         recipeUrl: "https://hebbarskitchen.com/dal-tadka-recipe-yellow-toor-dal-tadka/",
         diet: "Vegetarian",
+        modules: {
+          baseVariant: [
+            { id: 'toor_moong', name: 'Toor (70%) + Dhuli Moong (30%)', notes: 'Silky and light texture' },
+            { id: 'pure_toor', name: '100% Toor / Arhar Dal', notes: 'Traditional yellow dal' },
+            { id: 'chana_toor', name: 'Toor + Chana Dal (Dhaba Style)', notes: 'Hearty bite' }
+          ],
+          cookingFat: ['pure_ghee', 'mustard_oil', 'coconut_oil', 'groundnut_oil'],
+          tadkaStyle: ['cumin_garlic_hing', 'mustard_curry_urad', 'panch_phoron', 'mustard_sesame_curry'],
+          souringAgent: ['fresh_tomatoes_amchur', 'lemon_juice', 'tamarind_extract', 'kokum_rind'],
+          specialTwist: ['dhungar_smoke', 'kasuri_methi_crush', 'roasted_peanut_powder', 'pinch_of_jaggery', 'none']
+        },
         ingredients: [
-          { name: "Toor Dal", qty: 35, unit: "g" },
-          { name: "Basmati Rice", qty: 65, unit: "g" },
-          { name: "Onion (Pyaz)", qty: 30, unit: "g" },
-          { name: "Tomato (Tamatar)", qty: 30, unit: "g" },
-          { name: "Desi Ghee", qty: 8, unit: "ml" },
-          { name: "Jeera (Cumin)", qty: 2.5, unit: "g" },
-          { name: "Haldi (Turmeric)", qty: 1.5, unit: "g" }
+          { name: "Toor Dal", qty: 35, unit: "g", desiQty: "¼ katori" },
+          { name: "Basmati Rice", qty: 65, unit: "g", desiQty: "½ katori" },
+          { name: "Onion (Pyaz)", qty: 30, unit: "g", desiQty: "½ small" },
+          { name: "Tomato (Tamatar)", qty: 30, unit: "g", desiQty: "½ small" },
+          { name: "Desi Ghee", qty: 8, unit: "ml", desiQty: "1 tbsp" },
+          { name: "Jeera (Cumin)", qty: 2.5, unit: "g", desiQty: "½ tsp" },
+          { name: "Haldi (Turmeric)", qty: 1.5, unit: "g", desiQty: "¼ tsp" }
+        ],
+        steps: [
+          "Pressure cook rinsed lentils with turmeric, minced ginger, and salt until velvety soft.",
+          "Whisk dal gently with a wooden mathani to achieve desired family consistency.",
+          "Simmer with chosen souring agent (tomatoes / tamarind / amchur) for 4 minutes.",
+          "Prepare hot sizzling tempering in chosen fat/ghee and pour over dal with immediate lid seal.",
+          "Finish with signature family twist (Kasuri Methi / Dhungar Charcoal Smoke / Jaggery touch)."
         ]
       },
       {
@@ -132,13 +320,29 @@
         youtubeQuery: "Punjabi Rajma Masala Recipe Ranveer Brar",
         recipeUrl: "https://hebbarskitchen.com/rajma-recipe-rajma-masala-curry-recipe/",
         diet: "Vegetarian",
+        modules: {
+          baseVariant: [
+            { id: 'chitra_rajma', name: 'Chitra Rajma (Kashmiri/Himalayan)', notes: 'Soft, creamy melt' },
+            { id: 'red_rajma', name: 'Dark Red Kidney Beans', notes: 'Firm, robust texture' }
+          ],
+          cookingFat: ['mustard_oil', 'pure_ghee', 'groundnut_oil'],
+          tadkaStyle: ['cumin_garlic_hing', 'panch_phoron'],
+          souringAgent: ['fresh_tomatoes_amchur', 'curd_dahi', 'lemon_juice'],
+          specialTwist: ['kasuri_methi_crush', 'dhungar_smoke', 'none']
+        },
         ingredients: [
-          { name: "Rajma", qty: 45, unit: "g" },
-          { name: "Basmati Rice", qty: 65, unit: "g" },
-          { name: "Onion (Pyaz)", qty: 40, unit: "g" },
-          { name: "Tomato (Tamatar)", qty: 40, unit: "g" },
-          { name: "Mustard Oil", qty: 10, unit: "ml" },
-          { name: "Ginger-Garlic", qty: 8, unit: "g" }
+          { name: "Rajma", qty: 45, unit: "g", desiQty: "⅓ katori" },
+          { name: "Basmati Rice", qty: 65, unit: "g", desiQty: "½ katori" },
+          { name: "Onion (Pyaz)", qty: 40, unit: "g", desiQty: "1 small" },
+          { name: "Tomato (Tamatar)", qty: 40, unit: "g", desiQty: "1 medium" },
+          { name: "Mustard Oil", qty: 10, unit: "ml", desiQty: "1.5 tbsp" },
+          { name: "Ginger-Garlic", qty: 8, unit: "g", desiQty: "1 tsp" }
+        ],
+        steps: [
+          "Slow boil soaked rajma with black cardamom, bay leaf, and rock salt until melt-in-mouth soft.",
+          "Slow bhunai of finely minced onions, ginger-garlic paste, and crushed tomatoes in smoking mustard oil or ghee.",
+          "Mash a ladleful of cooked rajma to thicken the natural gravy matrix.",
+          "Simmer on low flame for 15 minutes, finishing with roasted kasuri methi and fresh coriander."
         ]
       },
       {
@@ -149,59 +353,128 @@
         youtubeQuery: "Dhaba Style Punjabi Aloo Paratha Recipe Ranveer Brar",
         recipeUrl: "https://hebbarskitchen.com/aloo-paratha-recipe-aloo-ka-paratha/",
         diet: "Vegetarian",
+        modules: {
+          baseVariant: [
+            { id: 'chakki_atta', name: '100% Whole Wheat Chakki Atta', notes: 'Golden, wholesome crust' },
+            { id: 'multigrain', name: 'Multigrain Atta with Gram Flour', notes: 'Nutty, high fiber' }
+          ],
+          cookingFat: ['pure_ghee', 'mustard_oil', 'groundnut_oil'],
+          tadkaStyle: ['cumin_garlic_hing', 'mustard_sesame_curry'],
+          souringAgent: ['fresh_tomatoes_amchur', 'lemon_juice'],
+          specialTwist: ['kasuri_methi_crush', 'none']
+        },
         ingredients: [
-          { name: "Chakki Atta", qty: 75, unit: "g" },
-          { name: "Potato (Aloo)", qty: 80, unit: "g" },
-          { name: "Desi Ghee", qty: 10, unit: "ml" },
-          { name: "Curd / Dahi", qty: 80, unit: "g" }
+          { name: "Chakki Atta", qty: 60, unit: "g", desiQty: "½ katori" },
+          { name: "Potato (Aloo)", qty: 70, unit: "g", desiQty: "1 medium" },
+          { name: "Desi Ghee", qty: 10, unit: "ml", desiQty: "1.5 tbsp" },
+          { name: "Onion (Pyaz)", qty: 15, unit: "g", desiQty: "¼ finely chopped" },
+          { name: "Jeera (Cumin)", qty: 1.5, unit: "g", desiQty: "¼ tsp" },
+          { name: "Lal Mirch Powder", qty: 1.5, unit: "g", desiQty: "¼ tsp" }
+        ],
+        steps: [
+          "Knead soft pliable whole wheat dough and rest for 15 minutes.",
+          "Mash boiled potatoes with chopped green chillies, roasted cumin powder, amchur, and fresh coriander.",
+          "Stuff spiced potato ball into rolled dough disc, seal gently, and roll with light hands.",
+          "Roast on hot cast iron tawa, basting generously with desi cow ghee until crisp golden brown spots appear."
         ]
       },
       {
         id: "paneer_butter_masala",
-        name: "Paneer Butter Masala and Roti",
+        name: "Restaurant Style Paneer Butter Masala",
         cuisine: "North Indian",
         prepTime: "30 mins",
         youtubeQuery: "Restaurant Style Paneer Butter Masala Recipe Chef Ranveer Brar",
         recipeUrl: "https://hebbarskitchen.com/paneer-butter-masala-recipe/",
         diet: "Vegetarian",
+        modules: {
+          baseVariant: [
+            { id: 'fresh_paneer', name: 'Fresh Malai Paneer Cubes', notes: 'Melt in mouth soft' },
+            { id: 'tofu_vegan', name: 'Pan-Seared Organic Tofu', notes: 'Plant-based alternative' }
+          ],
+          cookingFat: ['pure_ghee', 'mustard_oil', 'groundnut_oil'],
+          tadkaStyle: ['cumin_garlic_hing', 'panch_phoron'],
+          souringAgent: ['fresh_tomatoes_amchur', 'curd_dahi'],
+          specialTwist: ['kasuri_methi_crush', 'pinch_of_jaggery', 'none']
+        },
         ingredients: [
-          { name: "Fresh Paneer", qty: 65, unit: "g" },
-          { name: "Chakki Atta", qty: 65, unit: "g" },
-          { name: "Desi Ghee", qty: 10, unit: "ml" },
-          { name: "Tomato (Tamatar)", qty: 50, unit: "g" },
-          { name: "Onion (Pyaz)", qty: 30, unit: "g" }
+          { name: "Fresh Paneer", qty: 65, unit: "g", desiQty: "½ katori cubes" },
+          { name: "Tomato (Tamatar)", qty: 60, unit: "g", desiQty: "1.5 medium" },
+          { name: "Onion (Pyaz)", qty: 30, unit: "g", desiQty: "½ small" },
+          { name: "Desi Ghee", qty: 10, unit: "ml", desiQty: "1.5 tbsp" },
+          { name: "Ginger-Garlic", qty: 6, unit: "g", desiQty: "1 tsp" },
+          { name: "Lal Mirch Powder", qty: 2, unit: "g", desiQty: "½ tsp Kashmiri" },
+          { name: "Haldi (Turmeric)", qty: 1, unit: "g", desiQty: "¼ tsp" }
+        ],
+        steps: [
+          "Boil ripe tomatoes, cashew nuts, and whole spices, then blend into a velvety silk purée.",
+          "Sauté ginger-garlic paste and Kashmiri mirch in shimmering butter/ghee on low flame.",
+          "Pour in the tomato makhani base and slow simmer until aromatic butter separates at edges.",
+          "Add fresh malai paneer cubes, touch of organic honey/jaggery, and crushed toasted kasuri methi."
         ]
       },
       {
         id: "kanda_poha",
-        name: "Batata Kanda Poha",
+        name: "Authentic Maharashtrian Kanda Poha",
         cuisine: "Maharashtrian",
         prepTime: "15 mins",
         youtubeQuery: "Authentic Maharashtrian Kanda Poha Recipe Ranveer Brar",
-        recipeUrl: "https://hebbarskitchen.com/kanda-poha-recipe-onion-poha-recipe/",
+        recipeUrl: "https://hebbarskitchen.com/kanda-batata-poha-recipe/",
         diet: "Vegetarian",
+        modules: {
+          baseVariant: [
+            { id: 'thick_poha', name: 'J जाड पोहा (Thick Flattened Rice)', notes: 'Fluffy non-mushy texture' },
+            { id: 'red_poha', name: 'Red Rice Poha', notes: 'Nutty rustic heritage grain' }
+          ],
+          cookingFat: ['groundnut_oil', 'pure_ghee', 'mustard_oil'],
+          tadkaStyle: ['mustard_curry_urad', 'mustard_sesame_curry', 'cumin_garlic_hing'],
+          souringAgent: ['lemon_juice', 'kokum_rind'],
+          specialTwist: ['roasted_peanut_powder', 'pinch_of_jaggery', 'none']
+        },
         ingredients: [
-          { name: "Poha", qty: 60, unit: "g" },
-          { name: "Onion (Pyaz)", qty: 30, unit: "g" },
-          { name: "Potato (Aloo)", qty: 35, unit: "g" },
-          { name: "Sunflower Oil", qty: 8, unit: "ml" },
-          { name: "Mustard Seeds (Rai)", qty: 1.5, unit: "g" },
-          { name: "Haldi (Turmeric)", qty: 1.5, unit: "g" }
+          { name: "Poha", qty: 50, unit: "g", desiQty: "¾ katori" },
+          { name: "Onion (Pyaz)", qty: 35, unit: "g", desiQty: "½ medium diced" },
+          { name: "Potato (Aloo)", qty: 25, unit: "g", desiQty: "¼ diced" },
+          { name: "Mustard Seeds (Rai)", qty: 1.5, unit: "g", desiQty: "½ tsp" },
+          { name: "Jeera (Cumin)", qty: 1.5, unit: "g", desiQty: "½ tsp" },
+          { name: "Haldi (Turmeric)", qty: 1, unit: "g", desiQty: "¼ tsp" },
+          { name: "Sunflower Oil", qty: 8, unit: "ml", desiQty: "1 tbsp" }
+        ],
+        steps: [
+          "Gently rinse thick poha in colander, sprinkle salt and sugar, and let rest to fluff up.",
+          "Fry raw peanuts and diced potatoes in hot groundnut oil until crisp golden, then set aside.",
+          "Splutter mustard seeds, cumin, fresh curry leaves, green chillies, and sauté sliced onions till translucent.",
+          "Gently toss in softened poha with turmeric, cover with lid on steam for 2 minutes, and finish with fresh lemon & grated coconut."
         ]
       },
       {
-        id: "adrak_chai",
-        name: "Adrak Masala Chai",
-        cuisine: "All India",
+        id: "masala_chai",
+        name: "Kadak Masala Chai & Ginger Infusion",
+        cuisine: "All Indian",
         prepTime: "10 mins",
         youtubeQuery: "Perfect Adrak Masala Chai Recipe Ranveer Brar",
-        recipeUrl: "https://hebbarskitchen.com/masala-chai-recipe-masala-tea-recipe/",
+        recipeUrl: "https://hebbarskitchen.com/masala-chai-recipe-spiced-tea/",
         diet: "Vegetarian",
+        modules: {
+          baseVariant: [
+            { id: 'assam_ctc', name: 'Assam CTC Golden Blend', notes: 'Strong brisk liquor' },
+            { id: 'darjeeling_leaf', name: 'Darjeeling Orthodox Blend', notes: 'Floral delicate aroma' }
+          ],
+          cookingFat: ['pure_ghee'],
+          tadkaStyle: ['cumin_garlic_hing'],
+          souringAgent: ['lemon_juice'],
+          specialTwist: ['pinch_of_jaggery', 'none']
+        },
         ingredients: [
-          { name: "Amul Milk", qty: 85, unit: "ml" },
-          { name: "Chai Patti (Tea)", qty: 4.5, unit: "g" },
-          { name: "Sugar (Cheeni)", qty: 8, unit: "g" },
-          { name: "Ginger-Garlic", qty: 3, unit: "g" }
+          { name: "Chai Patti (Tea)", qty: 6, unit: "g", desiQty: "1.5 tsp" },
+          { name: "Amul Milk", qty: 80, unit: "ml", desiQty: "½ cup" },
+          { name: "Sugar (Cheeni)", qty: 8, unit: "g", desiQty: "1.5 tsp" },
+          { name: "Ginger-Garlic", qty: 4, unit: "g", desiQty: "1 inch crushed ginger" }
+        ],
+        steps: [
+          "Crush fresh spicy ginger and green cardamom pods in mortar pestle.",
+          "Bring water to a rolling boil with crushed aromatics for 2 minutes to extract essential zing.",
+          "Add strong tea leaves and simmer for 1 minute until deep ruby amber.",
+          "Pour in full cream milk and simmer over 3 rolling rises on low-medium flame before straining."
         ]
       }
     ];
@@ -482,14 +755,15 @@
       };
 
       // COOK MEAL WITH PRE-FLIGHT & REVERSIBILITY
-      const handleCookMealDirect = (recipeId, effectiveServings) => {
+            const handleCookMealDirect = (recipeId, effectiveServings, customIngredients = null, customLabel = null) => {
         const recipe = INDIAN_RECIPES.find(r => r.id === recipeId);
         if (!recipe) return;
 
         let deductions = [];
         let updatedPantry = [...pantry];
+        const ingredientsToUse = customIngredients || recipe.ingredients;
 
-        recipe.ingredients.forEach(ing => {
+        ingredientsToUse.forEach(ing => {
           const index = updatedPantry.findIndex(p =>
             p.shortName.toLowerCase() === ing.name.toLowerCase() ||
             p.name.toLowerCase().indexOf(ing.name.toLowerCase()) !== -1 ||
@@ -516,10 +790,11 @@
 
         setPantry(updatedPantry);
 
+        const displayName = customLabel || (recipe.name + (culinaryProfile ? ` (${culinaryProfile.familyName})` : ''));
         const newLog = {
           id: "log-" + Date.now(),
           time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-          recipeName: recipe.name,
+          recipeName: displayName,
           servings: effectiveServings,
           deductions
         };
@@ -530,16 +805,16 @@
         const newLedgerEvent = {
           id: "ev-" + Date.now(),
           type: "DEBIT",
-          title: `Cooked ${recipe.name}`,
+          title: `Cooked ${displayName}`,
           subtitle: `${effectiveServings} portions (${deductions.map(d => d.name).join(', ')})`,
           time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
           amount: `${deductions.length} items deducted`,
-          source: "Meal Depletion",
+          source: "Family Recipe Depletion",
           logId: newLog.id
         };
         setLedgerEvents(prev => [newLedgerEvent, ...prev]);
 
-        showToast(`🥘 Cooked ${recipe.name}! Deducted ${deductions.length} ingredients.`);
+        showToast(`🥘 Cooked ${displayName}! Deducted ${deductions.length} ingredients.`);
       };
 
       // 1-CLICK UNDO MEAL HANDLER
@@ -1205,6 +1480,23 @@
                   <h1 class="text-2xl font-black bg-gradient-to-r from-amber-950 to-orange-700 bg-clip-text text-transparent">
                     DearHome
                   </h1>
+
+            {/* CULINARY PROFILE BADGE */}
+            <div
+              onClick={() => { setCulinaryWizardStep(1); setIsCulinaryModalOpen(true); }}
+              class="flex items-center gap-2.5 px-3 py-1.5 bg-gradient-to-r from-amber-50 to-orange-50 hover:from-amber-100 hover:to-orange-100 border border-orange-200 rounded-2xl cursor-pointer shadow-sm transition-all text-left"
+              title="Click to customize Family Culinary Profile & Regional Taste"
+            >
+              <span class="text-xl">{culinaryProfile ? culinaryProfile.avatar : "🥘"}</span>
+              <div>
+                <span class="text-[9px] font-black uppercase tracking-wider text-amber-800 block">Family Taste Profile</span>
+                <span class="text-xs font-black text-slate-900 leading-tight block">{culinaryProfile ? culinaryProfile.familyName : "Set Up Taste"}</span>
+              </div>
+              <span class="text-[10px] bg-orange-200 text-orange-950 font-bold px-2 py-0.5 rounded-full ml-1">
+                {culinaryProfile ? culinaryProfile.regionLabel.split('(')[0] : "Tune ⚙️"}
+              </span>
+            </div>
+
                   <span class="text-[10px] font-black uppercase tracking-wider bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-md">
                     SDG 12: Zero Waste Engine
                   </span>
@@ -1839,6 +2131,45 @@
               <div class="flex justify-between items-center pb-4 border-b border-slate-100">
                 <div>
                   <h3 class="font-black text-xl text-slate-900">Family Profile & Guest Scaler</h3>
+
+              {/* FAMILY CULINARY TASTE PROFILE CARD */}
+              <div class="p-5 bg-gradient-to-br from-amber-50/80 to-orange-50/80 rounded-3xl border border-orange-200 shadow-sm space-y-3">
+                <div class="flex justify-between items-center">
+                  <div class="flex items-center gap-2.5">
+                    <span class="text-2xl">{culinaryProfile ? culinaryProfile.avatar : "🥘"}</span>
+                    <div>
+                      <h4 class="font-black text-base text-slate-900">{culinaryProfile ? culinaryProfile.familyName : "Family Culinary Archetype"}</h4>
+                      <p class="text-xs text-slate-500">{culinaryProfile ? culinaryProfile.regionLabel : "North / South / East / West Traditions"}</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => { setCulinaryWizardStep(1); setIsCulinaryModalOpen(true); }}
+                    class="text-xs font-black text-white bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 px-3.5 py-2 rounded-xl shadow-md transition-all"
+                  >
+                    🎛️ Reconfigure Taste
+                  </button>
+                </div>
+
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-2 text-xs">
+                  <div class="p-2.5 bg-white rounded-xl border border-orange-100">
+                    <span class="text-[10px] text-slate-400 font-bold uppercase block">Fat Medium</span>
+                    <strong class="text-slate-800">{culinaryProfile ? culinaryProfile.cookingFatLabel.split('&')[0] : "Desi Ghee"}</strong>
+                  </div>
+                  <div class="p-2.5 bg-white rounded-xl border border-orange-100">
+                    <span class="text-[10px] text-slate-400 font-bold uppercase block">Tadka Style</span>
+                    <strong class="text-slate-800">{culinaryProfile ? culinaryProfile.defaultTadkaLabel.split('+')[0] : "Jeera Garlic"}</strong>
+                  </div>
+                  <div class="p-2.5 bg-white rounded-xl border border-orange-100">
+                    <span class="text-[10px] text-slate-400 font-bold uppercase block">Souring Agent</span>
+                    <strong class="text-slate-800">{culinaryProfile ? culinaryProfile.souringAgentLabel.split('&')[0] : "Tomatoes"}</strong>
+                  </div>
+                  <div class="p-2.5 bg-white rounded-xl border border-orange-100">
+                    <span class="text-[10px] text-slate-400 font-bold uppercase block">Spice Heat</span>
+                    <strong class="text-orange-600">Level {culinaryProfile ? culinaryProfile.spiceLevel : 3}/5 🔥</strong>
+                  </div>
+                </div>
+              </div>
+
                   <p class="text-xs text-slate-500 mt-0.5">Calculates exact ingredient weights based on diners & appetite</p>
                 </div>
                 <div class="p-3 bg-orange-50 rounded-2xl border border-orange-200 text-center">
@@ -1931,6 +2262,25 @@
                       >
                         <Icons.Video />
                       </a>
+                    </div>
+
+                    
+                    <div class="flex items-center justify-between pt-1">
+                      <span class="text-[10px] font-bold text-amber-800 bg-amber-100/70 px-2 py-0.5 rounded-md">
+                        ✨ {culinaryProfile ? culinaryProfile.familyName : 'Family Calibrated'}
+                      </span>
+                      <button
+                        onClick={() => {
+                          setActiveRecipeForConfig(recipe);
+                          setConfigModalTab("configured");
+                          setForkTitleInput(`Maa's ${recipe.name}`);
+                          setForkAuthorInput(culinaryProfile ? culinaryProfile.familyName : "Mom");
+                          setForkNotesInput("Family secret touch with authentic tempering.");
+                        }}
+                        class="text-[11px] font-bold text-amber-700 hover:text-amber-900 bg-amber-50 hover:bg-amber-100 px-2.5 py-1 rounded-lg border border-amber-200/80 transition-all flex items-center gap-1"
+                      >
+                        <span>🎛️ Tune to Family Style</span>
+                      </button>
                     </div>
 
                     <div class="space-y-1.5 pt-2 border-t border-slate-100 text-xs">
