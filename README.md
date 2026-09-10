@@ -13,6 +13,13 @@
 
 ## 🌟 What is DearHome?
 
+### 🎛️ Family Culinary Profile & Modular Recipe Configurator
+- **Personalized Household Taste**: Solves the Indian culinary variance gap by configuring regional roots (*Punjabi*, *Tamil Nadu*, *Bengali*, *Maharashtrian*, *Gujarati*, *Andhra*), cooking mediums (*Pure Desi Ghee*, *Mustard Oil*, *Coconut Oil*, *Sesame Oil*), and signature tempering (*Tadka / Phodnii*).
+- **Modular Recipe Tuning**: Dynamically customize Base lentils/proteins, Tadka styles, souring agents (Tamarind vs. Kokum vs. Amchur), and secret family touches (*Dhungar Charcoal Smoke*, *Kasuri Methi Crush*, *Jaggery touch*).
+- **Zero-Waste Auto-Depletion Engine**: Scales recipe ingredients to effective diner portions and auto-deducts the exact configured ingredients from the live digital pantry ledger upon cooking.
+- **Heirloom Voice & Family Forks**: Transcribes audio notes from mothers and grandmothers and allows saving custom household recipe variations.
+
+
 Every day, millions of households face the same daily friction:
 1. **Silent Stockouts**: Discovering you are out of milk or cooking oil mid-recipe.
 2. **Food Waste**: Forgotten perishables rotting in the back of the refrigerator.
