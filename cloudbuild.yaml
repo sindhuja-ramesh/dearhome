@@ -68,18 +68,17 @@ steps:
       - '--set-secrets'
       - 'GEMINI_API_KEY=Dearhome_api_key:latest'
 
-  # Step 5: Set public access IAM policy (must be separate step after service exists)
+  # Step 5: Set public access IAM policy (best-effort — requires Cloud Build SA to have run.admin)
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
-    entrypoint: 'gcloud'
+    entrypoint: 'bash'
     args:
-      - 'beta'
-      - 'run'
-      - 'services'
-      - 'add-iam-policy-binding'
-      - 'dearhome'
-      - '--region=us-central1'
-      - '--member=allUsers'
-      - '--role=roles/run.invoker'
+      - '-c'
+      - |
+        gcloud beta run services add-iam-policy-binding dearhome \
+          --region=us-central1 \
+          --member=allUsers \
+          --role=roles/run.invoker || echo "IAM binding skipped - set manually in Cloud Console"
+    allowFailure: true
 
 images:
   - 'gcr.io/$PROJECT_ID/dearhome:$COMMIT_SHA'
