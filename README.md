@@ -115,3 +115,5 @@ gcloud run deploy dearhome \
    - Multi-device instant synchronization across mobile, desktop, and kitchen tablets.
 5. **⏰ 24/7 Unattended Google Apps Script Trigger**:
    - Free background worker (`scripts/gmail_pantry_sync.gs`) that continuously syncs orders without needing the browser open.
+
+<!-- Trigger rebuild 1789090949072 -->
