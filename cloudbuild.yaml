@@ -53,7 +53,6 @@ steps:
       - 'us-central1'
       - '--platform'
       - 'managed'
-      - '--allow-unauthenticated'
       - '--port'
       - '8080'
       - '--memory'
@@ -68,6 +67,19 @@ steps:
       - 'FIREBASE_PROJECT_ID=$PROJECT_ID,NODE_ENV=production'
       - '--set-secrets'
       - 'GEMINI_API_KEY=Dearhome_api_key:latest'
+
+  # Step 5: Set public access IAM policy (must be separate step after service exists)
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: 'gcloud'
+    args:
+      - 'beta'
+      - 'run'
+      - 'services'
+      - 'add-iam-policy-binding'
+      - 'dearhome'
+      - '--region=us-central1'
+      - '--member=allUsers'
+      - '--role=roles/run.invoker'
 
 images:
   - 'gcr.io/$PROJECT_ID/dearhome:$COMMIT_SHA'
