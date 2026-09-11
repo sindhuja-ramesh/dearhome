@@ -11,7 +11,7 @@ ENV PORT=8080
 
 # Install dependencies
 COPY package*.json ./
-RUN npm ci --omit=dev
+RUN npm install --omit=dev --no-audit --prefer-offline
 
 # Copy application files
 COPY server.js ./
