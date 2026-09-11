@@ -11,8 +11,7 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
-const fs = require('fs');
-require('dotenv').config();
+// NOTE: No dotenv — all secrets injected by Google Secret Manager at Cloud Run runtime
 
 const app = express();
 const PORT = process.env.PORT || 8080;
